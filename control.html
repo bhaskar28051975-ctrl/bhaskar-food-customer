@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Master Control</title>
+    <title>Master Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 p-6 min-h-screen font-sans">
-    <div class="max-w-md mx-auto space-y-4">
-        <div class="bg-white p-8 rounded-[3rem] shadow-2xl border-b-8 border-red-600">
-            <h1 class="text-3xl font-black text-gray-800 italic leading-none mb-1">BHASKAR<br><span class="text-red-600 not-italic">COMMAND</span></h1>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Operational Control Center</p>
+<body class="bg-gray-900 text-white p-6">
+    <div class="max-w-md mx-auto space-y-6">
+        <div class="text-center py-10">
+            <h1 class="text-3xl font-black italic">BHASKAR <span class="text-red-500">FOOD</span></h1>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Command Center</p>
         </div>
-
-        <div class="grid grid-cols-1 gap-3">
-            <a href="admin.html" class="bg-white p-6 rounded-[2rem] shadow-md flex items-center gap-4 border-l-4 border-blue-500 active:scale-95 transition">
-                <div class="bg-blue-100 p-3 rounded-2xl">⚙️</div>
-                <div><h3 class="font-black text-gray-800 uppercase">Management</h3><p class="text-xs text-gray-400 font-bold">Add Hotels & Menus</p></div>
+        <div class="grid grid-cols-2 gap-4">
+            <a href="admin.html" class="bg-gray-800 p-8 rounded-[2rem] flex flex-col items-center gap-2 border border-gray-700">
+                <i class="fa-solid fa-hotel text-2xl text-blue-400"></i>
+                <span class="text-[10px] font-black uppercase">Hotels</span>
             </a>
-
-            <a href="kitchen.html" class="bg-white p-6 rounded-[2rem] shadow-md flex items-center gap-4 border-l-4 border-orange-500 active:scale-95 transition">
-                <div class="bg-orange-100 p-3 rounded-2xl">👨‍🍳</div>
-                <div><h3 class="font-black text-gray-800 uppercase">Live Kitchen</h3><p class="text-xs text-gray-400 font-bold">Accept & Cook Orders</p></div>
+            <a href="kitchen.html" class="bg-gray-800 p-8 rounded-[2rem] flex flex-col items-center gap-2 border border-gray-700">
+                <i class="fa-solid fa-fire text-2xl text-orange-400"></i>
+                <span class="text-[10px] font-black uppercase">Kitchen</span>
             </a>
-
-            <a href="delivery.html" class="bg-white p-6 rounded-[2rem] shadow-md flex items-center gap-4 border-l-4 border-green-500 active:scale-95 transition">
-                <div class="bg-green-100 p-3 rounded-2xl">🚴</div>
-                <div><h3 class="font-black text-gray-800 uppercase">Delivery Fleet</h3><p class="text-xs text-gray-400 font-bold">Track Pickups & Drops</p></div>
+            <a href="delivery.html" class="bg-gray-800 p-8 rounded-[2rem] flex flex-col items-center gap-2 border border-gray-700">
+                <i class="fa-solid fa-motorcycle text-2xl text-green-400"></i>
+                <span class="text-[10px] font-black uppercase">Delivery</span>
             </a>
-
-            <a href="reports.html" class="bg-white p-6 rounded-[2rem] shadow-md flex items-center gap-4 border-l-4 border-purple-500 active:scale-95 transition">
-                <div class="bg-purple-100 p-3 rounded-2xl">📊</div>
-                <div><h3 class="font-black text-gray-800 uppercase">Insights</h3><p class="text-xs text-gray-400 font-bold">Earnings & Order History</p></div>
+            <a href="reports.html" class="bg-gray-800 p-8 rounded-[2rem] flex flex-col items-center gap-2 border border-gray-700">
+                <i class="fa-solid fa-chart-line text-2xl text-purple-400"></i>
+                <span class="text-[10px] font-black uppercase">Reports</span>
             </a>
         </div>
+        <a href="index.html" class="block bg-white text-black text-center py-4 rounded-2xl font-black uppercase text-xs">Customer App ➔</a>
     </div>
 </body>
 </html>
