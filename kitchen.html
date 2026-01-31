@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Kitchen Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-orange-50 p-4">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-2xl font-black text-orange-600 mb-6">👨‍🍳 KITCHEN LIVE</h1>
+        <div id="order-list" class="space-y-4"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { /* USE YOUR SAME CONFIG HERE */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        onValue(ref(db, 'orders'), (snap) => {
+            const container = document.getElementById('order-list');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const order = child.val();
+                if(order.status === 'completed') return;
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border-2 ${order.status === 'pending' ? 'border-red-400' : 'border-green-400'}">
+                        <div class="flex justify-between font-bold mb-2">
+                            <span>#${child.key.slice(-4)}</span>
+                            <span class="uppercase text-xs px-2 py-1 bg-gray-100 rounded">${order.status}</span>
+                        </div>
+                        <p class="text-lg font-black">${order.items}</p>
+                        <p class="text-xs text-gray-500 mb-4">For: ${order.customerName}</p>
+                        
+                        ${order.status === 'pending' ? 
+                            `<button onclick="updateStatus('${child.key}', 'preparing')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">START COOKING</button>` : 
+                            `<button onclick="updateStatus('${child.key}', 'ready_for_pickup')" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold">MARK AS READY</button>`
+                        }
+                    </div>`;
+            });
+        });
+
+        window.updateStatus = (id, newStatus) => {
+            update(ref(db, `orders/${id}`), { status: newStatus });
+        };
+    </script>
+</body>
+</html>
