@@ -59,7 +59,7 @@
             });
             const orderData = { customerName: name, address: addr, items: itemsList.replace(/%0A/g, ", "), totalAmount: finalTotal, status: "pending", timestamp: Date.now() };
             push(ref(db, 'orders'), orderData).then(() => {
-                window.open(`https://wa.me/91XXXXXXXXXX?text=*NEW ORDER*%0A${itemsList}*Total: ₹${finalTotal}*`, '_blank');
+                window.open(`https://wa.me/919154095125?text=*NEW ORDER*%0A${itemsList}*Total: ₹${finalTotal}*`, '_blank');
                 cart = {}; updateCartUI(); renderMenu();
             });
         };
