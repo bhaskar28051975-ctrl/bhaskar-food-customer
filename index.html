@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Menu & Cart</title>
+    <title>Bhaskar Food - Menu with Quantity</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .cart-bounce { animation: bounce 0.3s ease; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-    </style>
 </head>
 <body class="bg-gray-100 pb-32">
 
@@ -44,65 +40,97 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let cart = [];
+        // Cart object stores item details and quantity
+        let cart = {}; 
 
-        window.addToCart = (resName, dish, price) => {
-            cart.push({ resName, dish, price: parseInt(price) });
+        window.updateQty = (id, resName, dish, price, change) => {
+            if (!cart[id]) {
+                cart[id] = { resName, dish, price: parseInt(price), qty: 0 };
+            }
+            
+            cart[id].qty += change;
+
+            if (cart[id].qty <= 0) {
+                delete cart[id];
+            }
+
+            renderMenu(); // Refresh the list to show new numbers
             updateCartUI();
-            const bar = document.getElementById('cart-bar');
-            bar.classList.remove('hidden');
-            bar.classList.add('cart-bounce');
-            setTimeout(() => bar.classList.remove('cart-bounce'), 300);
         };
 
         function updateCartUI() {
-            const count = cart.length;
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('cart-count').innerText = `${count} ITEMS SELECTED`;
-            document.getElementById('cart-total').innerText = `₹${total}`;
+            const bar = document.getElementById('cart-bar');
+            const items = Object.values(cart);
+            const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            if (totalItems > 0) {
+                bar.classList.remove('hidden');
+                document.getElementById('cart-count').innerText = `${totalItems} ITEMS SELECTED`;
+                document.getElementById('cart-total').innerText = `₹${totalPrice}`;
+            } else {
+                bar.classList.add('hidden');
+            }
         }
 
         window.checkoutWhatsApp = () => {
             const myNumber = "91XXXXXXXXXX"; // CHANGE TO YOUR NUMBER
             let itemsList = "";
-            let total = 0;
-            let restaurant = cart[0].resName;
-
-            cart.forEach((item, index) => {
-                itemsList += `${index + 1}. ${item.dish} - ₹${item.price}%0A`;
-                total += item.price;
+            let finalTotal = 0;
+            const items = Object.values(cart);
+            
+            items.forEach((item) => {
+                const subTotal = item.price * item.qty;
+                itemsList += `• ${item.dish} (x${item.qty}) - ₹${subTotal}%0A`;
+                finalTotal += subTotal;
             });
 
-            const text = `*NEW MULTI-ITEM ORDER*%0A%0A*Hotel:* ${restaurant}%0A%0A*Items:*%0A${itemsList}%0A*TOTAL BILL: ₹${total}*%0A%0A*Please confirm this order.*`;
+            const text = `*NEW BHASKAR FOOD ORDER*%0A%0A*Items:*%0A${itemsList}%0A*TOTAL BILL: ₹${finalTotal}*%0A%0A*Please confirm this order.*`;
             window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
         };
 
+        let rawData = {};
         onValue(ref(db, 'restaurants'), (snap) => {
+            rawData = snap.val() || {};
+            renderMenu();
+        });
+
+        function renderMenu() {
             const container = document.getElementById('customer-list');
             container.innerHTML = "";
-            snap.forEach(child => {
-                const res = child.val();
+            
+            Object.keys(rawData).forEach(resId => {
+                const res = rawData[resId];
                 let menuHtml = "";
                 
                 if(res.menu) {
-                    Object.values(res.menu).forEach(item => {
+                    Object.keys(res.menu).forEach(itemId => {
+                        const item = res.menu[itemId];
+                        const cartId = resId + itemId; // Unique ID for cart tracking
+                        const currentQty = cart[cartId] ? cart[cartId].qty : 0;
+
                         menuHtml += `
                             <div class="flex justify-between items-center py-3 border-b border-gray-100">
                                 <div>
                                     <p class="font-bold text-gray-800">${item.dish}</p>
                                     <p class="text-sm font-bold text-red-500">₹${item.price}</p>
                                 </div>
-                                <button onclick="addToCart('${res.name}', '${item.dish}', '${item.price}')" 
-                                    class="border-2 border-red-500 text-red-500 px-4 py-1 rounded-xl text-xs font-black hover:bg-red-500 hover:text-white transition-colors">ADD +</button>
+                                <div class="flex items-center gap-3">
+                                    ${currentQty > 0 ? `
+                                        <button onclick="updateQty('${cartId}', '${res.name}', '${item.dish}', '${item.price}', -1)" 
+                                            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 font-bold text-gray-800">-</button>
+                                        <span class="font-black text-sm text-gray-900">${currentQty}</span>
+                                    ` : ''}
+                                    <button onclick="updateQty('${cartId}', '${res.name}', '${item.dish}', '${item.price}', 1)" 
+                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white font-bold">+</button>
+                                </div>
                             </div>`;
                     });
-                } else {
-                    menuHtml = "<p class='text-xs text-gray-400'>Menu items coming soon...</p>";
                 }
 
                 container.innerHTML += `
                     <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-200">
-                        <img src="${res.image}" class="w-full h-44 object-cover">
+                        <img src="${res.image}" class="w-full h-40 object-cover">
                         <div class="p-5">
                             <h2 class="text-xl font-black text-gray-900">${res.name}</h2>
                             <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-4">${res.cuisine}</p>
@@ -110,7 +138,7 @@
                         </div>
                     </div>`;
             });
-        });
+        }
     </script>
 </body>
 </html>
