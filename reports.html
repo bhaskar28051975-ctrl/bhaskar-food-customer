@@ -1,33 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Owner Reports</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhaskar Food - Reports</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-white p-6">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-2xl font-black mb-8 border-b border-slate-700 pb-4">📊 BUSINESS REPORTS</h1>
-        
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="bg-slate-800 p-5 rounded-3xl">
-                <p class="text-xs text-slate-400 font-bold uppercase">Total Sales</p>
-                <p id="total-sales" class="text-2xl font-black text-green-400">₹0</p>
+<body class="bg-gray-50 pb-20">
+
+    <nav class="bg-white border-b sticky top-0 z-[100] px-4 py-3 flex justify-between items-center">
+        <a href="control.html" class="text-gray-400"><i class="fa-solid fa-arrow-left"></i></a>
+        <h2 class="font-black text-xs uppercase tracking-widest">Sales Reports</h2>
+        <div class="w-4"></div> </nav>
+
+    <div class="max-w-md mx-auto p-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
+                <p class="text-[10px] font-black text-gray-400 uppercase mb-1">Total Sales</p>
+                <p id="total-sales" class="text-2xl font-black text-green-600">₹0</p>
             </div>
-            <div class="bg-slate-800 p-5 rounded-3xl">
-                <p class="text-xs text-slate-400 font-bold uppercase">Total Orders</p>
-                <p id="total-orders" class="text-2xl font-black text-blue-400">0</p>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
+                <p class="text-[10px] font-black text-gray-400 uppercase mb-1">Orders</p>
+                <p id="total-orders" class="text-2xl font-black text-blue-600">0</p>
             </div>
         </div>
 
-        <h2 class="text-sm font-bold text-slate-500 uppercase mb-4">Recent History</h2>
-        <div id="history-list" class="space-y-2"></div>
+        <h3 class="font-black text-gray-800 text-sm uppercase mt-6 mb-2">Order History</h3>
+        <div id="history-list" class="space-y-3">
+            </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
+        <a href="admin.html" class="text-gray-400"><i class="fa-solid fa-gears text-xl"></i></a>
+        <a href="kitchen.html" class="text-gray-400"><i class="fa-solid fa-utensils text-xl"></i></a>
+        <a href="delivery.html" class="text-gray-400"><i class="fa-solid fa-truck text-xl"></i></a>
+        <a href="reports.html" class="text-red-600"><i class="fa-solid fa-chart-pie text-xl"></i></a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { /* USE YOUR SAME CONFIG HERE */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+            authDomain: "bhaskar-food-app.firebaseapp.com",
+            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+            projectId: "bhaskar-food-app",
+            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
@@ -42,10 +64,23 @@
                     sales += parseInt(order.totalAmount);
                     count++;
                 }
+                
                 container.innerHTML += `
-                    <div class="flex justify-between text-xs bg-slate-800 p-3 rounded-xl border border-slate-700">
-                        <span>${order.customerName}</span>
-                        <span class="${order.status === 'completed' ? 'text-green-500' : 'text-orange-500'} font-bold">₹${order.totalAmount}</span>
+                    <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-black text-gray-800 text-sm">₹${order.totalAmount}</span>
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-full ${order.status === 'completed' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'} capitalize">${order.status}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 font-bold uppercase">${order.customerName}</p>
+                        <hr class="my-2">
+                        <div class="flex justify-between items-center">
+                            <div class="text-[9px] font-bold text-gray-400 uppercase">
+                                Delivered By: <span class="text-gray-800">${order.deliveredBy || 'N/A'}</span>
+                            </div>
+                            <a href="tel:${order.driverPhone}" class="text-[9px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-black">
+                                <i class="fa-solid fa-phone"></i> ${order.driverPhone || ''}
+                            </a>
+                        </div>
                     </div>`;
             });
             document.getElementById('total-sales').innerText = "₹" + sales;
