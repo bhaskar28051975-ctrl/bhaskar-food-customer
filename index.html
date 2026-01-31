@@ -3,92 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Order Online</title>
+    <title>Bhaskar Food - Order Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .food-card:active { transform: scale(0.98); }
-    </style>
 </head>
-<body class="bg-gray-50 pb-20">
+<body class="bg-gray-100 pb-10">
 
-    <header class="bg-white p-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-black text-red-600 italic">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tirupati Delivery</p>
-            </div>
-            <div class="bg-red-100 p-2 rounded-full">
-                🍴
-            </div>
-        </div>
+    <header class="bg-white p-5 shadow-sm sticky top-0 z-50">
+        <h1 class="text-2xl font-black text-red-600 italic text-center">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-6">
-        <div class="relative">
-            <input type="text" placeholder="Search for food or restaurant..." class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-red-500 text-sm">
-            <span class="absolute left-4 top-4 text-gray-400">🔍</span>
-        </div>
-
-        <h2 class="text-xl font-black text-gray-800 uppercase tracking-tight">Nearby Restaurants</h2>
-
-        <div id="restaurant-display" class="grid gap-6">
-            <div class="animate-pulse space-y-4">
-                <div class="bg-gray-200 h-48 rounded-3xl"></div>
-                <div class="h-4 bg-gray-200 w-1/2 rounded"></div>
-            </div>
-        </div>
-    </main>
+    <main id="customer-list" class="max-w-md mx-auto p-4 space-y-6">
+        </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // USING YOUR NEW FOOD APP CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
             authDomain: "bhaskar-food-app.firebaseapp.com",
             databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
             projectId: "bhaskar-food-app",
-            storageBucket: "bhaskar-food-app.firebasestorage.app",
-            messagingSenderId: "712053690568",
             appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Load Restaurants from Firebase
-        onValue(ref(db, 'restaurants'), (snap) => {
-            const container = document.getElementById('restaurant-display');
-            container.innerHTML = "";
-            
-            if(!snap.exists()) {
-                container.innerHTML = "<p class='text-center text-gray-400'>No restaurants available yet.</p>";
-                return;
-            }
+        window.sendWhatsApp = (resName, dish, price) => {
+            const myNumber = "91XXXXXXXXXX"; // CHANGE THIS TO YOUR NUMBER
+            const text = `*NEW FOOD ORDER*%0A%0A*Hotel:* ${resName}%0A*Dish:* ${dish}%0A*Price:* ₹${price}%0A%0A*Please confirm my order.*`;
+            window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
+        };
 
-            snap.forEach((child) => {
-                const rest = child.val();
-                container.innerHTML += `
-                    <div class="food-card bg-white rounded-[2.5rem] overflow-hidden shadow-lg border border-gray-100 transition-all">
-                        <div class="relative">
-                            <img src="${rest.image}" class="w-full h-56 object-cover" alt="${rest.name}">
-                            <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-sm">
-                                <span class="text-xs font-black text-gray-800 uppercase">${rest.cuisine}</span>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl font-black text-gray-800 uppercase leading-tight">${rest.name}</h3>
-                                <div class="bg-green-600 text-white px-2 py-1 rounded-lg flex items-center gap-1">
-                                    <span class="text-xs font-bold">${rest.rating}</span>
-                                    <span class="text-[10px]">★</span>
+        onValue(ref(db, 'restaurants'), (snap) => {
+            const container = document.getElementById('customer-list');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const res = child.val();
+                let menuHtml = "";
+                
+                if(res.menu) {
+                    Object.values(res.menu).forEach(item => {
+                        menuHtml += `
+                            <div class="flex justify-between items-center py-2 border-b border-dashed">
+                                <div>
+                                    <p class="font-bold text-gray-700">${item.dish}</p>
+                                    <p class="text-sm text-green-600 font-bold">₹${item.price}</p>
                                 </div>
-                            </div>
-                            <button onclick="alert('Menu for ${rest.name} coming soon!')" 
-                                class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-sm tracking-widest active:scale-95 transition shadow-lg">
-                                View Menu
-                            </button>
+                                <button onclick="sendWhatsApp('${res.name}', '${item.dish}', '${item.price}')" 
+                                    class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-black">ORDER</button>
+                            </div>`;
+                    });
+                } else {
+                    menuHtml = "<p class='text-xs text-gray-400'>Menu loading soon...</p>";
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-3xl shadow-md overflow-hidden border">
+                        <img src="${res.image}" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h2 class="text-xl font-black uppercase text-gray-800">${res.name}</h2>
+                            <p class="text-xs text-gray-400 mb-4">${res.cuisine}</p>
+                            <div class="space-y-2">${menuHtml}</div>
                         </div>
                     </div>`;
             });
