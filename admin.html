@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Admin - Dish Photos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-red-50 p-4">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border">
+        <div class="bg-red-600 p-6 text-white text-center">
+            <h1 class="text-xl font-black uppercase">Restaurant Manager</h1>
+        </div>
+        <div class="p-6 space-y-6">
+            <div class="space-y-2">
+                <h2 class="font-bold text-gray-800 uppercase text-xs">1. New Restaurant</h2>
+                <input id="resName" type="text" placeholder="Hotel Name" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
+                <input id="resCuisine" type="text" placeholder="Cuisine (Veg/Non-Veg)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
+                <input id="resImg" type="text" placeholder="Hotel Image URL" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
+                <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Save Hotel</button>
+            </div>
+            <hr>
+            <div class="space-y-3">
+                <h2 class="font-bold text-gray-800 uppercase text-xs">2. Manage Menus (Add Dishes)</h2>
+                <div id="admin-restaurant-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+            authDomain: "bhaskar-food-app.firebaseapp.com",
+            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+            projectId: "bhaskar-food-app",
+            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.addRestaurant = () => {
+            const name = document.getElementById('resName').value;
+            const cuisine = document.getElementById('resCuisine').value;
+            const img = document.getElementById('resImg').value;
+            if(name) {
+                push(ref(db, 'restaurants'), { name, cuisine, image: img || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400", rating: "4.2" });
+                alert("Hotel Added!");
+                document.getElementById('resName').value = "";
+            }
+        };
+
+        window.addMenuItem = (resId) => {
+            const dish = prompt("Dish Name (e.g. Masala Dosa):");
+            const price = prompt("Price (e.g. 60):");
+            const dishImg = prompt("Dish Image URL:");
+            const type = prompt("Type: Enter 'v' for Veg or 'n' for Non-Veg:");
+
+            if(dish && price) {
+                push(ref(db, `restaurants/${resId}/menu`), { 
+                    dish, 
+                    price, 
+                    dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100",
+                    isVeg: type.toLowerCase() === 'v' 
+                });
+                alert("Dish with photo added!");
+            }
+        };
+
+        window.deleteRes = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, 'restaurants/' + id)); };
+
+        onValue(ref(db, 'restaurants'), (snap) => {
+            const list = document.getElementById('admin-restaurant-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const res = child.val();
+                list.innerHTML += `
+                    <div class="p-3 bg-gray-50 rounded-xl border space-y-2">
+                        <div class="flex justify-between font-bold text-sm">
+                            <span>${res.name}</span>
+                            <button onclick="deleteRes('${child.key}')" class="text-red-500 text-[10px]">DELETE</button>
+                        </div>
+                        <button onclick="addMenuItem('${child.key}')" class="w-full bg-blue-600 text-white py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">+ Add Dish with Photo</button>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
