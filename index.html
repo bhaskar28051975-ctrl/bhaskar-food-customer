@@ -35,8 +35,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // Your Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
             authDomain: "bhaskar-food-app.firebaseapp.com",
@@ -51,6 +52,7 @@
         let cart = {};
         let rawData = {};
 
+        // Function to manage item quantity
         window.updateQty = (id, resName, dish, price, change) => {
             if (!cart[id]) cart[id] = { resName, dish, price: parseInt(price), qty: 0 };
             cart[id].qty += change;
@@ -59,6 +61,7 @@
             updateCartUI();
         };
 
+        // Function to update the floating cart bar
         function updateCartUI() {
             const bar = document.getElementById('cart-bar');
             const items = Object.values(cart);
@@ -73,12 +76,16 @@
             }
         }
 
+        // The Master Checkout Function
         window.checkoutWhatsApp = () => {
             const name = document.getElementById('custName').value;
             const addr = document.getElementById('custAddress').value;
-            const myNumber = "91XXXXXXXXXX"; // <--- CHANGE TO YOUR PHONE NUMBER
+            const myNumber = "91XXXXXXXXXX"; // CHANGE THIS TO YOUR ACTUAL MOBILE NUMBER
 
-            if(!name || !addr) { alert("Please enter Name and Address!"); return; }
+            if(!name || !addr) { 
+                alert("Please enter Name and Address before placing order!"); 
+                return; 
+            }
 
             let itemsList = "";
             let finalTotal = 0;
@@ -87,15 +94,38 @@
                 finalTotal += (item.price * item.qty);
             });
 
-            const text = `*NEW ORDER - BHASKAR FOOD*%0A%0A*Customer:* ${name}%0A*Address:* ${addr}%0A%0A*Items:*%0A${itemsList}%0A*TOTAL: ₹${finalTotal}*%0A%0A*Confirm?*`;
-            window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
+            // 1. Prepare data for Firebase Dashboards
+            const orderData = {
+                customerName: name,
+                address: addr,
+                items: itemsList.replace(/%0A/g, ", "), // Making it readable for reports
+                totalAmount: finalTotal,
+                status: "pending", 
+                timestamp: Date.now()
+            };
+
+            // 2. Save to Firebase first
+            push(ref(db, 'orders'), orderData).then(() => {
+                // 3. Then open WhatsApp for the customer
+                const text = `*NEW ORDER - BHASKAR FOOD*%0A%0A*Customer:* ${name}%0A*Address:* ${addr}%0A%0A*Items:*%0A${itemsList}%0A*TOTAL: ₹${finalTotal}*%0A%0A*Confirm?*`;
+                window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
+                
+                // Optional: Clear cart after ordering
+                cart = {};
+                updateCartUI();
+                renderMenu();
+            }).catch((error) => {
+                alert("Database Error: " + error.message);
+            });
         };
 
+        // Fetch restaurants from Firebase
         onValue(ref(db, 'restaurants'), (snap) => {
             rawData = snap.val() || {};
             renderMenu();
         });
 
+        // Display Menu logic
         function renderMenu() {
             const container = document.getElementById('customer-list');
             container.innerHTML = "";
