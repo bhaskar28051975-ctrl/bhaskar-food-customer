@@ -3,25 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Menu with Quantity</title>
+    <title>Bhaskar Food - Order Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 pb-32">
+<body class="bg-gray-100 pb-40">
 
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50">
         <h1 class="text-2xl font-black text-red-600 italic text-center">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
     </header>
 
-    <main id="customer-list" class="max-w-md mx-auto p-4 space-y-6">
-        </main>
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-200">
+            <h2 class="font-black text-gray-800 uppercase text-xs mb-3">Delivery Details</h2>
+            <input id="custName" type="text" placeholder="Your Full Name" class="w-full p-3 mb-2 border rounded-xl bg-gray-50 text-sm">
+            <input id="custAddress" type="text" placeholder="House No / Area / Landmark" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
+        </div>
 
-    <div id="cart-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-gray-900 text-white p-4 rounded-3xl shadow-2xl z-[100] flex justify-between items-center transition-all">
+        <div id="customer-list" class="space-y-6">
+            </div>
+    </main>
+
+    <div id="cart-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-gray-900 text-white p-4 rounded-3xl shadow-2xl z-[100] flex justify-between items-center">
         <div>
-            <p id="cart-count" class="text-xs font-bold text-gray-400 uppercase">0 ITEMS</p>
+            <p id="cart-count" class="text-xs font-bold text-gray-400">0 ITEMS</p>
             <p id="cart-total" class="text-lg font-black text-green-400">₹0</p>
         </div>
-        <button onclick="checkoutWhatsApp()" class="bg-green-500 text-white px-6 py-3 rounded-2xl font-black uppercase text-sm flex items-center gap-2">
-            Confirm Order ➔
+        <button onclick="checkoutWhatsApp()" class="bg-green-500 text-white px-6 py-3 rounded-2xl font-black uppercase text-sm">
+            Place Order ➔
         </button>
     </div>
 
@@ -40,21 +48,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Cart object stores item details and quantity
-        let cart = {}; 
+        let cart = {};
+        let rawData = {};
 
         window.updateQty = (id, resName, dish, price, change) => {
-            if (!cart[id]) {
-                cart[id] = { resName, dish, price: parseInt(price), qty: 0 };
-            }
-            
+            if (!cart[id]) cart[id] = { resName, dish, price: parseInt(price), qty: 0 };
             cart[id].qty += change;
-
-            if (cart[id].qty <= 0) {
-                delete cart[id];
-            }
-
-            renderMenu(); // Refresh the list to show new numbers
+            if (cart[id].qty <= 0) delete cart[id];
+            renderMenu();
             updateCartUI();
         };
 
@@ -63,10 +64,9 @@
             const items = Object.values(cart);
             const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
             const totalPrice = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-
             if (totalItems > 0) {
                 bar.classList.remove('hidden');
-                document.getElementById('cart-count').innerText = `${totalItems} ITEMS SELECTED`;
+                document.getElementById('cart-count').innerText = `${totalItems} ITEMS`;
                 document.getElementById('cart-total').innerText = `₹${totalPrice}`;
             } else {
                 bar.classList.add('hidden');
@@ -74,22 +74,26 @@
         }
 
         window.checkoutWhatsApp = () => {
-            const myNumber = "91XXXXXXXXXX"; // CHANGE TO YOUR NUMBER
+            const name = document.getElementById('custName').value;
+            const addr = document.getElementById('custAddress').value;
+            const myNumber = "91XXXXXXXXXX"; // PUT YOUR NUMBER HERE
+
+            if(!name || !addr) {
+                alert("Please enter your Name and Address first!");
+                return;
+            }
+
             let itemsList = "";
             let finalTotal = 0;
-            const items = Object.values(cart);
-            
-            items.forEach((item) => {
-                const subTotal = item.price * item.qty;
-                itemsList += `• ${item.dish} (x${item.qty}) - ₹${subTotal}%0A`;
-                finalTotal += subTotal;
+            Object.values(cart).forEach(item => {
+                itemsList += `• ${item.dish} x ${item.qty} = ₹${item.price * item.qty}%0A`;
+                finalTotal += (item.price * item.qty);
             });
 
-            const text = `*NEW BHASKAR FOOD ORDER*%0A%0A*Items:*%0A${itemsList}%0A*TOTAL BILL: ₹${finalTotal}*%0A%0A*Please confirm this order.*`;
+            const text = `*NEW ORDER - BHASKAR FOOD*%0A%0A*Customer:* ${name}%0A*Address:* ${addr}%0A%0A*Items:*%0A${itemsList}%0A*TOTAL: ₹${finalTotal}*%0A%0A*Confirm?*`;
             window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
         };
 
-        let rawData = {};
         onValue(ref(db, 'restaurants'), (snap) => {
             rawData = snap.val() || {};
             renderMenu();
@@ -98,45 +102,24 @@
         function renderMenu() {
             const container = document.getElementById('customer-list');
             container.innerHTML = "";
-            
             Object.keys(rawData).forEach(resId => {
                 const res = rawData[resId];
                 let menuHtml = "";
-                
                 if(res.menu) {
                     Object.keys(res.menu).forEach(itemId => {
                         const item = res.menu[itemId];
-                        const cartId = resId + itemId; // Unique ID for cart tracking
-                        const currentQty = cart[cartId] ? cart[cartId].qty : 0;
-
-                        menuHtml += `
-                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                                <div>
-                                    <p class="font-bold text-gray-800">${item.dish}</p>
-                                    <p class="text-sm font-bold text-red-500">₹${item.price}</p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    ${currentQty > 0 ? `
-                                        <button onclick="updateQty('${cartId}', '${res.name}', '${item.dish}', '${item.price}', -1)" 
-                                            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 font-bold text-gray-800">-</button>
-                                        <span class="font-black text-sm text-gray-900">${currentQty}</span>
-                                    ` : ''}
-                                    <button onclick="updateQty('${cartId}', '${res.name}', '${item.dish}', '${item.price}', 1)" 
-                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white font-bold">+</button>
-                                </div>
-                            </div>`;
+                        const cartId = resId + itemId;
+                        const qty = cart[cartId] ? cart[cartId].qty : 0;
+                        menuHtml += `<div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <div><p class="font-bold text-gray-800">${item.dish}</p><p class="text-sm font-bold text-red-500">₹${item.price}</p></div>
+                            <div class="flex items-center gap-2">
+                                ${qty > 0 ? `<button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',-1)" class="w-8 h-8 rounded-full bg-gray-200">-</button><span>${qty}</span>` : ''}
+                                <button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',1)" class="w-8 h-8 rounded-full bg-red-500 text-white">+</button>
+                            </div>
+                        </div>`;
                     });
                 }
-
-                container.innerHTML += `
-                    <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-200">
-                        <img src="${res.image}" class="w-full h-40 object-cover">
-                        <div class="p-5">
-                            <h2 class="text-xl font-black text-gray-900">${res.name}</h2>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-4">${res.cuisine}</p>
-                            <div class="space-y-1">${menuHtml}</div>
-                        </div>
-                    </div>`;
+                container.innerHTML += `<div class="bg-white rounded-[2rem] shadow-sm border overflow-hidden"><img src="${res.image}" class="w-full h-40 object-cover"><div class="p-5"><h2 class="text-xl font-black">${res.name}</h2><div class="mt-4">${menuHtml}</div></div></div>`;
             });
         }
     </script>
