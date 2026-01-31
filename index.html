@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Order Details</title>
+    <title>Bhaskar Food - Order Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 pb-40">
 
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-red-600 italic text-center">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
+        <h1 class="text-2xl font-black text-red-600 italic text-center uppercase tracking-tighter">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
-        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-200">
-            <h2 class="font-black text-gray-800 uppercase text-xs mb-3">Delivery Details</h2>
-            <input id="custName" type="text" placeholder="Your Full Name" class="w-full p-3 mb-2 border rounded-xl bg-gray-50 text-sm">
-            <input id="custAddress" type="text" placeholder="House No / Area / Landmark" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100">
+            <h2 class="font-black text-gray-800 uppercase text-[10px] mb-3 tracking-widest">Delivery Details</h2>
+            <input id="custName" type="text" placeholder="Your Name" class="w-full p-3 mb-2 border rounded-2xl bg-gray-50 text-sm outline-none focus:border-red-500">
+            <input id="custAddress" type="text" placeholder="Complete Address / Landmark" class="w-full p-3 border rounded-2xl bg-gray-50 text-sm outline-none focus:border-red-500">
         </div>
 
         <div id="customer-list" class="space-y-6">
             </div>
     </main>
 
-    <div id="cart-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-gray-900 text-white p-4 rounded-3xl shadow-2xl z-[100] flex justify-between items-center">
+    <div id="cart-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-gray-900 text-white p-4 rounded-[2rem] shadow-2xl z-[100] flex justify-between items-center border border-white/10">
         <div>
-            <p id="cart-count" class="text-xs font-bold text-gray-400">0 ITEMS</p>
-            <p id="cart-total" class="text-lg font-black text-green-400">₹0</p>
+            <p id="cart-count" class="text-[10px] font-bold text-gray-400">0 ITEMS</p>
+            <p id="cart-total" class="text-xl font-black text-green-400">₹0</p>
         </div>
-        <button onclick="checkoutWhatsApp()" class="bg-green-500 text-white px-6 py-3 rounded-2xl font-black uppercase text-sm">
+        <button onclick="checkoutWhatsApp()" class="bg-green-500 text-white px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition">
             Place Order ➔
         </button>
     </div>
@@ -76,12 +76,9 @@
         window.checkoutWhatsApp = () => {
             const name = document.getElementById('custName').value;
             const addr = document.getElementById('custAddress').value;
-            const myNumber = "91XXXXXXXXXX"; // PUT YOUR NUMBER HERE
+            const myNumber = "91XXXXXXXXXX"; // <--- CHANGE TO YOUR PHONE NUMBER
 
-            if(!name || !addr) {
-                alert("Please enter your Name and Address first!");
-                return;
-            }
+            if(!name || !addr) { alert("Please enter Name and Address!"); return; }
 
             let itemsList = "";
             let finalTotal = 0;
@@ -110,16 +107,40 @@
                         const item = res.menu[itemId];
                         const cartId = resId + itemId;
                         const qty = cart[cartId] ? cart[cartId].qty : 0;
-                        menuHtml += `<div class="flex justify-between items-center py-3 border-b border-gray-100">
-                            <div><p class="font-bold text-gray-800">${item.dish}</p><p class="text-sm font-bold text-red-500">₹${item.price}</p></div>
-                            <div class="flex items-center gap-2">
-                                ${qty > 0 ? `<button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',-1)" class="w-8 h-8 rounded-full bg-gray-200">-</button><span>${qty}</span>` : ''}
-                                <button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',1)" class="w-8 h-8 rounded-full bg-red-500 text-white">+</button>
-                            </div>
-                        </div>`;
+                        
+                        menuHtml += `
+                            <div class="flex justify-between items-center py-4 border-b border-gray-50 last:border-0">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <img src="${item.dishImg}" class="w-16 h-16 rounded-2xl object-cover">
+                                        <div class="absolute -top-1 -left-1 w-3 h-3 border bg-white flex items-center justify-center">
+                                            <div class="w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-sm capitalize">${item.dish}</p>
+                                        <p class="text-sm font-black text-red-500">₹${item.price}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-full border">
+                                    ${qty > 0 ? `
+                                        <button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',-1)" class="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm text-gray-600 font-bold">-</button>
+                                        <span class="font-black text-xs w-4 text-center">${qty}</span>
+                                    ` : ''}
+                                    <button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',1)" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-500 text-white font-bold shadow-md">+</button>
+                                </div>
+                            </div>`;
                     });
                 }
-                container.innerHTML += `<div class="bg-white rounded-[2rem] shadow-sm border overflow-hidden"><img src="${res.image}" class="w-full h-40 object-cover"><div class="p-5"><h2 class="text-xl font-black">${res.name}</h2><div class="mt-4">${menuHtml}</div></div></div>`;
+                container.innerHTML += `
+                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                        <img src="${res.image}" class="w-full h-44 object-cover">
+                        <div class="p-5">
+                            <h2 class="text-xl font-black uppercase tracking-tight text-gray-800">${res.name}</h2>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest">${res.cuisine}</p>
+                            <div class="space-y-1">${menuHtml}</div>
+                        </div>
+                    </div>`;
             });
         }
     </script>
