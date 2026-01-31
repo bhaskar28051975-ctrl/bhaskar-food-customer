@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Owner Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-6">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-2xl font-black mb-8 border-b border-slate-700 pb-4">📊 BUSINESS REPORTS</h1>
+        
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-slate-800 p-5 rounded-3xl">
+                <p class="text-xs text-slate-400 font-bold uppercase">Total Sales</p>
+                <p id="total-sales" class="text-2xl font-black text-green-400">₹0</p>
+            </div>
+            <div class="bg-slate-800 p-5 rounded-3xl">
+                <p class="text-xs text-slate-400 font-bold uppercase">Total Orders</p>
+                <p id="total-orders" class="text-2xl font-black text-blue-400">0</p>
+            </div>
+        </div>
+
+        <h2 class="text-sm font-bold text-slate-500 uppercase mb-4">Recent History</h2>
+        <div id="history-list" class="space-y-2"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { /* USE YOUR SAME CONFIG HERE */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        onValue(ref(db, 'orders'), (snap) => {
+            let sales = 0; let count = 0;
+            const container = document.getElementById('history-list');
+            container.innerHTML = "";
+
+            snap.forEach(child => {
+                const order = child.val();
+                if(order.status === 'completed') {
+                    sales += parseInt(order.totalAmount);
+                    count++;
+                }
+                container.innerHTML += `
+                    <div class="flex justify-between text-xs bg-slate-800 p-3 rounded-xl border border-slate-700">
+                        <span>${order.customerName}</span>
+                        <span class="${order.status === 'completed' ? 'text-green-500' : 'text-orange-500'} font-bold">₹${order.totalAmount}</span>
+                    </div>`;
+            });
+            document.getElementById('total-sales').innerText = "₹" + sales;
+            document.getElementById('total-orders').innerText = count;
+        });
+    </script>
+</body>
+</html>
