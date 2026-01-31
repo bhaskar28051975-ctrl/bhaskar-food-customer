@@ -1,50 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Kitchen Dashboard</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-orange-50 p-4">
+<body class="bg-orange-50 pb-24 p-4">
     <div class="max-w-md mx-auto">
-        <h1 class="text-2xl font-black text-orange-600 mb-6">👨‍🍳 KITCHEN LIVE</h1>
+        <h1 class="text-2xl font-black text-orange-600 mb-6 uppercase italic">👨‍🍳 Kitchen Live</h1>
         <div id="order-list" class="space-y-4"></div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
+        <a href="admin.html" class="text-gray-400"><i class="fa-solid fa-gears text-xl"></i></a>
+        <a href="kitchen.html" class="text-orange-600"><i class="fa-solid fa-utensils text-xl"></i></a>
+        <a href="delivery.html" class="text-gray-400"><i class="fa-solid fa-truck text-xl"></i></a>
+        <a href="reports.html" class="text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i></a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = { /* USE YOUR SAME CONFIG HERE */ };
+        const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         onValue(ref(db, 'orders'), (snap) => {
-            const container = document.getElementById('order-list');
-            container.innerHTML = "";
+            const container = document.getElementById('order-list'); container.innerHTML = "";
             snap.forEach(child => {
                 const order = child.val();
-                if(order.status === 'completed') return;
-
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border-2 ${order.status === 'pending' ? 'border-red-400' : 'border-green-400'}">
-                        <div class="flex justify-between font-bold mb-2">
-                            <span>#${child.key.slice(-4)}</span>
-                            <span class="uppercase text-xs px-2 py-1 bg-gray-100 rounded">${order.status}</span>
-                        </div>
-                        <p class="text-lg font-black">${order.items}</p>
-                        <p class="text-xs text-gray-500 mb-4">For: ${order.customerName}</p>
-                        
-                        ${order.status === 'pending' ? 
-                            `<button onclick="updateStatus('${child.key}', 'preparing')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">START COOKING</button>` : 
-                            `<button onclick="updateStatus('${child.key}', 'ready_for_pickup')" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold">MARK AS READY</button>`
-                        }
+                if(order.status === 'pending' || order.status === 'preparing') {
+                    container.innerHTML += `<div class="bg-white p-5 rounded-[2rem] shadow-sm border-2 ${order.status === 'pending' ? 'border-red-400' : 'border-orange-400'}">
+                        <div class="flex justify-between mb-2"><span class="font-black text-xs uppercase">${order.status}</span></div>
+                        <p class="font-bold text-gray-800">${order.items}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mb-4 uppercase mt-2">To: ${order.customerName}</p>
+                        <button onclick="updateStatus('${child.key}', '${order.status === 'pending' ? 'preparing' : 'ready_for_pickup'}')" class="w-full ${order.status === 'pending' ? 'bg-orange-500' : 'bg-green-600'} text-white py-3 rounded-xl font-black uppercase text-xs">
+                            ${order.status === 'pending' ? 'Start Cooking' : 'Mark Ready'}
+                        </button>
                     </div>`;
+                }
             });
         });
-
-        window.updateStatus = (id, newStatus) => {
-            update(ref(db, `orders/${id}`), { status: newStatus });
-        };
+        window.updateStatus = (id, s) => update(ref(db, `orders/${id}`), { status: s });
     </script>
 </body>
 </html>
