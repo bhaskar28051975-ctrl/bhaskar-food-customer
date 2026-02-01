@@ -2,14 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen</title>
+    <title>Kitchen Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-orange-50 pb-24 p-4">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-2xl font-black text-orange-600 mb-6 uppercase italic">👨‍🍳 Kitchen Live</h1>
-        <div id="order-list" class="space-y-4"></div>
+    <div class="max-w-md mx-auto space-y-8">
+        <h1 class="text-2xl font-black text-orange-600 italic uppercase">👨‍🍳 Kitchen Live</h1>
+        
+        <div id="live-orders" class="space-y-4"></div>
+
+        <hr class="border-orange-200">
+        
+        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest">Last 10 Orders History</h2>
+        <div id="order-history" class="space-y-2 opacity-60"></div>
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
@@ -21,23 +26,35 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, limitToLast, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
         onValue(ref(db, 'orders'), (snap) => {
-            const container = document.getElementById('order-list'); container.innerHTML = "";
-            snap.forEach(child => {
-                const order = child.val();
+            const live = document.getElementById('live-orders'); live.innerHTML = "";
+            const hist = document.getElementById('order-history'); hist.innerHTML = "";
+            let all = [];
+            snap.forEach(c => { all.push({id: c.key, ...c.val()}); });
+
+            all.reverse().forEach((order, index) => {
                 if(order.status === 'pending' || order.status === 'preparing') {
-                    container.innerHTML += `<div class="bg-white p-5 rounded-[2rem] shadow-sm border-2 ${order.status === 'pending' ? 'border-red-400' : 'border-orange-400'}">
-                        <div class="flex justify-between mb-2"><span class="font-black text-xs uppercase">${order.status}</span></div>
+                    live.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm border-2 ${order.status === 'pending' ? 'border-red-400' : 'border-orange-400'}">
+                        <div class="flex justify-between font-black text-xs uppercase mb-2">
+                            <span>${order.location || 'Home Delivery'}</span>
+                            <span class="text-red-500">${order.status}</span>
+                        </div>
                         <p class="font-bold text-gray-800">${order.items}</p>
-                        <p class="text-[10px] text-gray-400 font-bold mb-4 uppercase mt-2">To: ${order.customerName}</p>
-                        <button onclick="updateStatus('${child.key}', '${order.status === 'pending' ? 'preparing' : 'ready_for_pickup'}')" class="w-full ${order.status === 'pending' ? 'bg-orange-500' : 'bg-green-600'} text-white py-3 rounded-xl font-black uppercase text-xs">
-                            ${order.status === 'pending' ? 'Start Cooking' : 'Mark Ready'}
-                        </button>
+                        <p class="text-[10px] text-gray-400 uppercase font-bold mt-2">Chef, Cook this for: ${order.customerName}</p>
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="updateStatus('${order.id}', 'preparing')" class="flex-1 bg-orange-500 text-white py-3 rounded-xl font-black uppercase text-[10px]">Preparing</button>
+                            <button onclick="updateStatus('${order.id}', 'ready_for_pickup')" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-black uppercase text-[10px]">Ready</button>
+                            <button onclick="updateStatus('${order.id}', 'cancelled')" class="bg-gray-200 text-gray-600 px-4 rounded-xl font-black text-[10px]">X</button>
+                        </div>
+                    </div>`;
+                } else if (index < 10) {
+                    hist.innerHTML += `<div class="bg-white p-3 rounded-xl border flex justify-between text-[10px] font-bold">
+                        <span>${order.items}</span>
+                        <span class="uppercase ${order.status === 'cancelled' ? 'text-red-500' : 'text-green-600'}">${order.status}</span>
                     </div>`;
                 }
             });
