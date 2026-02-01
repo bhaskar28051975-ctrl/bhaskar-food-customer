@@ -2,33 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery App</title>
+    <title>Delivery Partner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-blue-50 pb-24">
-    <div id="login-screen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-blue-600 mb-6 uppercase">Driver Enrollment</h2>
-            <input id="drName" type="text" placeholder="Your Full Name" class="w-full p-4 mb-3 border-2 border-gray-100 rounded-2xl outline-none focus:border-blue-500 font-bold">
-            <input id="drPhone" type="tel" placeholder="Mobile Number" class="w-full p-4 mb-6 border-2 border-gray-100 rounded-2xl outline-none focus:border-blue-500 font-bold">
-            <button onclick="saveDriver()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Start Working ➔</button>
+    <div id="login-screen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6 text-white">
+        <div class="w-full max-w-md space-y-6">
+            <h1 class="text-3xl font-black uppercase italic">Partner Enrollment</h1>
+            <input id="drName" type="text" placeholder="Full Name" class="w-full p-5 rounded-2xl text-black font-bold">
+            <input id="drPhone" type="tel" placeholder="Mobile Number" class="w-full p-5 rounded-2xl text-black font-bold">
+            <button onclick="login()" class="w-full bg-white text-blue-600 py-5 rounded-2xl font-black uppercase shadow-xl">Start Work ➔</button>
         </div>
     </div>
 
     <div class="max-w-md mx-auto p-4">
-        <header class="flex justify-between items-center mb-6 bg-white p-5 rounded-[2rem] shadow-sm">
-            <h1 class="text-xl font-black text-blue-600 italic">🚴 DELIVERY</h1>
-            <p id="disp-name" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"></p>
-        </header>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-black text-blue-600 italic uppercase">🚴 Pickup Point</h1>
+            <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase">Log Out</button>
+        </div>
         <div id="delivery-list" class="space-y-4"></div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
-        <a href="admin.html" class="text-gray-400"><i class="fa-solid fa-gears text-xl"></i></a>
-        <a href="kitchen.html" class="text-gray-400"><i class="fa-solid fa-utensils text-xl"></i></a>
-        <a href="delivery.html" class="text-blue-600"><i class="fa-solid fa-truck text-xl"></i></a>
-        <a href="reports.html" class="text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i></a>
     </div>
 
     <script type="module">
@@ -37,39 +30,37 @@
         const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        window.saveDriver = () => {
+        window.login = () => {
             const n = document.getElementById('drName').value; const p = document.getElementById('drPhone').value;
             if(n && p) { localStorage.setItem('dr_n', n); localStorage.setItem('dr_p', p); location.reload(); }
         };
+        window.logout = () => { localStorage.clear(); location.reload(); };
 
-        if(!localStorage.getItem('dr_n')) { document.getElementById('login-screen').classList.remove('hidden'); }
-        else { document.getElementById('disp-name').innerText = localStorage.getItem('dr_n') + " (" + localStorage.getItem('dr_p') + ")"; }
+        if(!localStorage.getItem('dr_n')) document.getElementById('login-screen').classList.remove('hidden');
 
         onValue(ref(db, 'orders'), (snap) => {
             const container = document.getElementById('delivery-list'); container.innerHTML = "";
             snap.forEach(child => {
                 const order = child.val();
-                if(order.status === 'ready_for_pickup' || order.status === 'on_the_way') {
-                    container.innerHTML += `<div class="bg-white p-6 rounded-[2.5rem] shadow-lg border-l-4 border-blue-500">
-                        <div class="flex justify-between mb-4"><span class="text-[10px] font-black bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase italic">${order.status.replace(/_/g, ' ')}</span><span class="text-lg font-black text-gray-800">₹${order.totalAmount}</span></div>
-                        <h3 class="font-black text-gray-900">${order.customerName}</h3><p class="text-sm text-gray-500 leading-tight mb-6">${order.address}</p>
-                        <button onclick="updateStatus('${child.key}', '${order.status === 'ready_for_pickup' ? 'on_the_way' : 'completed'}')" class="w-full ${order.status === 'ready_for_pickup' ? 'bg-blue-600' : 'bg-green-600'} text-white py-4 rounded-2xl font-black uppercase text-sm shadow-xl">
-                            ${order.status === 'ready_for_pickup' ? 'Pick Up Order' : 'Mark Delivered ✅'}
-                        </button>
+                if(order.status === 'ready_for_pickup') {
+                    container.innerHTML += `<div class="bg-white p-6 rounded-[2rem] shadow-lg border-l-8 border-blue-500">
+                        <div class="flex justify-between mb-4">
+                            <span class="text-xs font-black bg-blue-100 px-3 py-1 rounded-full">${order.location || 'HOME'}</span>
+                            <span class="text-xl font-black text-green-600">₹${order.totalAmount}</span>
+                        </div>
+                        <h3 class="font-black text-gray-800">${order.customerName}</h3>
+                        <p class="text-sm font-bold text-gray-400 mt-2">${order.items}</p>
+                        ${order.location.includes('http') ? `<a href="${order.location}" class="block mt-4 text-blue-600 font-bold text-xs underline">OPEN LIVE LOCATION</a>` : ''}
+                        <button onclick="complete('${child.key}')" class="w-full mt-6 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs">Mark Delivered ✅</button>
                     </div>`;
                 }
             });
         });
-
-        window.updateStatus = (id, s) => {
-            const up = { status: s };
-            if(s === 'completed') { 
-                up.deliveredBy = localStorage.getItem('dr_n'); 
-                up.driverPhone = localStorage.getItem('dr_p'); 
-                up.completedAt = Date.now();
-            }
-            update(ref(db, `orders/${id}`), up);
-        };
+        window.complete = (id) => update(ref(db, `orders/${id}`), { 
+            status: 'completed', 
+            deliveredBy: localStorage.getItem('dr_n'),
+            driverPhone: localStorage.getItem('dr_p') 
+        });
     </script>
 </body>
 </html>
