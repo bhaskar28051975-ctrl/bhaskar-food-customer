@@ -2,82 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food - Order Now</title>
+    <title>Bhaskar Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 pb-40">
-    <header class="bg-white p-5 shadow-sm sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-red-600 italic text-center uppercase tracking-tighter">Bhaskar <span class="text-gray-800 not-italic">Food</span></h1>
+<body class="bg-gray-100 pb-80">
+    <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center">
+        <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
+        <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Reorder</button>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-6">
-        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100">
-            <h2 class="font-black text-gray-800 uppercase text-[10px] mb-3 tracking-widest">Delivery Details</h2>
-            <input id="custName" type="text" placeholder="Your Name" class="w-full p-3 mb-2 border rounded-2xl bg-gray-50 text-sm outline-none">
-            <input id="custAddress" type="text" placeholder="Address / Landmark" class="w-full p-3 border rounded-2xl bg-gray-50 text-sm outline-none">
-        </div>
-        <div id="customer-list" class="space-y-6"></div>
-    </main>
+    <div id="customer-list" class="p-4 space-y-6"></div>
 
-    <div id="cart-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-gray-900 text-white p-4 rounded-[2rem] shadow-2xl z-[100] flex justify-between items-center">
-        <div><p id="cart-count" class="text-[10px] font-bold text-gray-400">0 ITEMS</p><p id="cart-total" class="text-xl font-black text-green-400">₹0</p></div>
-        <button onclick="checkoutWhatsApp()" class="bg-green-500 text-white px-8 py-3 rounded-2xl font-black uppercase text-xs">Place Order ➔</button>
+    <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
+        <div class="flex justify-between items-center mb-4">
+            <p id="panel-total" class="text-2xl font-black text-green-600">₹0</p>
+            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase tracking-widest">Cancel</button>
+        </div>
+
+        <div class="space-y-3">
+            <input id="custName" type="text" placeholder="Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
+            
+            <div id="mode-inputs"></div>
+
+            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Confirm Order ➔</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        let cart = {}; let rawData = {};
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        window.updateQty = (id, resName, dish, price, change) => {
-            if (!cart[id]) cart[id] = { resName, dish, price: parseInt(price), qty: 0 };
-            cart[id].qty += change; if (cart[id].qty <= 0) delete cart[id];
-            renderMenu(); updateCartUI();
+        let cart = {}; let appMode = 'table'; let userLoc = "";
+
+        // Get Mode from Admin
+        onValue(ref(db, 'settings/mode'), (s) => {
+            appMode = s.val() || 'table';
+            const div = document.getElementById('mode-inputs');
+            if(appMode === 'table') {
+                div.innerHTML = `<select id="tableNum" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
+                    <option value="">Select Table Number</option>
+                    ${[1,2,3,4,5,6,7,8,9,10].map(n => `<option value="Table ${n}">Table ${n}</option>`)}
+                </select>`;
+            } else {
+                div.innerHTML = `<button onclick="getLocation()" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase">📍 Send My Live Location</button>`;
+            }
+        });
+
+        window.getLocation = () => {
+            navigator.geolocation.getCurrentPosition(p => {
+                userLoc = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+                alert("Location Captured!");
+            });
         };
 
-        function updateCartUI() {
-            const bar = document.getElementById('cart-bar');
-            const items = Object.values(cart);
-            const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
-            const totalPrice = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            totalItems > 0 ? bar.classList.remove('hidden') : bar.classList.add('hidden');
-            document.getElementById('cart-count').innerText = `${totalItems} ITEMS`;
-            document.getElementById('cart-total').innerText = `₹${totalPrice}`;
+        window.updateQty = (id, dish, price, change) => {
+            if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
+            cart[id].qty += change; if(cart[id].qty <= 0) delete cart[id];
+            updateUI();
+        };
+
+        function updateUI() {
+            const panel = document.getElementById('checkout-panel');
+            const total = Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0);
+            total > 0 ? panel.classList.remove('hidden') : panel.classList.add('hidden');
+            document.getElementById('panel-total').innerText = "₹" + total;
         }
 
-        window.checkoutWhatsApp = () => {
+        window.placeOrder = () => {
             const name = document.getElementById('custName').value;
-            const addr = document.getElementById('custAddress').value;
-            if(!name || !addr) { alert("Enter Name/Address"); return; }
-            let itemsList = ""; let finalTotal = 0;
-            Object.values(cart).forEach(item => {
-                itemsList += `• ${item.dish} x ${item.qty} = ₹${item.price * item.qty}%0A`;
-                finalTotal += (item.price * item.qty);
-            });
-            const orderData = { customerName: name, address: addr, items: itemsList.replace(/%0A/g, ", "), totalAmount: finalTotal, status: "pending", timestamp: Date.now() };
+            const table = document.getElementById('tableNum')?.value || "";
+            if(!name) return alert("Enter Name");
+            
+            let itemsText = Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", ");
+            const orderData = {
+                customerName: name,
+                location: appMode === 'table' ? table : userLoc,
+                items: itemsText,
+                totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
+                status: "pending",
+                timestamp: Date.now()
+            };
             push(ref(db, 'orders'), orderData).then(() => {
-                window.open(`https://wa.me/919154095125?text=*NEW ORDER*%0A${itemsList}*Total: ₹${finalTotal}*`, '_blank');
-                cart = {}; updateCartUI(); renderMenu();
+                alert("Order Sent to Kitchen!");
+                location.reload();
             });
         };
 
-        onValue(ref(db, 'restaurants'), (snap) => { rawData = snap.val() || {}; renderMenu(); });
-        function renderMenu() {
+        onValue(ref(db, 'restaurants'), (snap) => {
             const container = document.getElementById('customer-list'); container.innerHTML = "";
-            Object.keys(rawData).forEach(resId => {
-                const res = rawData[resId]; let menuHtml = "";
+            snap.forEach(resSnap => {
+                const res = resSnap.val();
+                let menuHtml = "";
                 if(res.menu) {
-                    Object.keys(res.menu).forEach(itemId => {
-                        const item = res.menu[itemId]; const cartId = resId + itemId; const qty = cart[cartId] ? cart[cartId].qty : 0;
-                        menuHtml += `<div class="flex justify-between items-center py-4 border-b border-gray-50 last:border-0"><div class="flex items-center gap-3"><img src="${item.dishImg}" class="w-16 h-16 rounded-2xl object-cover"><div><p class="font-bold text-gray-800 text-sm capitalize">${item.dish}</p><p class="text-sm font-black text-red-500">₹${item.price}</p></div></div><div class="flex items-center gap-2 bg-gray-50 p-1 rounded-full border">${qty > 0 ? `<button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',-1)" class="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm">-</button><span class="font-black text-xs w-4 text-center">${qty}</span>` : ''}<button onclick="updateQty('${cartId}','${res.name}','${item.dish}','${item.price}',1)" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-500 text-white">+</button></div></div>`;
+                    Object.keys(res.menu).forEach(mId => {
+                        const m = res.menu[mId];
+                        menuHtml += `<div class="flex justify-between items-center py-2 border-b last:border-0">
+                            <div><p class="font-bold text-sm">${m.dish}</p><p class="text-red-500 font-black text-xs">₹${m.price}</p></div>
+                            <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white px-4 py-1 rounded-full text-xs font-black">+ ADD</button>
+                        </div>`;
                     });
                 }
-                container.innerHTML += `<div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden"><img src="${res.image}" class="w-full h-44 object-cover"><div class="p-5"><h2 class="text-xl font-black text-gray-800">${res.name}</h2><p class="text-[10px] font-bold text-gray-400 uppercase mb-4">${res.cuisine}</p><div class="space-y-1">${menuHtml}</div></div></div>`;
+                container.innerHTML += `<div class="bg-white p-5 rounded-[2rem] shadow-sm border">
+                    <h2 class="text-lg font-black mb-4">${res.name}</h2>
+                    ${menuHtml}
+                </div>`;
             });
-        }
+        });
     </script>
 </body>
 </html>
