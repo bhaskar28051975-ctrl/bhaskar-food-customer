@@ -2,22 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Mode Control</title>
+    <title>Admin - Master Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-red-50 pb-24 p-4">
-    <div class="max-w-md mx-auto space-y-4">
+    <div class="max-w-md mx-auto space-y-6">
         <div class="bg-white p-6 rounded-[2rem] shadow-xl border">
-            <h1 class="text-xl font-black text-red-600 mb-4 uppercase">System Mode</h1>
-            <select id="appMode" onchange="updateMode(this.value)" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold">
+            <h1 class="text-xl font-black text-red-600 mb-4 uppercase">System Settings</h1>
+            <label class="text-[10px] font-bold text-gray-400 uppercase">Service Mode</label>
+            <select id="appMode" onchange="updateSetting('mode', this.value)" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold mb-4">
                 <option value="table">Table Service (Dine-In)</option>
                 <option value="delivery">Home Delivery (Live Location)</option>
             </select>
-            <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">Controls Customer App inputs</p>
+            
+            <label class="text-[10px] font-bold text-gray-400 uppercase">Delivery Commission (%)</label>
+            <input id="commRate" type="number" placeholder="e.g. 10" onchange="updateSetting('commission', this.value)" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold">
         </div>
 
-        <div id="admin-restaurant-list" class="space-y-3"></div>
+        <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-3">
+            <h2 class="font-black text-gray-800 uppercase text-xs">Add New Hotel</h2>
+            <input id="resName" type="text" placeholder="Hotel Name" class="w-full p-3 border rounded-xl bg-gray-50">
+            <input id="resImg" type="text" placeholder="Hotel Image URL" class="w-full p-3 border rounded-xl bg-gray-50">
+            <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-3 rounded-xl font-black uppercase">Save Hotel</button>
+        </div>
+
+        <div id="admin-restaurant-list" class="space-y-4"></div>
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
@@ -33,23 +43,40 @@
         const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        window.updateMode = (val) => set(ref(db, 'settings/mode'), val);
-        onValue(ref(db, 'settings/mode'), (s) => { if(s.exists()) document.getElementById('appMode').value = s.val(); });
+        window.updateSetting = (key, val) => set(ref(db, `settings/${key}`), val);
+        
+        onValue(ref(db, 'settings'), (s) => {
+            if(s.exists()){
+                document.getElementById('appMode').value = s.val().mode || 'table';
+                document.getElementById('commRate').value = s.val().commission || 0;
+            }
+        });
 
-        // Logic to show restaurants and add dishes (Same as before)
+        window.addRestaurant = () => {
+            const name = document.getElementById('resName').value;
+            const image = document.getElementById('resImg').value;
+            if(name) push(ref(db, 'restaurants'), { name, image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" });
+        };
+
+        window.addDish = (id) => {
+            const dish = prompt("Dish Name?");
+            const price = prompt("Price?");
+            const dishImg = prompt("Dish Image URL?");
+            if(dish && price) push(ref(db, `restaurants/${id}/menu`), { dish, price, dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" });
+        };
+
         onValue(ref(db, 'restaurants'), (snap) => {
             const list = document.getElementById('admin-restaurant-list'); list.innerHTML = "";
             snap.forEach(child => {
-                list.innerHTML += `<div class="p-4 bg-white rounded-2xl shadow-sm border flex justify-between">
-                    <span class="font-bold">${child.val().name}</span>
-                    <button onclick="addDish('${child.key}')" class="text-blue-600 font-black text-xs uppercase">+ Dish</button>
+                list.innerHTML += `<div class="p-4 bg-white rounded-2xl shadow-sm border">
+                    <div class="flex items-center gap-3 mb-2">
+                        <img src="${child.val().image}" class="w-10 h-10 rounded-lg object-cover">
+                        <span class="font-bold">${child.val().name}</span>
+                    </div>
+                    <button onclick="addDish('${child.key}')" class="w-full bg-gray-100 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase">+ Add Dish with URL</button>
                 </div>`;
             });
         });
-        window.addDish = (id) => {
-            const dish = prompt("Dish Name?"); const price = prompt("Price?");
-            if(dish && price) push(ref(db, `restaurants/${id}/menu`), { dish, price, dishImg: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" });
-        };
     </script>
 </body>
 </html>
