@@ -4,63 +4,88 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bhaskar Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 pb-80">
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center">
-        <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
-        <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Reorder</button>
+        <h1 class="text-xl font-black text-red-600 italic uppercase tracking-tighter">Bhaskar Food</h1>
+        <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
     </header>
 
     <div id="customer-list" class="p-4 space-y-6"></div>
 
     <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
         <div class="flex justify-between items-center mb-4">
-            <p id="panel-total" class="text-2xl font-black text-green-600">₹0</p>
-            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase tracking-widest">Cancel</button>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">To Pay</p>
+                <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
+            </div>
+            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase tracking-widest bg-red-50 px-4 py-2 rounded-full">Cancel</button>
         </div>
 
         <div class="space-y-3">
-            <input id="custName" type="text" placeholder="Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
-            
+            <input id="custName" type="text" placeholder="Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none focus:border-red-500">
             <div id="mode-inputs"></div>
-
-            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Confirm Order ➔</button>
+            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Confirm Order ➔</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
+            authDomain: "bhaskar-food-app.firebaseapp.com", 
+            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
+            projectId: "bhaskar-food-app", 
+            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
+        };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        let cart = {}; let appMode = 'table'; let userLoc = "";
+        let cart = {}; let appMode = 'table'; let userLoc = ""; let resData = {};
 
-        // Get Mode from Admin
+        // 1. Get Mode from Admin
         onValue(ref(db, 'settings/mode'), (s) => {
             appMode = s.val() || 'table';
             const div = document.getElementById('mode-inputs');
             if(appMode === 'table') {
-                div.innerHTML = `<select id="tableNum" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
+                div.innerHTML = `<select id="tableNum" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none">
                     <option value="">Select Table Number</option>
-                    ${[1,2,3,4,5,6,7,8,9,10].map(n => `<option value="Table ${n}">Table ${n}</option>`)}
+                    ${[1,2,3,4,5,6,7,8,9,10,11,12].map(n => `<option value="Table ${n}">Table ${n}</option>`).join("")}
                 </select>`;
             } else {
-                div.innerHTML = `<button onclick="getLocation()" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase">📍 Send My Live Location</button>`;
+                div.innerHTML = `<button onclick="getLocation()" id="locBtn" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase transition-all">📍 Send My Live Location</button>`;
             }
         });
 
         window.getLocation = () => {
+            const btn = document.getElementById('locBtn');
             navigator.geolocation.getCurrentPosition(p => {
                 userLoc = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-                alert("Location Captured!");
-            });
+                btn.innerText = "✅ Location Captured";
+                btn.classList.add('bg-blue-50', 'border-blue-500');
+            }, (err) => alert("Please enable GPS/Location"));
         };
 
+        // 2. The Logic for Plus/Minus
         window.updateQty = (id, dish, price, change) => {
             if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
-            cart[id].qty += change; if(cart[id].qty <= 0) delete cart[id];
+            
+            cart[id].qty += change;
+            
+            if(cart[id].qty <= 0) {
+                delete cart[id];
+            }
+            
             updateUI();
+            renderMenu(); // Redraw menu to show updated numbers
+        };
+
+        window.cancelOrder = () => {
+            cart = {};
+            updateUI();
+            renderMenu();
         };
 
         function updateUI() {
@@ -70,11 +95,68 @@
             document.getElementById('panel-total').innerText = "₹" + total;
         }
 
+        // 3. Render function to show Plus/Minus buttons
+        function renderMenu() {
+            const container = document.getElementById('customer-list'); 
+            container.innerHTML = "";
+            
+            Object.keys(resData).forEach(resId => {
+                const res = resData[resId];
+                let menuHtml = "";
+                
+                if(res.menu) {
+                    Object.keys(res.menu).forEach(mId => {
+                        const m = res.menu[mId];
+                        const currentQty = cart[mId] ? cart[mId].qty : 0;
+                        
+                        menuHtml += `
+                        <div class="flex justify-between items-center py-4 border-b last:border-0 border-gray-50">
+                            <div>
+                                <p class="font-black text-gray-800 text-sm">${m.dish}</p>
+                                <p class="text-red-500 font-black text-xs">₹${m.price}</p>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                ${currentQty > 0 ? `
+                                    <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', -1)" class="w-8 h-8 rounded-full border-2 border-red-500 text-red-500 font-black flex items-center justify-center">-</button>
+                                    <span class="font-black text-sm w-4 text-center">${currentQty}</span>
+                                ` : ''}
+                                <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white h-8 ${currentQty > 0 ? 'w-8 rounded-full' : 'px-4 rounded-full'} text-xs font-black flex items-center justify-center transition-all">
+                                    ${currentQty > 0 ? '+' : '+ ADD'}
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                container.innerHTML += `
+                <div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
+                    <img src="${res.image}" class="w-full h-44 object-cover">
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <h2 class="text-xl font-black text-gray-800 uppercase italic">${res.name}</h2>
+                        </div>
+                        <div class="space-y-1">${menuHtml}</div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // Load Data from Firebase
+        onValue(ref(db, 'restaurants'), (snap) => {
+            resData = snap.val() || {};
+            renderMenu();
+        });
+
         window.placeOrder = () => {
             const name = document.getElementById('custName').value;
             const table = document.getElementById('tableNum')?.value || "";
-            if(!name) return alert("Enter Name");
             
+            if(!name) return alert("Please enter your name");
+            if(appMode === 'table' && !table) return alert("Please select table number");
+            if(appMode === 'delivery' && !userLoc) return alert("Please send location first");
+
             let itemsText = Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", ");
             const orderData = {
                 customerName: name,
@@ -84,35 +166,12 @@
                 status: "pending",
                 timestamp: Date.now()
             };
+
             push(ref(db, 'orders'), orderData).then(() => {
-                alert("Order Sent to Kitchen!");
+                alert("Order Placed Successfully!");
                 location.reload();
             });
         };
-
-        onValue(ref(db, 'restaurants'), (snap) => {
-            const container = document.getElementById('customer-list'); container.innerHTML = "";
-            snap.forEach(resSnap => {
-                const res = resSnap.val();
-                let menuHtml = "";
-                if(res.menu) {
-                    Object.keys(res.menu).forEach(mId => {
-                        const m = res.menu[mId];
-                        menuHtml += `<div class="flex justify-between items-center py-2 border-b last:border-0">
-                            <div><p class="font-bold text-sm">${m.dish}</p><p class="text-red-500 font-black text-xs">₹${m.price}</p></div>
-                            <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white px-4 py-1 rounded-full text-xs font-black">+ ADD</button>
-                        </div>`;
-                    });
-                }
-                container.innerHTML += `<div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
-    <img src="${res.image}" class="w-full h-44 object-cover">
-    <div class="p-5">
-        <h2 class="text-xl font-black text-gray-800">${res.name}</h2>
-        <div class="space-y-1">${menuHtml}</div>
-    </div>
-</div>`;
-            });
-        });
     </script>
 </body>
 </html>
