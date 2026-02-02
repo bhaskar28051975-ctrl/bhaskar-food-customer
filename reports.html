@@ -2,29 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Report</title>
+    <title>Master Financial Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 pb-24 p-4">
-    <div class="max-w-md mx-auto space-y-6">
-        <h1 class="text-2xl font-black uppercase">📊 Business Summary</h1>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border text-center">
-                <p class="text-[9px] font-black text-gray-400 uppercase">Grand Total Sales</p>
-                <p id="grandTotal" class="text-2xl font-black text-green-600">₹0</p>
+    <div class="max-w-md mx-auto space-y-4">
+        <h1 class="text-2xl font-black uppercase italic text-gray-800">📊 Profit Report</h1>
+        
+        <div class="grid grid-cols-1 gap-3">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex justify-between items-center">
+                <span class="text-[10px] font-black text-gray-400 uppercase">Gross Sales</span>
+                <span id="grossSales" class="text-xl font-black text-blue-600">₹0</span>
             </div>
-            <div id="statusCounts" class="bg-gray-900 p-4 rounded-3xl text-white text-[9px] font-bold space-y-1">
-                </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex justify-between items-center">
+                <span class="text-[10px] font-black text-red-400 uppercase">Delivery Commissions</span>
+                <span id="totalComm" class="text-xl font-black text-red-500">- ₹0</span>
+            </div>
+            <div class="bg-green-600 p-6 rounded-[2.5rem] shadow-lg flex justify-between items-center text-white">
+                <span class="text-xs font-black uppercase">Net Profit</span>
+                <span id="netProfit" class="text-2xl font-black">₹0</span>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-[2rem] border shadow-sm">
-            <h2 class="text-xs font-black uppercase mb-4 text-blue-600 underline">Sold Items Wise</h2>
-            <div id="itemWiseList" class="space-y-2"></div>
+        <div class="bg-white p-6 rounded-[2rem] border shadow-sm mt-6">
+            <h2 class="text-[10px] font-black uppercase mb-4 text-gray-400 tracking-widest text-center">Order Breakdown</h2>
+            <div id="report-list" class="space-y-3"></div>
         </div>
-
-        <h2 class="text-xs font-black uppercase text-gray-400 tracking-widest">Order Logs</h2>
-        <div id="full-details" class="space-y-4"></div>
     </div>
 
     <script type="module">
@@ -34,42 +37,36 @@
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
         onValue(ref(db, 'orders'), (snap) => {
-            let total = 0; let stats = { pending:0, preparing:0, ready_for_pickup:0, completed:0, cancelled:0 };
-            let itemsMap = {};
-            const logContainer = document.getElementById('full-details'); logContainer.innerHTML = "";
+            let gross = 0; let commissionTotal = 0;
+            const list = document.getElementById('report-list'); list.innerHTML = "";
 
-            snap.forEach(c => {
-                const o = c.val();
-                stats[o.status]++;
-                
+            snap.forEach(child => {
+                const o = child.val();
                 if(o.status === 'completed') {
-                    total += parseInt(o.totalAmount);
-                    // Map items for item-wise report
-                    o.items.split(', ').forEach(i => {
-                        itemsMap[i] = (itemsMap[i] || 0) + 1;
-                    });
+                    const sale = parseFloat(o.totalAmount || 0);
+                    const comm = parseFloat(o.commissionPaid || 0);
+                    
+                    gross += sale;
+                    commissionTotal += comm;
+
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center text-[10px] font-bold border-b pb-2">
+                            <div>
+                                <p class="text-gray-800">${o.customerName}</p>
+                                <p class="text-gray-400 font-normal">By: ${o.deliveredBy}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-blue-600">₹${sale}</p>
+                                <p class="text-red-400">-₹${comm.toFixed(2)}</p>
+                            </div>
+                        </div>`;
                 }
-
-                logContainer.innerHTML += `<div class="bg-white p-4 rounded-2xl border text-[10px] font-bold">
-                    <div class="flex justify-between uppercase"><span>${o.customerName}</span><span class="${o.status === 'completed' ? 'text-green-600' : 'text-red-500'}">${o.status}</span></div>
-                    <p class="text-gray-400 mt-1">${o.items} - ₹${o.totalAmount}</p>
-                </div>`;
             });
 
-            // Update UI
-            document.getElementById('grandTotal').innerText = "₹" + total;
-            document.getElementById('statusCounts').innerHTML = `
-                <p>PENDING: ${stats.pending}</p>
-                <p>KITCHEN: ${stats.preparing}</p>
-                <p>READY: ${stats.ready_for_pickup}</p>
-                <p>DELIVERED: ${stats.completed}</p>
-                <p>CANCELLED: ${stats.cancelled}</p>
-            `;
-
-            const itemDiv = document.getElementById('itemWiseList'); itemDiv.innerHTML = "";
-            Object.keys(itemsMap).forEach(name => {
-                itemDiv.innerHTML += `<div class="flex justify-between text-xs font-bold border-b pb-1"><span>${name}</span><span>x${itemsMap[name]}</span></div>`;
-            });
+            const net = gross - commissionTotal;
+            document.getElementById('grossSales').innerText = "₹" + gross.toFixed(2);
+            document.getElementById('totalComm').innerText = "- ₹" + commissionTotal.toFixed(2);
+            document.getElementById('netProfit').innerText = "₹" + net.toFixed(2);
         });
     </script>
 </body>
