@@ -13,14 +13,18 @@
             <h1 class="text-xl font-black text-red-600 mb-4 uppercase italic">System Settings</h1>
             
             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Service Mode</label>
-            <select id="appMode" onchange="updateSetting('mode', this.value)" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold mb-4 outline-none focus:border-red-500">
+            <select id="appMode" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold mb-4 outline-none focus:border-red-500">
                 <option value="table">Table Service (Dine-In)</option>
                 <option value="delivery">Home Delivery (Live Location)</option>
             </select>
             
             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Delivery Commission (%)</label>
-            <input id="commRate" type="number" placeholder="e.g. 10" onchange="updateSetting('commission', this.value)" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:border-red-500">
-            <p class="text-[9px] text-gray-400 mt-2 italic">* This % will be deducted from sales in Reports</p>
+            <input id="commRate" type="number" placeholder="e.g. 10" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:border-red-500">
+            <p class="text-[9px] text-gray-400 mt-2 italic mb-4">* This % will be deducted from sales in Reports</p>
+            
+            <button onclick="saveSystemSettings()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">
+                Update System & Commission ✅
+            </button>
         </div>
 
         <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-3">
@@ -55,14 +59,25 @@
         const app = initializeApp(firebaseConfig); 
         const db = getDatabase(app);
 
-        // --- SETTINGS LOGIC ---
-        // Save settings as numeric values for mathematical consistency
-        window.updateSetting = (key, val) => {
-            const valueToSave = (key === 'commission') ? parseFloat(val) : val;
-            set(ref(db, `settings/${key}`), valueToSave);
+        // --- NEW SETTINGS LOGIC WITH OK/SUBMIT BUTTON ---
+        window.saveSystemSettings = () => {
+            const mode = document.getElementById('appMode').value;
+            const comm = document.getElementById('commRate').value;
+
+            if(comm === "") {
+                alert("Please enter a commission percentage");
+                return;
+            }
+
+            set(ref(db, 'settings'), {
+                mode: mode,
+                commission: parseFloat(comm)
+            }).then(() => {
+                alert("Settings Updated! Commission is now locked at " + comm + "%");
+            });
         };
         
-        // Sync inputs with Database
+        // Sync inputs from Database on page load
         onValue(ref(db, 'settings'), (s) => {
             if(s.exists()){
                 const settings = s.val();
@@ -78,4 +93,49 @@
             if(name) {
                 push(ref(db, 'restaurants'), { 
                     name, 
-                    image: image || "
+                    image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" 
+                }).then(() => {
+                    document.getElementById('resName').value = "";
+                    document.getElementById('resImg').value = "";
+                });
+            }
+        };
+
+        window.addDish = (id) => {
+            const dish = prompt("Dish Name?");
+            const price = prompt("Price?");
+            const dishImg = prompt("Dish Image URL?");
+            if(dish && price) {
+                push(ref(db, `restaurants/${id}/menu`), { 
+                    dish, 
+                    price: parseFloat(price), 
+                    dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" 
+                });
+            }
+        };
+
+        window.deleteHotel = (id) => {
+            if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`));
+        };
+
+        onValue(ref(db, 'restaurants'), (snap) => {
+            const list = document.getElementById('admin-restaurant-list'); 
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const res = child.val();
+                list.innerHTML += `
+                <div class="p-4 bg-white rounded-2xl shadow-sm border">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${res.image}" class="w-10 h-10 rounded-lg object-cover">
+                            <span class="font-bold text-sm">${res.name}</span>
+                        </div>
+                        <button onclick="deleteHotel('${child.key}')" class="text-red-500 text-xs font-black">DELETE</button>
+                    </div>
+                    <button onclick="addDish('${child.key}')" class="w-full bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
+                </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
