@@ -104,10 +104,13 @@
                         </div>`;
                     });
                 }
-                container.innerHTML += `<div class="bg-white p-5 rounded-[2rem] shadow-sm border">
-                    <h2 class="text-lg font-black mb-4">${res.name}</h2>
-                    ${menuHtml}
-                </div>`;
+                container.innerHTML += `<div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
+    <img src="${res.image}" class="w-full h-44 object-cover">
+    <div class="p-5">
+        <h2 class="text-xl font-black text-gray-800">${res.name}</h2>
+        <div class="space-y-1">${menuHtml}</div>
+    </div>
+</div>`;
             });
         });
     </script>
