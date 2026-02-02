@@ -1,66 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Partner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner - Bhaskar Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-blue-50 pb-24 p-4">
+
+    <div id="login-screen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-blue-600 mb-2 uppercase italic">Driver Login</h2>
+            <p class="text-[10px] text-gray-400 font-bold mb-6 uppercase">Enter details to track your commission</p>
+            <input id="drName" type="text" placeholder="Your Full Name" class="w-full p-4 mb-3 border rounded-2xl bg-gray-50 font-bold">
+            <input id="drPhone" type="tel" placeholder="Phone Number" class="w-full p-4 mb-6 border rounded-2xl bg-gray-50 font-bold">
+            <button onclick="saveDriver()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">START EARNING</button>
+        </div>
+    </div>
+
     <div class="max-w-md mx-auto space-y-6">
-        <div class="bg-blue-600 p-6 rounded-[2.5rem] text-white shadow-xl">
-            <p class="text-[10px] font-black uppercase opacity-80">Total Earnings (Commission)</p>
-            <h1 id="myEarnings" class="text-3xl font-black italic">₹0</h1>
+        <div class="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Your Total Earnings</p>
+                <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
+                <p id="disp-name" class="text-[10px] mt-2 font-bold opacity-80 uppercase"></p>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl"><i class="fa-solid fa-motorcycle"></i></div>
         </div>
 
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Pickups</h2>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Orders Ready for Pickup</h2>
         <div id="delivery-list" class="space-y-4"></div>
 
-        <hr>
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Delivery History</h2>
+        <hr class="border-blue-100">
+        
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Recent Commission History</h2>
         <div id="delivery-history" class="space-y-2"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        let commRate = 0;
-        onValue(ref(db, 'settings/commission'), s => commRate = s.val() || 0);
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
+            authDomain: "bhaskar-food-app.firebaseapp.com", 
+            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
+            projectId: "bhaskar-food-app", 
+            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getDatabase(app);
 
+        // --- AUTH LOGIC ---
+        window.saveDriver = () => {
+            const n = document.getElementById('drName').value;
+            const p = document.getElementById('drPhone').value;
+            if(n && p) {
+                localStorage.setItem('dr_n', n);
+                localStorage.setItem('dr_p', p);
+                location.reload();
+            } else { alert("Please enter Name and Phone"); }
+        };
+
+        if(!localStorage.getItem('dr_p')) {
+            document.getElementById('login-screen').classList.remove('hidden');
+        } else {
+            document.getElementById('disp-name').innerText = "Driver: " + localStorage.getItem('dr_n');
+        }
+
+        // --- COMMISSION LOGIC ---
+        let currentRate = 0;
+        onValue(ref(db, 'settings/commission'), s => {
+            currentRate = parseFloat(s.val()) || 0;
+        });
+
+        // --- RENDER ORDERS & HISTORY ---
         onValue(ref(db, 'orders'), (snap) => {
             const list = document.getElementById('delivery-list');
             const history = document.getElementById('delivery-history');
-            let totalComm = 0; list.innerHTML = ""; history.innerHTML = "";
+            const driverPhone = localStorage.getItem('dr_p');
+            
+            let totalComm = 0; 
+            list.innerHTML = ""; 
+            history.innerHTML = "";
 
             snap.forEach(child => {
                 const o = child.val();
-                const myComm = (o.totalAmount * commRate / 100);
                 
+                // Calculate potential commission for active orders
+                const potentialComm = (parseFloat(o.totalAmount || 0) * currentRate / 100).toFixed(2);
+
                 if(o.status === 'ready_for_pickup') {
-                    list.innerHTML += `<div class="bg-white p-5 rounded-3xl border-l-8 border-blue-500 shadow-sm">
-                        <p class="font-black text-gray-800">${o.customerName} - ${o.location}</p>
-                        <p class="text-xs text-gray-500">${o.items}</p>
-                        <button onclick="complete('${child.key}')" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs">Deliver (Earn ₹${myComm})</button>
+                    list.innerHTML += `
+                    <div class="bg-white p-6 rounded-[2rem] border-l-[10px] border-blue-500 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-black text-gray-800 text-lg leading-tight">${o.customerName}</p>
+                            <span class="bg-blue-100 text-blue-600 text-[10px] px-3 py-1 rounded-full font-black uppercase">Earn ₹${potentialComm}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 font-bold italic mb-3">📍 ${o.location}</p>
+                        <p class="text-xs text-gray-400 border-t pt-3 mb-4">${o.items}</p>
+                        <button onclick="completeOrder('${child.key}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-md active:scale-95 transition-all">Mark as Delivered</button>
                     </div>`;
                 } 
-                else if (o.status === 'completed' && o.driverPhone === localStorage.getItem('dr_p')) {
-                    totalComm += myComm;
-                    history.innerHTML += `<div class="bg-white p-3 rounded-xl flex justify-between text-[10px] font-bold border">
-                        <span>${o.customerName}</span>
-                        <span class="text-green-600">+₹${myComm}</span>
+                else if (o.status === 'completed' && o.driverPhone === driverPhone) {
+                    // Use the stored commissionPaid from the order if it exists, otherwise calculate it
+                    const commissionAmount = parseFloat(o.commissionPaid || potentialComm);
+                    totalComm += commissionAmount;
+
+                    history.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center text-[10px] font-bold border border-gray-100 shadow-sm">
+                        <div>
+                            <p class="text-gray-800 uppercase">${o.customerName}</p>
+                            <p class="text-gray-400 font-normal">Order Total: ₹${o.totalAmount}</p>
+                        </div>
+                        <span class="text-green-600 bg-green-50 px-3 py-2 rounded-xl">+ ₹${commissionAmount.toFixed(2)}</span>
                     </div>`;
                 }
             });
-            document.getElementById('myEarnings').innerText = "₹" + totalComm;
+            document.getElementById('myEarnings').innerText = "₹" + totalComm.toFixed(2);
         });
 
-        window.complete = (id) => update(ref(db, `orders/${id}`), { 
-            status: 'completed', 
-            deliveredBy: localStorage.getItem('dr_n'),
-            driverPhone: localStorage.getItem('dr_p') 
-        });
+        // --- THE COMPLETE LOGIC (STORE COMMISSION) ---
+        window.completeOrder = (orderId) => {
+            // Fetch the order data first to calculate commission based on order amount
+            get(ref(db, `orders/${orderId}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const orderData = snapshot.val();
+                    const earned = (parseFloat(orderData.totalAmount) * currentRate / 100);
+
+                    update(ref(db, `orders/${orderId}`), { 
+                        status: 'completed', 
+                        deliveredBy: localStorage.getItem('dr_n'),
+                        driverPhone: localStorage.getItem('dr_p'),
+                        commissionPaid: earned // This stores the profit deduction for reports
+                    }).then(() => {
+                        alert("Great Job! Commission Earned: ₹" + earned.toFixed(2));
+                    });
+                }
+            });
+        };
     </script>
 </body>
 </html>
