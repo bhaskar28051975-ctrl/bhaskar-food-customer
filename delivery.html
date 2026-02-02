@@ -4,24 +4,20 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Partner</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-blue-50 pb-24">
-    <div id="login-screen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6 text-white">
-        <div class="w-full max-w-md space-y-6">
-            <h1 class="text-3xl font-black uppercase italic">Partner Enrollment</h1>
-            <input id="drName" type="text" placeholder="Full Name" class="w-full p-5 rounded-2xl text-black font-bold">
-            <input id="drPhone" type="tel" placeholder="Mobile Number" class="w-full p-5 rounded-2xl text-black font-bold">
-            <button onclick="login()" class="w-full bg-white text-blue-600 py-5 rounded-2xl font-black uppercase shadow-xl">Start Work ➔</button>
+<body class="bg-blue-50 pb-24 p-4">
+    <div class="max-w-md mx-auto space-y-6">
+        <div class="bg-blue-600 p-6 rounded-[2.5rem] text-white shadow-xl">
+            <p class="text-[10px] font-black uppercase opacity-80">Total Earnings (Commission)</p>
+            <h1 id="myEarnings" class="text-3xl font-black italic">₹0</h1>
         </div>
-    </div>
 
-    <div class="max-w-md mx-auto p-4">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-black text-blue-600 italic uppercase">🚴 Pickup Point</h1>
-            <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase">Log Out</button>
-        </div>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Pickups</h2>
         <div id="delivery-list" class="space-y-4"></div>
+
+        <hr>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Delivery History</h2>
+        <div id="delivery-history" class="space-y-2"></div>
     </div>
 
     <script type="module">
@@ -30,32 +26,36 @@
         const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        window.login = () => {
-            const n = document.getElementById('drName').value; const p = document.getElementById('drPhone').value;
-            if(n && p) { localStorage.setItem('dr_n', n); localStorage.setItem('dr_p', p); location.reload(); }
-        };
-        window.logout = () => { localStorage.clear(); location.reload(); };
-
-        if(!localStorage.getItem('dr_n')) document.getElementById('login-screen').classList.remove('hidden');
+        let commRate = 0;
+        onValue(ref(db, 'settings/commission'), s => commRate = s.val() || 0);
 
         onValue(ref(db, 'orders'), (snap) => {
-            const container = document.getElementById('delivery-list'); container.innerHTML = "";
+            const list = document.getElementById('delivery-list');
+            const history = document.getElementById('delivery-history');
+            let totalComm = 0; list.innerHTML = ""; history.innerHTML = "";
+
             snap.forEach(child => {
-                const order = child.val();
-                if(order.status === 'ready_for_pickup') {
-                    container.innerHTML += `<div class="bg-white p-6 rounded-[2rem] shadow-lg border-l-8 border-blue-500">
-                        <div class="flex justify-between mb-4">
-                            <span class="text-xs font-black bg-blue-100 px-3 py-1 rounded-full">${order.location || 'HOME'}</span>
-                            <span class="text-xl font-black text-green-600">₹${order.totalAmount}</span>
-                        </div>
-                        <h3 class="font-black text-gray-800">${order.customerName}</h3>
-                        <p class="text-sm font-bold text-gray-400 mt-2">${order.items}</p>
-                        ${order.location.includes('http') ? `<a href="${order.location}" class="block mt-4 text-blue-600 font-bold text-xs underline">OPEN LIVE LOCATION</a>` : ''}
-                        <button onclick="complete('${child.key}')" class="w-full mt-6 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs">Mark Delivered ✅</button>
+                const o = child.val();
+                const myComm = (o.totalAmount * commRate / 100);
+                
+                if(o.status === 'ready_for_pickup') {
+                    list.innerHTML += `<div class="bg-white p-5 rounded-3xl border-l-8 border-blue-500 shadow-sm">
+                        <p class="font-black text-gray-800">${o.customerName} - ${o.location}</p>
+                        <p class="text-xs text-gray-500">${o.items}</p>
+                        <button onclick="complete('${child.key}')" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs">Deliver (Earn ₹${myComm})</button>
+                    </div>`;
+                } 
+                else if (o.status === 'completed' && o.driverPhone === localStorage.getItem('dr_p')) {
+                    totalComm += myComm;
+                    history.innerHTML += `<div class="bg-white p-3 rounded-xl flex justify-between text-[10px] font-bold border">
+                        <span>${o.customerName}</span>
+                        <span class="text-green-600">+₹${myComm}</span>
                     </div>`;
                 }
             });
+            document.getElementById('myEarnings').innerText = "₹" + totalComm;
         });
+
         window.complete = (id) => update(ref(db, `orders/${id}`), { 
             status: 'completed', 
             deliveredBy: localStorage.getItem('dr_n'),
