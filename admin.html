@@ -1,31 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Master Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-red-50 pb-24 p-4">
     <div class="max-w-md mx-auto space-y-6">
-        <div class="bg-white p-6 rounded-[2rem] shadow-xl border">
-            <h1 class="text-xl font-black text-red-600 mb-4 uppercase italic">System Settings</h1>
-            
-            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Service Mode</label>
-            <select id="appMode" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold mb-4 outline-none focus:border-red-500">
-                <option value="table">Table Service (Dine-In)</option>
-                <option value="delivery">Home Delivery (Live Location)</option>
-            </select>
-            
-            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Delivery Commission (%)</label>
-            <input id="commRate" type="number" placeholder="e.g. 10" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:border-red-500">
-            
-            <button onclick="saveSystemSettings()" class="w-full bg-gray-800 text-white py-4 mt-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">
-                Update System ✅
-            </button>
-        </div>
-
         <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-3">
             <h2 class="font-black text-gray-800 uppercase text-xs tracking-widest">Add New Hotel</h2>
             <input id="resName" type="text" placeholder="Hotel Name" class="w-full p-3 border rounded-xl bg-gray-50 text-sm">
@@ -37,16 +19,9 @@
         <div id="admin-restaurant-list" class="space-y-4"></div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100] shadow-2xl">
-        <a href="admin.html" class="text-red-600"><i class="fa-solid fa-gears text-xl"></i></a>
-        <a href="kitchen.html" class="text-gray-400"><i class="fa-solid fa-utensils text-xl"></i></a>
-        <a href="delivery.html" class="text-gray-400"><i class="fa-solid fa-truck text-xl"></i></a>
-        <a href="reports.html" class="text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i></a>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
@@ -55,24 +30,9 @@
             projectId: "bhaskar-food-app", 
             appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
         };
-        const app = initializeApp(firebaseConfig); 
-        const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        // --- SETTINGS ---
-        window.saveSystemSettings = () => {
-            const mode = document.getElementById('appMode').value;
-            const comm = document.getElementById('commRate').value;
-            set(ref(db, 'settings'), { mode, commission: parseFloat(comm || 0) }).then(() => alert("Settings Updated!"));
-        };
-
-        onValue(ref(db, 'settings'), (s) => {
-            if(s.exists()){
-                document.getElementById('appMode').value = s.val().mode || 'table';
-                document.getElementById('commRate').value = s.val().commission || 0;
-            }
-        });
-
-        // --- HOTEL MGMT ---
+        // --- ADD RESTAURANT ---
         window.addRestaurant = () => {
             const name = document.getElementById('resName').value;
             const image = document.getElementById('resImg').value;
@@ -82,46 +42,30 @@
             }
         };
 
-        window.deleteHotel = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`)); };
+        // --- DELETE HOTEL ---
+        window.deleteHotel = (id) => { if(confirm("Delete entire Hotel?")) remove(ref(db, `restaurants/${id}`)); };
 
-        // --- DISH MGMT ---
-        window.addDish = (hotelId) => {
+        // --- ADD DISH ---
+        window.addDish = (id) => {
             const dish = prompt("Dish Name?");
-            const price = prompt("Price (₹)?");
+            const price = prompt("Price?");
             const dishImg = prompt("Dish Image URL?");
             if(dish && price) {
-                push(ref(db, `restaurants/${hotelId}/menu`), { 
-                    dish, 
-                    price: parseFloat(price), 
+                push(ref(db, `restaurants/${id}/menu`), { 
+                    dish, price: parseFloat(price), 
                     dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" 
                 });
             }
         };
 
+        // --- DELETE INDIVIDUAL DISH ---
         window.deleteDish = (hotelId, dishId) => {
-            if(confirm("Delete this item?")) remove(ref(db, `restaurants/${hotelId}/menu/${dishId}`));
+            if(confirm("Delete this item?")) {
+                remove(ref(db, `restaurants/${hotelId}/menu/${dishId}`));
+            }
         };
 
-        window.editDish = (hotelId, dishId) => {
-            get(ref(db, `restaurants/${hotelId}/menu/${dishId}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const item = snapshot.val();
-                    const newName = prompt("Edit Dish Name:", item.dish);
-                    const newPrice = prompt("Edit Price (₹):", item.price);
-                    const newImg = prompt("Edit Image URL:", item.dishImg);
-
-                    if (newName && newPrice) {
-                        update(ref(db, `restaurants/${hotelId}/menu/${dishId}`), {
-                            dish: newName,
-                            price: parseFloat(newPrice),
-                            dishImg: newImg || item.dishImg
-                        }).then(() => alert("Updated!"));
-                    }
-                }
-            });
-        };
-
-        // --- RENDER LIST ---
+        // --- RENDER ADMIN LIST ---
         onValue(ref(db, 'restaurants'), (snap) => {
             const list = document.getElementById('admin-restaurant-list'); 
             list.innerHTML = "";
@@ -131,36 +75,29 @@
                 let menuHtml = "";
                 
                 if(res.menu) {
-                    Object.keys(res.menu).forEach(dishId => {
-                        const item = res.menu[dishId];
+                    Object.keys(res.menu).forEach(mId => {
+                        const m = res.menu[mId];
                         menuHtml += `
-                        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                            <div class="flex items-center gap-3">
-                                <img src="${item.dishImg}" class="w-10 h-10 rounded-lg object-cover border shadow-sm">
-                                <div>
-                                    <p class="text-[11px] font-black text-gray-800 leading-none">${item.dish}</p>
-                                    <p class="text-[10px] font-bold text-green-600 mt-1">₹${item.price}</p>
-                                </div>
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                            <div class="flex items-center gap-2">
+                                <img src="${m.dishImg}" class="w-8 h-8 rounded object-cover border">
+                                <span class="text-[11px] font-bold">${m.dish} - ₹${m.price}</span>
                             </div>
-                            <div class="flex gap-4">
-                                <button onclick="editDish('${hotelId}', '${dishId}')" class="text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="deleteDish('${hotelId}', '${dishId}')" class="text-red-400"><i class="fa-solid fa-circle-xmark"></i></button>
-                            </div>
+                            <button onclick="deleteDish('${hotelId}', '${mId}')" class="text-red-500 hover:scale-110">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
                         </div>`;
                     });
                 }
 
                 list.innerHTML += `
-                <div class="p-5 bg-white rounded-[2rem] shadow-sm border">
-                    <div class="flex items-center justify-between mb-4 pb-2 border-b">
-                        <div class="flex items-center gap-3">
-                            <img src="${res.image}" class="w-10 h-10 rounded-full object-cover border-2 border-red-100">
-                            <span class="font-black text-sm uppercase italic text-gray-700">${res.name}</span>
-                        </div>
-                        <button onclick="deleteHotel('${hotelId}')" class="text-red-500 text-[9px] font-black bg-red-50 px-2 py-1 rounded-lg uppercase">Delete Hotel</button>
+                <div class="p-4 bg-white rounded-2xl shadow-sm border mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-sm uppercase">${res.name}</span>
+                        <button onclick="deleteHotel('${hotelId}')" class="text-[10px] text-red-600 font-black uppercase">Delete Hotel</button>
                     </div>
-                    <div class="space-y-1 mb-4">${menuHtml || '<p class="text-[10px] text-gray-300 italic">No dishes added.</p>'}</div>
-                    <button onclick="addDish('${hotelId}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-md active:scale-95 transition-all">+ Add Dish</button>
+                    <div class="mb-3 space-y-1">${menuHtml}</div>
+                    <button onclick="addDish('${hotelId}')" class="w-full bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
                 </div>`;
             });
         });
