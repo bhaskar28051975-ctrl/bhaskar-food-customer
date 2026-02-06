@@ -20,10 +20,9 @@
             
             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Delivery Commission (%)</label>
             <input id="commRate" type="number" placeholder="e.g. 10" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:border-red-500">
-            <p class="text-[9px] text-gray-400 mt-2 italic mb-4">* This % will be deducted from sales in Reports</p>
             
-            <button onclick="saveSystemSettings()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">
-                Update System & Commission ✅
+            <button onclick="saveSystemSettings()" class="w-full bg-gray-800 text-white py-4 mt-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">
+                Update System ✅
             </button>
         </div>
 
@@ -34,7 +33,7 @@
             <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow-lg active:scale-95 transition-transform">Save Hotel</button>
         </div>
 
-        <h2 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-2">Managed Hotels</h2>
+        <h2 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-2">Managed Hotels & Menus</h2>
         <div id="admin-restaurant-list" class="space-y-4"></div>
     </div>
 
@@ -47,7 +46,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
@@ -59,54 +58,39 @@
         const app = initializeApp(firebaseConfig); 
         const db = getDatabase(app);
 
-        // --- NEW SETTINGS LOGIC WITH OK/SUBMIT BUTTON ---
+        // --- SETTINGS ---
         window.saveSystemSettings = () => {
             const mode = document.getElementById('appMode').value;
             const comm = document.getElementById('commRate').value;
-
-            if(comm === "") {
-                alert("Please enter a commission percentage");
-                return;
-            }
-
-            set(ref(db, 'settings'), {
-                mode: mode,
-                commission: parseFloat(comm)
-            }).then(() => {
-                alert("Settings Updated! Commission is now locked at " + comm + "%");
-            });
+            set(ref(db, 'settings'), { mode, commission: parseFloat(comm || 0) }).then(() => alert("Settings Updated!"));
         };
-        
-        // Sync inputs from Database on page load
+
         onValue(ref(db, 'settings'), (s) => {
             if(s.exists()){
-                const settings = s.val();
-                document.getElementById('appMode').value = settings.mode || 'table';
-                document.getElementById('commRate').value = settings.commission || 0;
+                document.getElementById('appMode').value = s.val().mode || 'table';
+                document.getElementById('commRate').value = s.val().commission || 0;
             }
         });
 
-        // --- HOTEL MANAGEMENT ---
+        // --- HOTEL MGMT ---
         window.addRestaurant = () => {
             const name = document.getElementById('resName').value;
             const image = document.getElementById('resImg').value;
             if(name) {
-                push(ref(db, 'restaurants'), { 
-                    name, 
-                    image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" 
-                }).then(() => {
-                    document.getElementById('resName').value = "";
-                    document.getElementById('resImg').value = "";
-                });
+                push(ref(db, 'restaurants'), { name, image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" });
+                document.getElementById('resName').value = ""; document.getElementById('resImg').value = "";
             }
         };
 
-        window.addDish = (id) => {
+        window.deleteHotel = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`)); };
+
+        // --- DISH MGMT ---
+        window.addDish = (hotelId) => {
             const dish = prompt("Dish Name?");
-            const price = prompt("Price?");
+            const price = prompt("Price (₹)?");
             const dishImg = prompt("Dish Image URL?");
             if(dish && price) {
-                push(ref(db, `restaurants/${id}/menu`), { 
+                push(ref(db, `restaurants/${hotelId}/menu`), { 
                     dish, 
                     price: parseFloat(price), 
                     dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" 
@@ -114,25 +98,69 @@
             }
         };
 
-        window.deleteHotel = (id) => {
-            if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`));
+        window.deleteDish = (hotelId, dishId) => {
+            if(confirm("Delete this item?")) remove(ref(db, `restaurants/${hotelId}/menu/${dishId}`));
         };
 
+        window.editDish = (hotelId, dishId) => {
+            get(ref(db, `restaurants/${hotelId}/menu/${dishId}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const item = snapshot.val();
+                    const newName = prompt("Edit Dish Name:", item.dish);
+                    const newPrice = prompt("Edit Price (₹):", item.price);
+                    const newImg = prompt("Edit Image URL:", item.dishImg);
+
+                    if (newName && newPrice) {
+                        update(ref(db, `restaurants/${hotelId}/menu/${dishId}`), {
+                            dish: newName,
+                            price: parseFloat(newPrice),
+                            dishImg: newImg || item.dishImg
+                        }).then(() => alert("Updated!"));
+                    }
+                }
+            });
+        };
+
+        // --- RENDER LIST ---
         onValue(ref(db, 'restaurants'), (snap) => {
             const list = document.getElementById('admin-restaurant-list'); 
             list.innerHTML = "";
             snap.forEach(child => {
                 const res = child.val();
+                const hotelId = child.key;
+                let menuHtml = "";
+                
+                if(res.menu) {
+                    Object.keys(res.menu).forEach(dishId => {
+                        const item = res.menu[dishId];
+                        menuHtml += `
+                        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.dishImg}" class="w-10 h-10 rounded-lg object-cover border shadow-sm">
+                                <div>
+                                    <p class="text-[11px] font-black text-gray-800 leading-none">${item.dish}</p>
+                                    <p class="text-[10px] font-bold text-green-600 mt-1">₹${item.price}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <button onclick="editDish('${hotelId}', '${dishId}')" class="text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteDish('${hotelId}', '${dishId}')" class="text-red-400"><i class="fa-solid fa-circle-xmark"></i></button>
+                            </div>
+                        </div>`;
+                    });
+                }
+
                 list.innerHTML += `
-                <div class="p-4 bg-white rounded-2xl shadow-sm border">
-                    <div class="flex items-center justify-between mb-3">
+                <div class="p-5 bg-white rounded-[2rem] shadow-sm border">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b">
                         <div class="flex items-center gap-3">
-                            <img src="${res.image}" class="w-10 h-10 rounded-lg object-cover">
-                            <span class="font-bold text-sm">${res.name}</span>
+                            <img src="${res.image}" class="w-10 h-10 rounded-full object-cover border-2 border-red-100">
+                            <span class="font-black text-sm uppercase italic text-gray-700">${res.name}</span>
                         </div>
-                        <button onclick="deleteHotel('${child.key}')" class="text-red-500 text-xs font-black">DELETE</button>
+                        <button onclick="deleteHotel('${hotelId}')" class="text-red-500 text-[9px] font-black bg-red-50 px-2 py-1 rounded-lg uppercase">Delete Hotel</button>
                     </div>
-                    <button onclick="addDish('${child.key}')" class="w-full bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
+                    <div class="space-y-1 mb-4">${menuHtml || '<p class="text-[10px] text-gray-300 italic">No dishes added.</p>'}</div>
+                    <button onclick="addDish('${hotelId}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-md active:scale-95 transition-all">+ Add Dish</button>
                 </div>`;
             });
         });
