@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 pb-80">
+<body class="bg-gray-100 pb-80 text-gray-800">
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
         <h1 class="text-xl font-black text-red-600 italic uppercase tracking-tighter">Bhaskar Food</h1>
         <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
@@ -22,7 +22,6 @@
             </div>
             <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase tracking-widest bg-red-50 px-4 py-2 rounded-full">Cancel</button>
         </div>
-
         <div class="space-y-3">
             <input id="custName" type="text" placeholder="Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none focus:border-red-500">
             <div id="mode-inputs"></div>
@@ -41,8 +40,7 @@
             projectId: "bhaskar-food-app", 
             appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
         };
-        const app = initializeApp(firebaseConfig); 
-        const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
         let cart = {}; let appMode = 'table'; let userLoc = ""; let resData = {};
 
@@ -52,14 +50,14 @@
             if(appMode === 'table') {
                 div.innerHTML = `<select id="tableNum" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n => `<option value="Table ${n}">Table ${n}</option>`).join("")}</select>`;
             } else {
-                div.innerHTML = `<button onclick="getLocation()" id="locBtn" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase">📍 Send My Live Location</button>`;
+                div.innerHTML = `<button onclick="getLocation()" id="locBtn" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase">📍 Send Live Location</button>`;
             }
         });
 
         window.getLocation = () => {
             navigator.geolocation.getCurrentPosition(p => {
                 userLoc = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-                document.getElementById('locBtn').innerText = "✅ Location Captured";
+                document.getElementById('locBtn').innerText = "✅ Location Saved";
             });
         };
 
@@ -67,8 +65,7 @@
             if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
             cart[id].qty += change;
             if(cart[id].qty <= 0) delete cart[id];
-            updateUI();
-            renderMenu();
+            updateUI(); renderMenu();
         };
 
         window.cancelOrder = () => { cart = {}; updateUI(); renderMenu(); };
@@ -92,38 +89,38 @@
                         const m = res.menu[mId];
                         const currentQty = cart[mId] ? cart[mId].qty : 0;
                         
+                        // --- UPDATED DESIGN: HUGE IMAGES ---
                         menuHtml += `
-                        <div class="flex justify-between items-center py-5 border-b last:border-0 border-gray-100">
-                            <div class="flex items-center gap-4">
-                                <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}" 
-                                     class="w-24 h-24 rounded-[1.5rem] object-cover border-2 border-white shadow-md">
-                                <div>
-                                    <p class="font-black text-gray-800 text-base leading-tight">${m.dish}</p>
-                                    <p class="text-red-500 font-black text-sm mt-1">₹${m.price}</p>
+                        <div class="flex flex-col gap-3 py-6 border-b last:border-0 border-gray-100">
+                            <div class="flex gap-4">
+                                <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}" 
+                                     class="w-32 h-32 rounded-[2rem] object-cover shadow-xl border-2 border-white">
+                                <div class="flex flex-col justify-between py-1 flex-1">
+                                    <div>
+                                        <p class="font-black text-gray-800 text-lg leading-tight">${m.dish}</p>
+                                        <p class="text-green-600 font-black text-base mt-1">₹${m.price}</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-3">
+                                        ${currentQty > 0 ? `
+                                            <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', -1)" class="w-10 h-10 rounded-full border-2 border-red-500 text-red-500 font-black flex items-center justify-center">-</button>
+                                            <span class="font-black text-lg w-4 text-center">${currentQty}</span>
+                                        ` : ''}
+                                        <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white h-10 ${currentQty > 0 ? 'w-10 rounded-full' : 'px-6 rounded-full'} text-xs font-black shadow-lg">
+                                            ${currentQty > 0 ? '+' : '+ ADD'}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                ${currentQty > 0 ? `
-                                    <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', -1)" class="w-8 h-8 rounded-full border-2 border-red-500 text-red-500 font-black flex items-center justify-center">-</button>
-                                    <span class="font-black text-sm w-4 text-center">${currentQty}</span>
-                                ` : ''}
-                                <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white h-9 ${currentQty > 0 ? 'w-9 rounded-full' : 'px-5 rounded-full'} text-[11px] font-black shadow-lg transition-all">
-                                    ${currentQty > 0 ? '+' : '+ ADD'}
-                                </button>
                             </div>
                         </div>`;
                     });
                 }
 
                 container.innerHTML += `
-                <div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
-                    <img src="${res.image}" class="w-full h-48 object-cover">
+                <div class="bg-white rounded-[3rem] shadow-sm border overflow-hidden">
+                    <img src="${res.image}" class="w-full h-56 object-cover shadow-inner">
                     <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <h2 class="text-xl font-black text-gray-800 uppercase italic">${res.name}</h2>
-                        </div>
+                        <h2 class="text-2xl font-black text-gray-800 uppercase italic mb-4">${res.name}</h2>
                         <div class="space-y-2">${menuHtml}</div>
                     </div>
                 </div>`;
@@ -131,23 +128,20 @@
         }
 
         onValue(ref(db, 'restaurants'), (snap) => {
-            resData = snap.val() || {};
-            renderMenu();
+            resData = snap.val() || {}; renderMenu();
         });
 
         window.placeOrder = () => {
             const name = document.getElementById('custName').value;
-            const table = document.getElementById('tableNum')?.value || "";
             if(!name) return alert("Enter Name");
-
             push(ref(db, 'orders'), {
                 customerName: name,
-                location: appMode === 'table' ? table : userLoc,
+                location: appMode === 'table' ? document.getElementById('tableNum').value : userLoc,
                 items: Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", "),
                 totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
                 status: "pending",
                 timestamp: Date.now()
-            }).then(() => { alert("Order Placed!"); location.reload(); });
+            }).then(() => { alert("Order Sent!"); location.reload(); });
         };
     </script>
 </body>
