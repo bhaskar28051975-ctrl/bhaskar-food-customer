@@ -41,7 +41,8 @@
             projectId: "bhaskar-food-app", 
             appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
         };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig); 
+        const db = getDatabase(app);
 
         let cart = {}; let appMode = 'table'; let userLoc = ""; let resData = {};
 
@@ -68,18 +69,13 @@
             }, (err) => alert("Please enable GPS/Location"));
         };
 
-        // 2. The Logic for Plus/Minus
+        // 2. Cart Logic
         window.updateQty = (id, dish, price, change) => {
             if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
-            
             cart[id].qty += change;
-            
-            if(cart[id].qty <= 0) {
-                delete cart[id];
-            }
-            
+            if(cart[id].qty <= 0) delete cart[id];
             updateUI();
-            renderMenu(); // Redraw menu to show updated numbers
+            renderMenu();
         };
 
         window.cancelOrder = () => {
@@ -95,7 +91,7 @@
             document.getElementById('panel-total').innerText = "₹" + total;
         }
 
-        // 3. Render function to show Plus/Minus buttons
+        // 3. Render Menu with Images
         function renderMenu() {
             const container = document.getElementById('customer-list'); 
             container.innerHTML = "";
@@ -109,11 +105,16 @@
                         const m = res.menu[mId];
                         const currentQty = cart[mId] ? cart[mId].qty : 0;
                         
+                        // UPDATED: Dish row with Image
                         menuHtml += `
                         <div class="flex justify-between items-center py-4 border-b last:border-0 border-gray-50">
-                            <div>
-                                <p class="font-black text-gray-800 text-sm">${m.dish}</p>
-                                <p class="text-red-500 font-black text-xs">₹${m.price}</p>
+                            <div class="flex items-center gap-3">
+                                <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" 
+                                     class="w-12 h-12 rounded-xl object-cover border shadow-sm">
+                                <div>
+                                    <p class="font-black text-gray-800 text-sm">${m.dish}</p>
+                                    <p class="text-red-500 font-black text-xs">₹${m.price}</p>
+                                </div>
                             </div>
                             
                             <div class="flex items-center gap-3">
@@ -137,13 +138,13 @@
                             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                             <h2 class="text-xl font-black text-gray-800 uppercase italic">${res.name}</h2>
                         </div>
-                        <div class="space-y-1">${menuHtml}</div>
+                        <div class="space-y-1">${menuHtml || '<p class="text-gray-400 italic text-xs">No items available</p>'}</div>
                     </div>
                 </div>`;
             });
         }
 
-        // Load Data from Firebase
+        // Firebase Listeners
         onValue(ref(db, 'restaurants'), (snap) => {
             resData = snap.val() || {};
             renderMenu();
@@ -152,22 +153,21 @@
         window.placeOrder = () => {
             const name = document.getElementById('custName').value;
             const table = document.getElementById('tableNum')?.value || "";
-            
             if(!name) return alert("Please enter your name");
-            if(appMode === 'table' && !table) return alert("Please select table number");
-            if(appMode === 'delivery' && !userLoc) return alert("Please send location first");
+            if(appMode === 'table' && !table) return alert("Please select table");
+            if(appMode === 'delivery' && !userLoc) return alert("Please capture location");
 
-            let itemsText = Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", ");
-            const orderData = {
+            const itemsText = Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", ");
+            const total = Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0);
+
+            push(ref(db, 'orders'), {
                 customerName: name,
                 location: appMode === 'table' ? table : userLoc,
                 items: itemsText,
-                totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
+                totalAmount: total,
                 status: "pending",
                 timestamp: Date.now()
-            };
-
-            push(ref(db, 'orders'), orderData).then(() => {
+            }).then(() => {
                 alert("Order Placed Successfully!");
                 location.reload();
             });
