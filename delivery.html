@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Partner - Bhaskar Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-blue-50 pb-24 p-4">
 
@@ -21,8 +22,15 @@
     <div class="max-w-md mx-auto space-y-6">
         <div class="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
             <div class="relative z-10">
-                <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Your Total Earnings</p>
-                <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Your Current Earnings</p>
+                        <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
+                    </div>
+                    <button onclick="settleEarnings()" class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90" title="Settle & Clear History">
+                        <i class="fa-solid fa-rotate text-xl"></i>
+                    </button>
+                </div>
                 <p id="disp-name" class="text-[10px] mt-2 font-bold opacity-80 uppercase"></p>
             </div>
             <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl"><i class="fa-solid fa-motorcycle"></i></div>
@@ -33,7 +41,7 @@
 
         <hr class="border-blue-100">
         
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Recent Commission History</h2>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Today's Unpaid History</h2>
         <div id="delivery-history" class="space-y-2"></div>
     </div>
 
@@ -51,6 +59,9 @@
         const app = initializeApp(firebaseConfig); 
         const db = getDatabase(app);
 
+        const drPhone = localStorage.getItem('dr_p');
+        let completedOrderKeys = []; // To keep track of keys for clearing
+
         // --- AUTH LOGIC ---
         window.saveDriver = () => {
             const n = document.getElementById('drName').value;
@@ -62,32 +73,29 @@
             } else { alert("Please enter Name and Phone"); }
         };
 
-        if(!localStorage.getItem('dr_p')) {
+        if(!drPhone) {
             document.getElementById('login-screen').classList.remove('hidden');
         } else {
             document.getElementById('disp-name').innerText = "Driver: " + localStorage.getItem('dr_n');
         }
 
-        // --- COMMISSION LOGIC ---
         let currentRate = 0;
         onValue(ref(db, 'settings/commission'), s => {
             currentRate = parseFloat(s.val()) || 0;
         });
 
-        // --- RENDER ORDERS & HISTORY ---
+        // --- RENDER LOGIC ---
         onValue(ref(db, 'orders'), (snap) => {
             const list = document.getElementById('delivery-list');
             const history = document.getElementById('delivery-history');
-            const driverPhone = localStorage.getItem('dr_p');
             
             let totalComm = 0; 
             list.innerHTML = ""; 
             history.innerHTML = "";
+            completedOrderKeys = []; 
 
             snap.forEach(child => {
                 const o = child.val();
-                
-                // Calculate potential commission for active orders
                 const potentialComm = (parseFloat(o.totalAmount || 0) * currentRate / 100).toFixed(2);
 
                 if(o.status === 'ready_for_pickup') {
@@ -102,10 +110,11 @@
                         <button onclick="completeOrder('${child.key}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-md active:scale-95 transition-all">Mark as Delivered</button>
                     </div>`;
                 } 
-                else if (o.status === 'completed' && o.driverPhone === driverPhone) {
-                    // Use the stored commissionPaid from the order if it exists, otherwise calculate it
+                // Only show 'completed' orders, 'settled' orders will be hidden
+                else if (o.status === 'completed' && o.driverPhone === drPhone) {
                     const commissionAmount = parseFloat(o.commissionPaid || potentialComm);
                     totalComm += commissionAmount;
+                    completedOrderKeys.push(child.key);
 
                     history.innerHTML += `
                     <div class="bg-white p-4 rounded-2xl flex justify-between items-center text-[10px] font-bold border border-gray-100 shadow-sm">
@@ -120,21 +129,32 @@
             document.getElementById('myEarnings').innerText = "₹" + totalComm.toFixed(2);
         });
 
-        // --- THE COMPLETE LOGIC (STORE COMMISSION) ---
+        // --- SETTLE & CLEAR LOGIC ---
+        window.settleEarnings = () => {
+            if (completedOrderKeys.length === 0) return alert("No earnings to settle!");
+            
+            if (confirm("Are you paid by the hotel? This will clear your current earnings display.")) {
+                const updates = {};
+                completedOrderKeys.forEach(key => {
+                    updates[`orders/${key}/status`] = 'settled';
+                });
+
+                update(ref(db), updates).then(() => {
+                    alert("Account Settled! Earnings reset to ₹0");
+                });
+            }
+        };
+
         window.completeOrder = (orderId) => {
-            // Fetch the order data first to calculate commission based on order amount
             get(ref(db, `orders/${orderId}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     const orderData = snapshot.val();
                     const earned = (parseFloat(orderData.totalAmount) * currentRate / 100);
-
                     update(ref(db, `orders/${orderId}`), { 
                         status: 'completed', 
                         deliveredBy: localStorage.getItem('dr_n'),
                         driverPhone: localStorage.getItem('dr_p'),
-                        commissionPaid: earned // This stores the profit deduction for reports
-                    }).then(() => {
-                        alert("Great Job! Commission Earned: ₹" + earned.toFixed(2));
+                        commissionPaid: earned
                     });
                 }
             });
