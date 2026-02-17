@@ -6,13 +6,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Smooth scrolling for the whole page */
         html { scroll-behavior: smooth; }
         .dish-card { transition: transform 0.2s; }
         .dish-card:active { transform: scale(0.95); }
+        /* Temporary Layer Styling */
+        #opening-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(220, 38, 38, 0.95); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center; padding: 20px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 pb-80 text-gray-800">
+
+    <div id="opening-layer">
+        <i class="fa-solid fa-utensils text-6xl mb-4 animate-bounce"></i>
+        <h1 class="text-4xl font-black uppercase tracking-tighter">Bhaskar Food</h1>
+        <p class="text-xl font-bold mt-2">WE ARE OPENING SOON!</p>
+        <div class="mt-6 bg-white text-red-600 px-6 py-3 rounded-full font-black text-2xl shadow-2xl">
+            COMING SOON
+        </div>
+        <p class="mt-4 opacity-80 text-sm">Online ordering will be active shortly.</p>
+        <button onclick="document.getElementById('opening-layer').style.display='none'" class="mt-10 text-[10px] underline opacity-50">Admin Preview</button>
+    </div>
+
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
         <h1 class="text-xl font-black text-red-600 italic uppercase tracking-tighter">Bhaskar Food</h1>
         <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
@@ -87,25 +105,18 @@
         function renderMenu() {
             const container = document.getElementById('customer-list'); 
             container.innerHTML = "";
-            
             Object.keys(resData).forEach(resId => {
                 const res = resData[resId];
                 let menuHtml = "";
-                
                 if(res.menu) {
                     Object.keys(res.menu).forEach(mId => {
                         const m = res.menu[mId];
                         const currentQty = cart[mId] ? cart[mId].qty : 0;
-                        
-                        // GRID CARD DESIGN
                         menuHtml += `
                         <div class="dish-card bg-gray-50 rounded-[2rem] p-3 border border-gray-100 flex flex-col items-center text-center">
-                            <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}" 
-                                 class="w-full aspect-square rounded-[1.5rem] object-cover shadow-md mb-3">
-                            
+                            <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}" class="w-full aspect-square rounded-[1.5rem] object-cover shadow-md mb-3">
                             <p class="font-black text-gray-800 text-sm leading-tight h-10 overflow-hidden line-clamp-2">${m.dish}</p>
                             <p class="text-red-500 font-black text-sm my-2">₹${m.price}</p>
-                            
                             <div class="w-full flex items-center justify-center gap-2">
                                 ${currentQty > 0 ? `
                                     <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', -1)" class="w-8 h-8 rounded-full bg-white border border-red-500 text-red-500 font-black flex items-center justify-center shadow-sm">-</button>
@@ -118,15 +129,12 @@
                         </div>`;
                     });
                 }
-
                 container.innerHTML += `
                 <div class="bg-white rounded-[3rem] shadow-sm border overflow-hidden">
                     <img src="${res.image}" class="w-full h-44 object-cover">
                     <div class="p-6">
                         <h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">${res.name}</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            ${menuHtml}
-                        </div>
+                        <div class="grid grid-cols-2 gap-4">${menuHtml}</div>
                     </div>
                 </div>`;
             });
@@ -139,11 +147,9 @@
         window.placeOrder = () => {
             const name = document.getElementById('custName').value;
             if(!name) return alert("Please enter your name!");
-            
             const table = document.getElementById('tableNum')?.value || "";
             if(appMode === 'table' && !table) return alert("Select Table!");
             if(appMode === 'delivery' && !userLoc) return alert("Capture Location!");
-
             push(ref(db, 'orders'), {
                 customerName: name,
                 location: appMode === 'table' ? table : userLoc,
