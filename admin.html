@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Master Control</title>
+    <title>Admin - The Grill on Duty</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -21,7 +21,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
@@ -32,66 +32,62 @@
         };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
+        // --- BULK ADD WITH DIFFERENT CATEGORY IMAGES ---
+        window.loadFullMenu = (id) => {
+            if(!confirm("Add 30+ items with unique images?")) return;
+            
+            const imgNoodles = "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400";
+            const imgRice = "https://images.unsplash.com/photo-1512058560366-cd24270083cd?w=400";
+            const imgPaneer = "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400";
+            const imgBread = "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=400";
+            const imgDrink = "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400";
+
+            const fullMenu = [
+                // Starters
+                { dish: "Paneer Kolivada", price: 270, img: imgPaneer }, 
+                { dish: "Paneer Majestic", price: 270, img: imgPaneer }, 
+                { dish: "Veg Manchurian", price: 280, img: imgNoodles },
+                // Noodles
+                { dish: "Veg Noodles", price: 140, img: imgNoodles }, 
+                { dish: "Schezwan Noodles", price: 150, img: imgNoodles }, 
+                { dish: "Mushroom Noodles", price: 160, img: imgNoodles },
+                // Fried Rice
+                { dish: "Veg Fried Rice", price: 140, img: imgRice }, 
+                { dish: "Paneer Fried Rice", price: 200, img: imgRice },
+                // Gravies
+                { dish: "Aloo Gobi Masala", price: 180, img: imgPaneer }, 
+                { dish: "Paneer Butter Masala", price: 250, img: imgPaneer }, 
+                { dish: "Dal Fry", price: 160, img: imgPaneer },
+                // Breads
+                { dish: "Tandoori Roti", price: 30, img: imgBread }, 
+                { dish: "Butter Naan", price: 45, img: imgBread }, 
+                { dish: "Garlic Naan", price: 55, img: imgBread },
+                // Mocktails
+                { dish: "Fresh Lime Soda", price: 50, img: imgDrink }, 
+                { dish: "Watermelon Mojito", price: 150, img: imgDrink }, 
+                { dish: "Blueberry Mojito", price: 150, img: imgDrink }
+            ];
+
+            fullMenu.forEach(item => {
+                push(ref(db, `restaurants/${id}/menu`), {
+                    dish: item.dish, 
+                    price: item.price,
+                    dishImg: item.img
+                });
+            });
+            alert("Menu Loaded with diverse images!");
+        };
+
         window.addRestaurant = () => {
             const name = document.getElementById('resName').value;
             const image = document.getElementById('resImg').value;
             if(name) {
                 push(ref(db, 'restaurants'), { name, image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" });
-                document.getElementById('resName').value = ""; document.getElementById('resImg').value = "";
+                document.getElementById('resName').value = ""; 
             }
         };
 
-        window.deleteHotel = (id) => { if(confirm("Delete entire Hotel?")) remove(ref(db, `restaurants/${id}`)); };
-
-        // --- BULK ADD SCRIPT FOR "THE GRILL ON DUTY" ---
-        window.bulkAddMenu = (id) => {
-            if(!confirm("Add all items from the menu photos to this hotel?")) return;
-            
-            const menuData = [
-                { dish: "Veg Noodles", price: 140 }, { dish: "Schezwan Veg Noodles", price: 150 },
-                { dish: "Gobi Noodles", price: 150 }, { dish: "Schezwan Gobi Noodles", price: 160 },
-                { dish: "Veg Fried Rice", price: 140 }, { dish: "Schezwan Veg Fried Rice", price: 150 },
-                { dish: "Aloo Gobi Masala", price: 180 }, { dish: "Paneer Butter Masala", price: 250 },
-                { dish: "Tandoori Roti", price: 30 }, { dish: "Butter Naan", price: 45 },
-                { dish: "Fresh Lime Soda", price: 50 }, { dish: "Watermelon Mint Mojito", price: 150 }
-            ];
-
-            menuData.forEach(item => {
-                push(ref(db, `restaurants/${id}/menu`), {
-                    dish: item.dish,
-                    price: item.price,
-                    dishImg: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"
-                });
-            });
-            alert("Bulk Items Added!");
-        };
-
-        window.addDish = (id) => {
-            const dish = prompt("Dish Name?");
-            const price = prompt("Price?");
-            const dishImg = prompt("Dish Image URL?");
-            if(dish && price) {
-                push(ref(db, `restaurants/${id}/menu`), { 
-                    dish, price: parseFloat(price), 
-                    dishImg: dishImg || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100" 
-                });
-            }
-        };
-
-        window.editDish = (hotelId, dishId, oldName, oldPrice, oldImg) => {
-            const newName = prompt("Edit Dish Name:", oldName);
-            const newPrice = prompt("Edit Price:", oldPrice);
-            const newImg = prompt("Edit Image URL:", oldImg);
-            if(newName && newPrice) {
-                update(ref(db, `restaurants/${hotelId}/menu/${dishId}`), {
-                    dish: newName, price: parseFloat(newPrice), dishImg: newImg || oldImg
-                });
-            }
-        };
-
-        window.deleteDish = (hotelId, dishId) => {
-            if(confirm("Delete this item?")) remove(ref(db, `restaurants/${hotelId}/menu/${dishId}`));
-        };
+        window.deleteHotel = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`)); };
 
         onValue(ref(db, 'restaurants'), (snap) => {
             const list = document.getElementById('admin-restaurant-list'); 
@@ -99,36 +95,13 @@
             snap.forEach(child => {
                 const res = child.val();
                 const hotelId = child.key;
-                let menuHtml = "";
-                
-                if(res.menu) {
-                    Object.keys(res.menu).forEach(mId => {
-                        const m = res.menu[mId];
-                        menuHtml += `
-                        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                            <div class="flex items-center gap-2">
-                                <img src="${m.dishImg}" class="w-8 h-8 rounded object-cover border">
-                                <span class="text-[11px] font-bold">${m.dish} - ₹${m.price}</span>
-                            </div>
-                            <div class="flex gap-3">
-                                <button onclick="editDish('${hotelId}', '${mId}', '${m.dish}', '${m.price}', '${m.dishImg}')" class="text-blue-500"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="deleteDish('${hotelId}', '${mId}')" class="text-red-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                            </div>
-                        </div>`;
-                    });
-                }
-
                 list.innerHTML += `
                 <div class="p-4 bg-white rounded-2xl shadow-sm border mb-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="font-bold text-sm uppercase">${res.name}</span>
-                        <button onclick="deleteHotel('${hotelId}')" class="text-[10px] text-red-600 font-black uppercase">Delete Hotel</button>
-                    </div>
-                    <div class="mb-3 space-y-1">${menuHtml}</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="addDish('${hotelId}')" class="bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
-                        <button onclick="bulkAddMenu('${hotelId}')" class="bg-green-50 py-2 rounded-lg text-green-600 font-black text-[10px] uppercase border border-green-100">⚡ Bulk Add Menu</button>
-                    </div>
+                    <p class="font-bold text-sm uppercase mb-3">${res.name}</p>
+                    <button onclick="loadFullMenu('${hotelId}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase">
+                        ⚡ Load Menu with Better Images
+                    </button>
+                    <button onclick="deleteHotel('${hotelId}')" class="w-full mt-2 text-red-500 text-[9px] font-bold uppercase">Delete Hotel</button>
                 </div>`;
             });
         });
