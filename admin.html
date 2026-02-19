@@ -21,7 +21,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
@@ -43,6 +43,29 @@
 
         window.deleteHotel = (id) => { if(confirm("Delete entire Hotel?")) remove(ref(db, `restaurants/${id}`)); };
 
+        // --- BULK ADD SCRIPT FOR "THE GRILL ON DUTY" ---
+        window.bulkAddMenu = (id) => {
+            if(!confirm("Add all items from the menu photos to this hotel?")) return;
+            
+            const menuData = [
+                { dish: "Veg Noodles", price: 140 }, { dish: "Schezwan Veg Noodles", price: 150 },
+                { dish: "Gobi Noodles", price: 150 }, { dish: "Schezwan Gobi Noodles", price: 160 },
+                { dish: "Veg Fried Rice", price: 140 }, { dish: "Schezwan Veg Fried Rice", price: 150 },
+                { dish: "Aloo Gobi Masala", price: 180 }, { dish: "Paneer Butter Masala", price: 250 },
+                { dish: "Tandoori Roti", price: 30 }, { dish: "Butter Naan", price: 45 },
+                { dish: "Fresh Lime Soda", price: 50 }, { dish: "Watermelon Mint Mojito", price: 150 }
+            ];
+
+            menuData.forEach(item => {
+                push(ref(db, `restaurants/${id}/menu`), {
+                    dish: item.dish,
+                    price: item.price,
+                    dishImg: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"
+                });
+            });
+            alert("Bulk Items Added!");
+        };
+
         window.addDish = (id) => {
             const dish = prompt("Dish Name?");
             const price = prompt("Price?");
@@ -55,17 +78,13 @@
             }
         };
 
-        // --- EDIT DISH FUNCTION ---
         window.editDish = (hotelId, dishId, oldName, oldPrice, oldImg) => {
             const newName = prompt("Edit Dish Name:", oldName);
             const newPrice = prompt("Edit Price:", oldPrice);
             const newImg = prompt("Edit Image URL:", oldImg);
-            
             if(newName && newPrice) {
                 update(ref(db, `restaurants/${hotelId}/menu/${dishId}`), {
-                    dish: newName,
-                    price: parseFloat(newPrice),
-                    dishImg: newImg || oldImg
+                    dish: newName, price: parseFloat(newPrice), dishImg: newImg || oldImg
                 });
             }
         };
@@ -92,12 +111,8 @@
                                 <span class="text-[11px] font-bold">${m.dish} - ₹${m.price}</span>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="editDish('${hotelId}', '${mId}', '${m.dish}', '${m.price}', '${m.dishImg}')" class="text-blue-500">
-                                    <i class="fa-solid fa-pen text-xs"></i>
-                                </button>
-                                <button onclick="deleteDish('${hotelId}', '${mId}')" class="text-red-500">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
+                                <button onclick="editDish('${hotelId}', '${mId}', '${m.dish}', '${m.price}', '${m.dishImg}')" class="text-blue-500"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="deleteDish('${hotelId}', '${mId}')" class="text-red-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
                             </div>
                         </div>`;
                     });
@@ -110,7 +125,10 @@
                         <button onclick="deleteHotel('${hotelId}')" class="text-[10px] text-red-600 font-black uppercase">Delete Hotel</button>
                     </div>
                     <div class="mb-3 space-y-1">${menuHtml}</div>
-                    <button onclick="addDish('${hotelId}')" class="w-full bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="addDish('${hotelId}')" class="bg-blue-50 py-2 rounded-lg text-blue-600 font-black text-[10px] uppercase border border-blue-100">+ Add Dish</button>
+                        <button onclick="bulkAddMenu('${hotelId}')" class="bg-green-50 py-2 rounded-lg text-green-600 font-black text-[10px] uppercase border border-green-100">⚡ Bulk Add Menu</button>
+                    </div>
                 </div>`;
             });
         });
