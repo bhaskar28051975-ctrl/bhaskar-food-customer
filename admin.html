@@ -33,47 +33,45 @@
     const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
     window.loadFullMenu = async (id) => {
-        if(!confirm("This will DELETE the current menu and add the NEW items from your photos. Proceed?")) return;
+    if(!confirm("This will DELETE the current menu and add the NEW items. Proceed?")) return;
+    
+    // STEP 1: Clear the existing menu to prevent "double" items
+    await remove(ref(db, `restaurants/${id}/menu`));
+
+    // STEP 2: Defined Menu with specific, non-missing images
+    const newMenu = [
+        // SOUPS
+        { dish: "Veg Manchow Soup", price: 150, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400" },
+        { dish: "Hot n Sour Soup", price: 160, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400" },
         
-        // STEP 1: Clear the existing menu
-        await remove(ref(db, `restaurants/${id}/menu`));
+        // TANDOORI STARTERS
+        { dish: "Paneer Tikka", price: 300, img: "https://images.unsplash.com/photo-1567184109191-378eb2446c53?w=400" },
+        { dish: "Mushroom Tikka", price: 250, img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400" },
+        
+        // SHAWARMA
+        { dish: "Classic Paneer Shawarma", price: 120, img: "https://images.unsplash.com/photo-1642935222650-693bc3e5c1bb?w=400" },
+        { dish: "Classic Mexican Shawarma", price: 140, img: "https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400" },
+        
+        // BIRYANI
+        { dish: "VEG Biryani", price: 220, img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?w=400" },
+        { dish: "Paneer Biryani", price: 270, img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400" },
 
-        // STEP 2: Define New Menu from your photos
-        const newMenu = [
-            // SOUPS
-            { dish: "Veg Manchow Soup", price: 150, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200" },
-            { dish: "Hot n Sour Soup", price: 160, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200" },
-            { dish: "Sweet Corn Soup", price: 170, img: "https://images.unsplash.com/photo-1628191010210-a59771593872?w=200" },
-            
-            // TANDOORI STARTERS
-            { dish: "Mushroom Tikka", price: 250, img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=200" },
-            { dish: "Gobi Tikka", price: 250, img: "https://images.unsplash.com/photo-1626132646529-500637532537?w=200" },
-            { dish: "Paneer Tikka", price: 300, img: "https://images.unsplash.com/photo-1567184109191-378eb2446c53?w=200" },
-            
-            // SHAWARMA
-            { dish: "Classic Paneer Shawarma", price: 120, img: "https://images.unsplash.com/photo-1642935222650-693bc3e5c1bb?w=200" },
-            { dish: "Classic Mexican Shawarma", price: 140, img: "https://images.unsplash.com/photo-1561651823-34feb02250e4?w=200" },
-            { dish: "Plate Classic Paneer", price: 170, img: "https://images.unsplash.com/photo-1642935222650-693bc3e5c1bb?w=200" },
-            
-            // BIRYANI
-            { dish: "VEG Biryani", price: 220, img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?w=200" },
-            { dish: "Paneer Biryani", price: 270, img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=200" },
-            { dish: "Mushroom Biryani", price: 240, img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?w=200" },
+        // CHINESE & MAIN
+        { dish: "Veg Noodles", price: 140, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400" },
+        { dish: "Veg Fried Rice", price: 140, img: "https://images.unsplash.com/photo-1512058560366-cd24270083cd?w=400" },
+        { dish: "Butter Naan", price: 45, img: "https://images.unsplash.com/photo-1601050690597-df056fb1d99a?w=400" }
+    ];
 
-            // FROM PREVIOUS PHOTOS (MAIN COURSE)
-            { dish: "Veg Noodles", price: 140, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200" },
-            { dish: "Paneer Butter Masala", price: 250, img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=200" },
-            { dish: "Butter Naan", price: 45, img: "https://images.unsplash.com/photo-1601050690597-df056fb1d99a?w=200" }
-        ];
-
-        // STEP 3: Upload new items
-        newMenu.forEach(item => {
-            push(ref(db, `restaurants/${id}/menu`), {
-                dish: item.dish, price: item.price, dishImg: item.img
-            });
+    // STEP 3: Upload new items
+    newMenu.forEach(item => {
+        push(ref(db, `restaurants/${id}/menu`), {
+            dish: item.dish, 
+            price: item.price, 
+            dishImg: item.img
         });
-        alert("Old menu removed. New menu uploaded successfully!");
-    };
+    });
+    alert("Menu Cleared and Updated Successfully!");
+};
 
     window.addRestaurant = () => {
         const name = document.getElementById('resName').value;
