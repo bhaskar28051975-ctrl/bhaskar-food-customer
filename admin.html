@@ -20,91 +20,88 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
-            authDomain: "bhaskar-food-app.firebaseapp.com", 
-            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
-            projectId: "bhaskar-food-app", 
-            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
-        };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
+        authDomain: "bhaskar-food-app.firebaseapp.com", 
+        databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
+        projectId: "bhaskar-food-app", 
+        appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
+    };
+    const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        // --- BULK ADD WITH DIFFERENT CATEGORY IMAGES ---
-        window.loadFullMenu = (id) => {
-            if(!confirm("Add 30+ items with unique images?")) return;
+    window.loadFullMenu = async (id) => {
+        if(!confirm("This will DELETE the current menu and add the NEW items from your photos. Proceed?")) return;
+        
+        // STEP 1: Clear the existing menu
+        await remove(ref(db, `restaurants/${id}/menu`));
+
+        // STEP 2: Define New Menu from your photos
+        const newMenu = [
+            // SOUPS
+            { dish: "Veg Manchow Soup", price: 150, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200" },
+            { dish: "Hot n Sour Soup", price: 160, img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200" },
+            { dish: "Sweet Corn Soup", price: 170, img: "https://images.unsplash.com/photo-1628191010210-a59771593872?w=200" },
             
-            const imgNoodles = "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400";
-            const imgRice = "https://images.unsplash.com/photo-1512058560366-cd24270083cd?w=400";
-            const imgPaneer = "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400";
-            const imgBread = "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=400";
-            const imgDrink = "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400";
+            // TANDOORI STARTERS
+            { dish: "Mushroom Tikka", price: 250, img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=200" },
+            { dish: "Gobi Tikka", price: 250, img: "https://images.unsplash.com/photo-1626132646529-500637532537?w=200" },
+            { dish: "Paneer Tikka", price: 300, img: "https://images.unsplash.com/photo-1567184109191-378eb2446c53?w=200" },
+            
+            // SHAWARMA
+            { dish: "Classic Paneer Shawarma", price: 120, img: "https://images.unsplash.com/photo-1642935222650-693bc3e5c1bb?w=200" },
+            { dish: "Classic Mexican Shawarma", price: 140, img: "https://images.unsplash.com/photo-1561651823-34feb02250e4?w=200" },
+            { dish: "Plate Classic Paneer", price: 170, img: "https://images.unsplash.com/photo-1642935222650-693bc3e5c1bb?w=200" },
+            
+            // BIRYANI
+            { dish: "VEG Biryani", price: 220, img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?w=200" },
+            { dish: "Paneer Biryani", price: 270, img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=200" },
+            { dish: "Mushroom Biryani", price: 240, img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?w=200" },
 
-            const fullMenu = [
-                // Starters
-                { dish: "Paneer Kolivada", price: 270, img: imgPaneer }, 
-                { dish: "Paneer Majestic", price: 270, img: imgPaneer }, 
-                { dish: "Veg Manchurian", price: 280, img: imgNoodles },
-                // Noodles
-                { dish: "Veg Noodles", price: 140, img: imgNoodles }, 
-                { dish: "Schezwan Noodles", price: 150, img: imgNoodles }, 
-                { dish: "Mushroom Noodles", price: 160, img: imgNoodles },
-                // Fried Rice
-                { dish: "Veg Fried Rice", price: 140, img: imgRice }, 
-                { dish: "Paneer Fried Rice", price: 200, img: imgRice },
-                // Gravies
-                { dish: "Aloo Gobi Masala", price: 180, img: imgPaneer }, 
-                { dish: "Paneer Butter Masala", price: 250, img: imgPaneer }, 
-                { dish: "Dal Fry", price: 160, img: imgPaneer },
-                // Breads
-                { dish: "Tandoori Roti", price: 30, img: imgBread }, 
-                { dish: "Butter Naan", price: 45, img: imgBread }, 
-                { dish: "Garlic Naan", price: 55, img: imgBread },
-                // Mocktails
-                { dish: "Fresh Lime Soda", price: 50, img: imgDrink }, 
-                { dish: "Watermelon Mojito", price: 150, img: imgDrink }, 
-                { dish: "Blueberry Mojito", price: 150, img: imgDrink }
-            ];
+            // FROM PREVIOUS PHOTOS (MAIN COURSE)
+            { dish: "Veg Noodles", price: 140, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200" },
+            { dish: "Paneer Butter Masala", price: 250, img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=200" },
+            { dish: "Butter Naan", price: 45, img: "https://images.unsplash.com/photo-1601050690597-df056fb1d99a?w=200" }
+        ];
 
-            fullMenu.forEach(item => {
-                push(ref(db, `restaurants/${id}/menu`), {
-                    dish: item.dish, 
-                    price: item.price,
-                    dishImg: item.img
-                });
-            });
-            alert("Menu Loaded with diverse images!");
-        };
-
-        window.addRestaurant = () => {
-            const name = document.getElementById('resName').value;
-            const image = document.getElementById('resImg').value;
-            if(name) {
-                push(ref(db, 'restaurants'), { name, image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" });
-                document.getElementById('resName').value = ""; 
-            }
-        };
-
-        window.deleteHotel = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`)); };
-
-        onValue(ref(db, 'restaurants'), (snap) => {
-            const list = document.getElementById('admin-restaurant-list'); 
-            list.innerHTML = "";
-            snap.forEach(child => {
-                const res = child.val();
-                const hotelId = child.key;
-                list.innerHTML += `
-                <div class="p-4 bg-white rounded-2xl shadow-sm border mb-4">
-                    <p class="font-bold text-sm uppercase mb-3">${res.name}</p>
-                    <button onclick="loadFullMenu('${hotelId}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase">
-                        ⚡ Load Menu with Better Images
-                    </button>
-                    <button onclick="deleteHotel('${hotelId}')" class="w-full mt-2 text-red-500 text-[9px] font-bold uppercase">Delete Hotel</button>
-                </div>`;
+        // STEP 3: Upload new items
+        newMenu.forEach(item => {
+            push(ref(db, `restaurants/${id}/menu`), {
+                dish: item.dish, price: item.price, dishImg: item.img
             });
         });
-    </script>
+        alert("Old menu removed. New menu uploaded successfully!");
+    };
+
+    window.addRestaurant = () => {
+        const name = document.getElementById('resName').value;
+        const image = document.getElementById('resImg').value;
+        if(name) {
+            push(ref(db, 'restaurants'), { name, image: image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" });
+            document.getElementById('resName').value = ""; 
+        }
+    };
+
+    window.deleteHotel = (id) => { if(confirm("Delete Hotel?")) remove(ref(db, `restaurants/${id}`)); };
+
+    onValue(ref(db, 'restaurants'), (snap) => {
+        const list = document.getElementById('admin-restaurant-list'); 
+        list.innerHTML = "";
+        snap.forEach(child => {
+            const res = child.val();
+            const hotelId = child.key;
+            list.innerHTML += `
+            <div class="p-4 bg-white rounded-2xl shadow-sm border mb-4">
+                <p class="font-bold text-sm uppercase mb-3 text-red-600">${res.name}</p>
+                <button onclick="loadFullMenu('${hotelId}')" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-md active:scale-95">
+                    🔄 REFRESH & LOAD NEW MENU
+                </button>
+                <button onclick="deleteHotel('${hotelId}')" class="w-full mt-4 text-gray-400 text-[9px] font-bold uppercase underline">Remove Hotel</button>
+            </div>`;
+        });
+    });
+</script>
 </body>
 </html>
