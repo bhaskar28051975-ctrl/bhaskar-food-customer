@@ -9,16 +9,12 @@
         html { scroll-behavior: smooth; }
         .dish-card { transition: transform 0.2s; }
         .dish-card:active { transform: scale(0.95); }
-
-        /* Floating "Bottle" Notification Styling */
         #opening-bottle {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 350px;
-            background: #dc2626; color: white;
-            padding: 15px 20px; border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            z-index: 1000; display: flex; align-items: center; justify-content: space-between;
-            border: 2px solid #ffd700;
+            width: 90%; max-width: 350px; background: #dc2626; color: white;
+            padding: 15px 20px; border-radius: 50px; z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            border: 2px solid #ffd700; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -28,17 +24,15 @@
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-clock animate-pulse text-yellow-300"></i>
             <div>
-                <p class="text-[10px] font-black uppercase tracking-tighter leading-none">Bhaskar Food</p>
+                <p class="text-[10px] font-black uppercase leading-none">Bhaskar Food</p>
                 <p class="text-xs font-bold">Opening Very Soon!</p>
             </div>
         </div>
-        <button onclick="startApp()" class="bg-white text-red-600 px-4 py-1.5 rounded-full font-black text-[10px] uppercase shadow-md active:scale-90">
-            START ➔
-        </button>
+        <button onclick="startApp()" class="bg-white text-red-600 px-4 py-1.5 rounded-full font-black text-[10px] uppercase">START ➔</button>
     </div>
 
     <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
-        <h1 class="text-xl font-black text-red-600 italic uppercase tracking-tighter">Bhaskar Food</h1>
+        <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
         <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
     </header>
 
@@ -47,15 +41,15 @@
     <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
         <div class="flex justify-between items-center mb-4 px-2">
             <div>
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Bill</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
                 <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
             </div>
-            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase tracking-widest bg-red-50 px-4 py-2 rounded-full">Cancel</button>
+            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
         </div>
         <div class="space-y-3">
-            <input id="custName" type="text" placeholder="Enter Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none">
+            <input id="custName" type="text" placeholder="Enter Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
             <div id="mode-inputs"></div>
-            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Confirm Order</button>
+            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Confirm Order</button>
         </div>
     </div>
 
@@ -72,35 +66,17 @@
         };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
 
-        let cart = {}; let appMode = 'table'; let userLoc = ""; let resData = {};
+        let cart = {}; let resData = {};
 
-        // START BUTTON LOGIC
-        window.startApp = () => {
-            document.getElementById('opening-bottle').style.display = 'none';
-        };
+        window.startApp = () => { document.getElementById('opening-bottle').style.display = 'none'; };
 
         window.updateQty = (id, dish, price, change) => {
-            // Hide coming soon if they add any item
             startApp();
-            
             if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
             cart[id].qty += change;
             if(cart[id].qty <= 0) delete cart[id];
             updateUI(); renderMenu();
         };
-
-        // --- Rest of your original functions ---
-        onValue(ref(db, 'settings/mode'), (s) => {
-            appMode = s.val() || 'table';
-            const div = document.getElementById('mode-inputs');
-            if(appMode === 'table') {
-                div.innerHTML = `<select id="tableNum" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm outline-none">
-                    ${[1,2,3,4,5,6,7,8,9,10,11,12].map(n => `<option value="Table ${n}">Table ${n}</option>`).join("")}
-                </select>`;
-            } else {
-                div.innerHTML = `<button onclick="getLocation()" id="locBtn" class="w-full p-4 border-2 border-dashed rounded-2xl text-blue-600 font-bold text-xs uppercase">📍 Send Live Location</button>`;
-            }
-        });
 
         window.cancelOrder = () => { cart = {}; updateUI(); renderMenu(); };
 
@@ -121,18 +97,14 @@
                         const m = res.menu[mId];
                         const currentQty = cart[mId] ? cart[mId].qty : 0;
                         menuHtml += `
-                        menuHtml += `
-<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
-    <img src="${m.dishImg}" 
-         onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" 
-         class="w-full aspect-square rounded-xl object-cover mb-2">
-    <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
-    <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
-    <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" 
-            class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase active:scale-90">
-        ${qty > 0 ? 'Added ('+qty+')' : 'Add +'}
-    </button>
-</div>`;
+                        <div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
+                            <img src="${m.dishImg}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2">
+                            <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
+                            <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
+                            <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase">
+                                ${currentQty > 0 ? 'Added ('+currentQty+')' : 'Add +'}
+                            </button>
+                        </div>`;
                     });
                 }
                 container.innerHTML += `
@@ -146,9 +118,7 @@
             });
         }
 
-        onValue(ref(db, 'restaurants'), (snap) => {
-            resData = snap.val() || {}; renderMenu();
-        });
+        onValue(ref(db, 'restaurants'), (snap) => { resData = snap.val() || {}; renderMenu(); });
 
         window.placeOrder = () => {
             const name = document.getElementById('custName').value;
@@ -157,8 +127,7 @@
                 customerName: name,
                 items: Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", "),
                 totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
-                status: "pending",
-                timestamp: Date.now()
+                status: "pending", timestamp: Date.now()
             }).then(() => { alert("Order Sent!"); location.reload(); });
         };
     </script>
