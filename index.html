@@ -121,20 +121,18 @@
                         const m = res.menu[mId];
                         const currentQty = cart[mId] ? cart[mId].qty : 0;
                         menuHtml += `
-                        <div class="dish-card bg-gray-50 rounded-[2rem] p-3 border border-gray-100 flex flex-col items-center text-center">
-                            <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'}" class="w-full aspect-square rounded-[1.5rem] object-cover shadow-md mb-3">
-                            <p class="font-black text-gray-800 text-sm leading-tight h-10 overflow-hidden line-clamp-2">${m.dish}</p>
-                            <p class="text-red-500 font-black text-sm my-2">₹${m.price}</p>
-                            <div class="w-full flex items-center justify-center gap-2">
-                                ${currentQty > 0 ? `
-                                    <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', -1)" class="w-8 h-8 rounded-full bg-white border border-red-500 text-red-500 font-black flex items-center justify-center shadow-sm">-</button>
-                                    <span class="font-black text-sm w-4">${currentQty}</span>
-                                ` : ''}
-                                <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="bg-red-500 text-white h-8 ${currentQty > 0 ? 'w-8 rounded-full' : 'px-4 rounded-full w-full'} text-[10px] font-black shadow-md uppercase">
-                                    ${currentQty > 0 ? '+' : 'Add'}
-                                </button>
-                            </div>
-                        </div>`;
+                        menuHtml += `
+<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
+    <img src="${m.dishImg}" 
+         onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" 
+         class="w-full aspect-square rounded-xl object-cover mb-2">
+    <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
+    <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
+    <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" 
+            class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase active:scale-90">
+        ${qty > 0 ? 'Added ('+qty+')' : 'Add +'}
+    </button>
+</div>`;
                     });
                 }
                 container.innerHTML += `
