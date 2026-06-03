@@ -1,164 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Partner - Bhaskar Food</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delivery Partner – Bhaskar Food</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+.pulse{width:14px;height:14px;background:#2563eb;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,0.4);animation:pl 1.5s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(37,99,235,0.4)}70%{box-shadow:0 0 0 12px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.cpulse{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,0.4);animation:cp 1.5s infinite}
+@keyframes cp{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.map-box{height:260px;width:100%;border-radius:16px;z-index:1}
+.sheet{animation:su .3s ease}
+@keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.overlay{background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)}
+</style>
 </head>
-<body class="bg-blue-50 pb-24 p-4">
+<body class="bg-blue-50 pb-28 p-4">
 
-    <div id="login-screen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-blue-600 mb-2 uppercase italic">Driver Login</h2>
-            <p class="text-[10px] text-gray-400 font-bold mb-6 uppercase">Enter details to track your commission</p>
-            <input id="drName" type="text" placeholder="Your Full Name" class="w-full p-4 mb-3 border rounded-2xl bg-gray-50 font-bold">
-            <input id="drPhone" type="tel" placeholder="Phone Number" class="w-full p-4 mb-6 border rounded-2xl bg-gray-50 font-bold">
-            <button onclick="saveDriver()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">START EARNING</button>
-        </div>
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="loginScreen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6">
+  <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl">
+    <h2 class="text-2xl font-black text-blue-600 mb-1 uppercase italic">🛵 Driver Login</h2>
+    <p class="text-[10px] text-gray-400 font-bold mb-6 uppercase">Enter your details to start delivering</p>
+    <input id="drName"  type="text" placeholder="Your Full Name *"   class="w-full p-4 mb-3 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none"/>
+    <input id="drPhone" type="tel"  placeholder="Phone Number *"     class="w-full p-4 mb-6 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none"/>
+    <button onclick="saveDriver()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase">🚀 Start Delivering</button>
+  </div>
+</div>
+
+<!-- ══ TRACK MAP MODAL ══ -->
+<div id="trackModal" class="overlay fixed inset-0 z-[150] hidden flex items-end justify-center">
+  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-5" style="max-height:92vh;overflow-y:auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-black text-gray-800 text-sm uppercase">📍 Live Customer Tracking</h3>
+      <button onclick="closeTrackModal()" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
 
-    <div class="max-w-md mx-auto space-y-6">
-        <div class="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-            <div class="relative z-10">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Your Current Earnings</p>
-                        <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
-                    </div>
-                    <button onclick="settleEarnings()" class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90" title="Settle & Clear History">
-                        <i class="fa-solid fa-rotate text-xl"></i>
-                    </button>
-                </div>
-                <p id="disp-name" class="text-[10px] mt-2 font-bold opacity-80 uppercase"></p>
+    <!-- Customer Info -->
+    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0" id="tAvatar">?</div>
+        <div>
+          <p class="font-black text-gray-800 text-sm" id="tName">—</p>
+          <p class="text-blue-600 font-bold text-xs" id="tPhone">—</p>
+          <p class="text-gray-500 text-xs" id="tAddress">—</p>
+        </div>
+      </div>
+      <!-- Radius Info -->
+      <div class="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border">
+        <span class="text-sm">📡</span>
+        <p class="text-xs font-bold text-gray-600">Delivery Radius: <span id="tRadius" class="text-blue-600">—</span></p>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div id="trackMap" class="map-box mb-3"></div>
+
+    <!-- Map Legend -->
+    <div class="flex gap-4 mb-4 text-xs font-bold">
+      <span class="flex items-center gap-1"><div class="pulse flex-shrink-0"></div> You (Delivery Boy)</span>
+      <span class="flex items-center gap-1"><div class="cpulse flex-shrink-0"></div> Customer</span>
+    </div>
+
+    <!-- Distance -->
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-3 mb-4 text-center">
+      <p class="text-[10px] font-black text-gray-500 uppercase">Distance to Customer</p>
+      <p class="font-black text-2xl text-green-600" id="tDistance">Calculating…</p>
+      <p class="text-[10px] text-gray-400 mt-1" id="tDistanceNote">—</p>
+    </div>
+
+    <!-- ORDER DETAILS -->
+    <div class="bg-white rounded-2xl border p-4 mb-4 space-y-2">
+      <p class="font-black text-xs text-gray-500 uppercase mb-2">🧾 Order Details</p>
+      <div id="tItems" class="space-y-1"></div>
+      <div class="border-t pt-2 mt-2 flex justify-between items-center">
+        <p class="font-black text-sm text-gray-700">💰 Cash on Delivery</p>
+        <p class="font-black text-xl text-red-600" id="tTotal">₹0</p>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
+        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect Cash from Customer on Delivery</p>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="space-y-2">
+      <a id="callBtn" href="" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase text-center block active:scale-95 transition-transform">📞 Call Customer</a>
+      <button id="deliverBtn" onclick="markDelivered()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase active:scale-95 transition-transform">✅ Mark as Delivered & Collected Cash</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="max-w-md mx-auto space-y-5">
+
+  <!-- EARNINGS HEADER -->
+  <div class="bg-blue-600 p-7 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+    <div class="relative z-10">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Today's Earnings</p>
+          <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
+          <p class="text-[10px] opacity-60 mt-1" id="ordersCount">0 deliveries completed</p>
+        </div>
+        <button onclick="settleEarnings()" title="Settle Earnings"
+          class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90">
+          <i class="fa-solid fa-rotate text-xl"></i>
+        </button>
+      </div>
+      <p id="dispName" class="text-[11px] mt-3 font-bold opacity-80 uppercase bg-white/10 rounded-xl px-3 py-1.5 inline-block"></p>
+    </div>
+    <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl"><i class="fa-solid fa-motorcycle"></i></div>
+  </div>
+
+  <!-- SEARCH BY PHONE -->
+  <div class="bg-white rounded-3xl shadow border p-5 space-y-3">
+    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🔍 Find Order by Customer Phone</p>
+    <div class="flex gap-2">
+      <input id="searchPhone" type="tel" placeholder="Enter customer phone number"
+        class="flex-1 p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <button onclick="searchByPhone()"
+        class="bg-blue-600 text-white px-4 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Search</button>
+    </div>
+    <div id="searchResult"></div>
+  </div>
+
+  <!-- PENDING ORDERS -->
+  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📦 Orders Ready for Pickup</p>
+  <div id="deliveryList" class="space-y-4"></div>
+
+  <hr class="border-blue-100"/>
+
+  <!-- HISTORY -->
+  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✅ Today's Completed Deliveries</p>
+  <div id="deliveryHistory" class="space-y-3"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const cfg = {
+  apiKey:      "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain:  "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId:   "bhaskar-food-app",
+  appId:       "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+};
+const db = getDatabase(initializeApp(cfg));
+
+/* ── STATE ── */
+let myPhone          = localStorage.getItem('dr_p') || '';
+let myName           = localStorage.getItem('dr_n') || '';
+let completedKeys    = [];
+let currentRate      = 10;   // commission %
+let activeOrderId    = null; // order being tracked
+let trackMap         = null;
+let myMarker         = null;
+let custMarker       = null;
+let custCircle       = null;
+let myWatchId        = null;
+let custListener     = null;
+let myLat            = null;
+let myLng            = null;
+let allOrders        = {};   // cache all orders
+
+/* ── LOGIN ── */
+if(!myPhone) document.getElementById('loginScreen').classList.remove('hidden');
+else document.getElementById('dispName').textContent = '🛵 ' + myName;
+
+window.saveDriver = () => {
+  const n = document.getElementById('drName').value.trim();
+  const p = document.getElementById('drPhone').value.trim();
+  if(!n||!p){ alert('Please enter Name and Phone'); return; }
+  localStorage.setItem('dr_n', n);
+  localStorage.setItem('dr_p', p);
+  location.reload();
+};
+
+/* ── COMMISSION RATE ── */
+onValue(ref(db,'settings/commission'), s => { currentRate = parseFloat(s.val())||10; });
+
+/* ── LIVE ORDERS ── */
+onValue(ref(db,'orders'), snap => {
+  allOrders = {};
+  const list    = document.getElementById('deliveryList');
+  const history = document.getElementById('deliveryHistory');
+  list.innerHTML = '';
+  history.innerHTML = '';
+  completedKeys = [];
+  let totalComm = 0, delivCount = 0;
+
+  snap.forEach(child => {
+    const o   = child.val();
+    const key = child.key;
+    allOrders[key] = { ...o, key };
+
+    const comm = ((parseFloat(o.totalAmount||0) * currentRate) / 100).toFixed(2);
+
+    if(o.status === 'pending' || o.status === 'ready_for_pickup') {
+      // Parse items for display
+      const itemLines = (o.items||'').split(',').map(i=>i.trim()).filter(Boolean);
+
+      list.innerHTML += `
+      <div class="bg-white rounded-[2rem] border-l-[8px] border-blue-500 shadow p-5 space-y-3">
+
+        <!-- Customer Info -->
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black flex-shrink-0">
+              ${(o.customerName||'?')[0].toUpperCase()}
             </div>
-            <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl"><i class="fa-solid fa-motorcycle"></i></div>
+            <div>
+              <p class="font-black text-gray-800 text-sm">${o.customerName||'—'}</p>
+              <a href="tel:${o.customerPhone||''}" class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</a>
+            </div>
+          </div>
+          <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-black uppercase flex-shrink-0">Earn ₹${comm}</span>
         </div>
 
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Orders Ready for Pickup</h2>
-        <div id="delivery-list" class="space-y-4"></div>
+        <!-- Address -->
+        ${o.address ? `<div class="flex items-start gap-2 bg-gray-50 rounded-xl px-3 py-2">
+          <span class="text-sm mt-0.5">📍</span>
+          <p class="text-xs text-gray-600 font-bold">${o.address}</p>
+        </div>` : ''}
 
-        <hr class="border-blue-100">
-        
-        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Today's Unpaid History</h2>
-        <div id="delivery-history" class="space-y-2"></div>
-    </div>
+        <!-- Radius -->
+        ${o.radiusMeters ? `<p class="text-[10px] text-blue-500 font-bold">📡 Delivery Radius: ${o.radiusMeters}m</p>` : ''}
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        <!-- Dishes -->
+        <div class="bg-orange-50 rounded-xl p-3 border border-orange-100 space-y-1">
+          <p class="text-[10px] font-black text-gray-500 uppercase mb-2">🍽️ Order Items</p>
+          ${itemLines.map(item=>`
+            <div class="flex justify-between items-center">
+              <p class="text-xs font-bold text-gray-700">• ${item}</p>
+            </div>`).join('')}
+        </div>
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
-            authDomain: "bhaskar-food-app.firebaseapp.com", 
-            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
-            projectId: "bhaskar-food-app", 
-            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
-        };
-        const app = initializeApp(firebaseConfig); 
-        const db = getDatabase(app);
+        <!-- Total + COD -->
+        <div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">
+          <div>
+            <p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>
+            <p class="font-black text-2xl text-red-600">₹${o.totalAmount||0}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] text-gray-400">Cash on Delivery</p>
+            <p class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-lg mt-1">Your cut: ₹${comm}</p>
+          </div>
+        </div>
 
-        const drPhone = localStorage.getItem('dr_p');
-        let completedOrderKeys = []; // To keep track of keys for clearing
+        <!-- BUTTONS -->
+        <div class="grid grid-cols-2 gap-2">
+          <button data-key="${key}" class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
+            🗺️ Track Customer
+          </button>
+          <button data-key="${key}" class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
+            ✅ Mark Delivered
+          </button>
+        </div>
+      </div>`;
+    }
 
-        // --- AUTH LOGIC ---
-        window.saveDriver = () => {
-            const n = document.getElementById('drName').value;
-            const p = document.getElementById('drPhone').value;
-            if(n && p) {
-                localStorage.setItem('dr_n', n);
-                localStorage.setItem('dr_p', p);
-                location.reload();
-            } else { alert("Please enter Name and Phone"); }
-        };
+    else if(o.status === 'completed' && o.driverPhone === myPhone) {
+      const paid = parseFloat(o.commissionPaid||comm);
+      totalComm += paid;
+      delivCount++;
+      completedKeys.push(key);
 
-        if(!drPhone) {
-            document.getElementById('login-screen').classList.remove('hidden');
-        } else {
-            document.getElementById('disp-name').innerText = "Driver: " + localStorage.getItem('dr_n');
-        }
+      history.innerHTML += `
+      <div class="bg-white rounded-2xl p-4 border shadow-sm space-y-2">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+            <p class="text-blue-600 text-xs font-bold">${o.customerPhone||'—'}</p>
+          </div>
+          <span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl">+₹${paid.toFixed(2)}</span>
+        </div>
+        <div class="bg-gray-50 rounded-xl px-3 py-2">
+          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Items Delivered</p>
+          ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-600">• ${i.trim()}</p>`).join('')}
+        </div>
+        <div class="flex justify-between text-xs font-bold text-gray-500">
+          <span>💰 Collected: ₹${o.totalAmount||0}</span>
+          <span class="text-green-600">✅ Delivered</span>
+        </div>
+      </div>`;
+    }
+  });
 
-        let currentRate = 0;
-        onValue(ref(db, 'settings/commission'), s => {
-            currentRate = parseFloat(s.val()) || 0;
-        });
+  document.getElementById('myEarnings').textContent  = '₹' + totalComm.toFixed(2);
+  document.getElementById('ordersCount').textContent  = delivCount + ' deliver' + (delivCount===1?'y':'ies') + ' completed';
 
-        // --- RENDER LOGIC ---
-        onValue(ref(db, 'orders'), (snap) => {
-            const list = document.getElementById('delivery-list');
-            const history = document.getElementById('delivery-history');
-            
-            let totalComm = 0; 
-            list.innerHTML = ""; 
-            history.innerHTML = "";
-            completedOrderKeys = []; 
+  if(!list.innerHTML) list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No pending orders right now.</p>';
+  if(!history.innerHTML) history.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
 
-            snap.forEach(child => {
-                const o = child.val();
-                const potentialComm = (parseFloat(o.totalAmount || 0) * currentRate / 100).toFixed(2);
+  /* attach button events */
+  document.querySelectorAll('.trackBtn').forEach(btn =>
+    btn.addEventListener('click', () => openTrackModal(btn.dataset.key))
+  );
+  document.querySelectorAll('.pickBtn').forEach(btn =>
+    btn.addEventListener('click', () => markDeliveredById(btn.dataset.key))
+  );
+});
 
-                if(o.status === 'ready_for_pickup') {
-                    list.innerHTML += `
-                    <div class="bg-white p-6 rounded-[2rem] border-l-[10px] border-blue-500 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <p class="font-black text-gray-800 text-lg leading-tight">${o.customerName}</p>
-                            <span class="bg-blue-100 text-blue-600 text-[10px] px-3 py-1 rounded-full font-black uppercase">Earn ₹${potentialComm}</span>
-                        </div>
-                        <p class="text-[11px] text-gray-500 font-bold italic mb-3">📍 ${o.location}</p>
-                        <p class="text-xs text-gray-400 border-t pt-3 mb-4">${o.items}</p>
-                        <button onclick="completeOrder('${child.key}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-md active:scale-95 transition-all">Mark as Delivered</button>
-                    </div>`;
-                } 
-                // Only show 'completed' orders, 'settled' orders will be hidden
-                else if (o.status === 'completed' && o.driverPhone === drPhone) {
-                    const commissionAmount = parseFloat(o.commissionPaid || potentialComm);
-                    totalComm += commissionAmount;
-                    completedOrderKeys.push(child.key);
+/* ══ SEARCH BY PHONE ══ */
+window.searchByPhone = () => {
+  const ph = document.getElementById('searchPhone').value.trim();
+  const res = document.getElementById('searchResult');
+  if(!ph){ res.innerHTML = '<p class="text-xs text-red-500 font-bold">Enter a phone number</p>'; return; }
 
-                    history.innerHTML += `
-                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center text-[10px] font-bold border border-gray-100 shadow-sm">
-                        <div>
-                            <p class="text-gray-800 uppercase">${o.customerName}</p>
-                            <p class="text-gray-400 font-normal">Order Total: ₹${o.totalAmount}</p>
-                        </div>
-                        <span class="text-green-600 bg-green-50 px-3 py-2 rounded-xl">+ ₹${commissionAmount.toFixed(2)}</span>
-                    </div>`;
-                }
-            });
-            document.getElementById('myEarnings').innerText = "₹" + totalComm.toFixed(2);
-        });
+  const found = Object.values(allOrders).filter(o =>
+    (o.customerPhone||'').replace(/\s/g,'') === ph.replace(/\s/g,'') &&
+    o.status !== 'settled'
+  );
 
-        // --- SETTLE & CLEAR LOGIC ---
-        window.settleEarnings = () => {
-            if (completedOrderKeys.length === 0) return alert("No earnings to settle!");
-            
-            if (confirm("Are you paid by the hotel? This will clear your current earnings display.")) {
-                const updates = {};
-                completedOrderKeys.forEach(key => {
-                    updates[`orders/${key}/status`] = 'settled';
-                });
+  if(!found.length){
+    res.innerHTML = '<p class="text-xs text-red-500 font-bold py-2">❌ No order found for this phone number.</p>';
+    return;
+  }
 
-                update(ref(db), updates).then(() => {
-                    alert("Account Settled! Earnings reset to ₹0");
-                });
-            }
-        };
+  res.innerHTML = found.map(o => `
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-2 space-y-2">
+      <div class="flex justify-between items-center">
+        <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+        <span class="text-[10px] font-black px-2 py-1 rounded-full ${o.status==='completed'?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700'} uppercase">${o.status}</span>
+      </div>
+      <p class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</p>
+      ${o.address?`<p class="text-xs text-gray-500 font-bold">📍 ${o.address}</p>`:''}
+      <div class="bg-white rounded-xl p-3 border">
+        ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-700 font-bold">• ${i.trim()}</p>`).join('')}
+        <p class="font-black text-red-600 text-base mt-2">💰 ₹${o.totalAmount||0} Cash on Delivery</p>
+      </div>
+      ${o.status==='pending'||o.status==='ready_for_pickup' ? `
+      <div class="grid grid-cols-2 gap-2">
+        <button data-key="${o.key}" class="trackBtnS bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>
+        <button data-key="${o.key}" class="pickBtnS bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>
+      </div>` : ''}
+    </div>`).join('');
 
-        window.completeOrder = (orderId) => {
-            get(ref(db, `orders/${orderId}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const orderData = snapshot.val();
-                    const earned = (parseFloat(orderData.totalAmount) * currentRate / 100);
-                    update(ref(db, `orders/${orderId}`), { 
-                        status: 'completed', 
-                        deliveredBy: localStorage.getItem('dr_n'),
-                        driverPhone: localStorage.getItem('dr_p'),
-                        commissionPaid: earned
-                    });
-                }
-            });
-        };
-    </script>
+  document.querySelectorAll('.trackBtnS').forEach(b => b.addEventListener('click', () => openTrackModal(b.dataset.key)));
+  document.querySelectorAll('.pickBtnS').forEach(b => b.addEventListener('click', () => markDeliveredById(b.dataset.key)));
+};
+
+/* ══ TRACK MODAL ══ */
+window.openTrackModal = (key) => {
+  activeOrderId = key;
+  const o = allOrders[key];
+  if(!o){ alert('Order not found!'); return; }
+
+  /* fill customer info */
+  document.getElementById('tAvatar').textContent  = (o.customerName||'?')[0].toUpperCase();
+  document.getElementById('tName').textContent    = o.customerName||'—';
+  document.getElementById('tPhone').textContent   = '📞 '+( o.customerPhone||'—');
+  document.getElementById('tAddress').textContent = o.address||'Location not set';
+  document.getElementById('tRadius').textContent  = (o.radiusMeters||200)+'m';
+  document.getElementById('tTotal').textContent   = '₹'+(o.totalAmount||0);
+  document.getElementById('callBtn').href         = 'tel:'+(o.customerPhone||'');
+
+  /* fill items */
+  const items = (o.items||'').split(',').map(i=>i.trim()).filter(Boolean);
+  document.getElementById('tItems').innerHTML = items.map(i=>
+    `<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0">
+       <span class="text-sm">🍽️</span>
+       <p class="text-sm font-bold text-gray-700">${i}</p>
+     </div>`
+  ).join('');
+
+  document.getElementById('trackModal').classList.remove('hidden');
+  document.getElementById('tDistance').textContent = 'Getting location…';
+
+  /* init map */
+  setTimeout(() => {
+    if(!trackMap){
+      trackMap = L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([20.5937,78.9629],5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+    }
+    trackMap.invalidateSize();
+
+    /* plot customer location if available */
+    if(o.lat && o.lng) plotCustomer(o.lat, o.lng, o.radiusMeters||200);
+
+    /* get MY location */
+    navigator.geolocation.getCurrentPosition(pos => {
+      myLat = pos.coords.latitude;
+      myLng = pos.coords.longitude;
+      plotMe(myLat, myLng);
+      if(o.lat && o.lng) updateDistance(myLat, myLng, o.lat, o.lng);
+      fitBounds();
+    }, null, {enableHighAccuracy:true});
+
+    /* watch MY movement */
+    if(myWatchId) navigator.geolocation.clearWatch(myWatchId);
+    myWatchId = navigator.geolocation.watchPosition(pos => {
+      myLat = pos.coords.latitude;
+      myLng = pos.coords.longitude;
+      plotMe(myLat, myLng);
+      const cur = allOrders[activeOrderId];
+      if(cur && cur.lat && cur.lng) updateDistance(myLat, myLng, cur.lat, cur.lng);
+    }, null, {enableHighAccuracy:true, maximumAge:8000});
+
+    /* listen to customer location updates in Firebase */
+    if(custListener) custListener();
+    custListener = onValue(ref(db,`orders/${key}`), snap => {
+      const d = snap.val();
+      if(!d) return;
+      allOrders[key] = { ...d, key };
+      if(d.lat && d.lng){
+        plotCustomer(d.lat, d.lng, d.radiusMeters||200);
+        document.getElementById('tAddress').textContent = d.address||'Tracking…';
+        if(myLat && myLng) updateDistance(myLat, myLng, d.lat, d.lng);
+      }
+    });
+
+  }, 300);
+};
+
+window.closeTrackModal = () => {
+  document.getElementById('trackModal').classList.add('hidden');
+  if(myWatchId){ navigator.geolocation.clearWatch(myWatchId); myWatchId=null; }
+  if(custListener){ custListener(); custListener=null; }
+  activeOrderId = null;
+};
+
+function plotMe(lat, lng){
+  if(!trackMap) return;
+  const icon = L.divIcon({html:'<div class="pulse"></div>',iconSize:[14,14],className:''});
+  if(myMarker) myMarker.setLatLng([lat,lng]);
+  else myMarker = L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🛵 You');
+}
+
+function plotCustomer(lat, lng, radius){
+  if(!trackMap) return;
+  const icon = L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});
+  if(custMarker) custMarker.setLatLng([lat,lng]);
+  else custMarker = L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();
+  if(custCircle){ custCircle.setLatLng([lat,lng]); custCircle.setRadius(radius); }
+  else custCircle = L.circle([lat,lng],{radius,color:'#dc2626',fillColor:'#dc2626',fillOpacity:0.08,weight:2}).addTo(trackMap);
+}
+
+function fitBounds(){
+  if(!trackMap) return;
+  const pts = [];
+  if(myMarker)   pts.push(myMarker.getLatLng());
+  if(custMarker) pts.push(custMarker.getLatLng());
+  if(pts.length === 2) trackMap.fitBounds(L.latLngBounds(pts).pad(0.3));
+  else if(pts.length === 1) trackMap.setView(pts[0], 16);
+}
+
+function updateDistance(lat1, lng1, lat2, lng2){
+  const R=6371000;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  const dist=Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+  const o = allOrders[activeOrderId];
+  const radius = o ? (o.radiusMeters||200) : 200;
+  document.getElementById('tDistance').textContent = dist >= 1000 ? (dist/1000).toFixed(1)+' km' : dist+' m';
+  if(dist <= radius)
+    document.getElementById('tDistanceNote').textContent = '✅ Customer is within delivery radius!';
+  else
+    document.getElementById('tDistanceNote').textContent = `⚠️ ${dist-radius}m outside radius – keep moving`;
+}
+
+/* ══ MARK DELIVERED ══ */
+window.markDelivered = () => { if(activeOrderId) markDeliveredById(activeOrderId); };
+
+window.markDeliveredById = (key) => {
+  if(!confirm('Confirm delivery & cash collected?')) return;
+  get(ref(db,`orders/${key}`)).then(snap => {
+    if(!snap.exists()) return;
+    const o    = snap.val();
+    const comm = (parseFloat(o.totalAmount||0)*currentRate/100);
+    update(ref(db,`orders/${key}`),{
+      status:        'completed',
+      deliveredBy:   myName,
+      driverPhone:   myPhone,
+      commissionPaid:comm,
+      deliveredAt:   Date.now()
+    });
+    closeTrackModal();
+    alert(`✅ Delivered!\nCash collected: ₹${o.totalAmount}\nYour commission: ₹${comm.toFixed(2)}`);
+  });
+};
+
+/* ══ SETTLE ══ */
+window.settleEarnings = () => {
+  if(!completedKeys.length){ alert('No earnings to settle!'); return; }
+  if(!confirm('Confirm settlement? This will clear your earnings display.')){ return; }
+  const upd = {};
+  completedKeys.forEach(k => { upd[`orders/${k}/status`] = 'settled'; });
+  update(ref(db), upd).then(() => alert('✅ Settled! Earnings reset to ₹0'));
+};
+</script>
 </body>
 </html>
