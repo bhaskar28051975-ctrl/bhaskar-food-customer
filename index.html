@@ -1,135 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhaskar Food</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        html { scroll-behavior: smooth; }
-        .dish-card { transition: transform 0.2s; }
-        .dish-card:active { transform: scale(0.95); }
-        #opening-bottle {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 350px; background: #dc2626; color: white;
-            padding: 15px 20px; border-radius: 50px; z-index: 1000;
-            display: flex; align-items: center; justify-content: space-between;
-            border: 2px solid #ffd700; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bhaskar Food</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+html{scroll-behavior:smooth}
+.dish-card{transition:transform 0.2s}
+.dish-card:active{transform:scale(0.95)}
+#trackMap{height:220px;width:100%;border-radius:16px;z-index:1}
+.pulse-dot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,0.4);animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.radius-ring{stroke:#dc2626;stroke-width:2;fill:rgba(220,38,38,0.08)}
+</style>
 </head>
 <body class="bg-gray-100 pb-80 text-gray-800">
 
-    <div id="opening-bottle">
+<header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
+  <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
+  <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
+</header>
+
+<div id="customer-list" class="p-4 space-y-8"></div>
+
+<!-- ══ CHECKOUT PANEL ══ -->
+<div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
+  <div class="flex justify-between items-center mb-4 px-2">
+    <div>
+      <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
+      <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
+    </div>
+    <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
+  </div>
+
+  <div class="space-y-3">
+    <!-- Name -->
+    <input id="custName" type="text" placeholder="Your Full Name *"
+      class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+    <!-- Phone -->
+    <input id="custPhone" type="tel" placeholder="Your Phone Number *"
+      class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+
+    <!-- LOCATION SECTION -->
+    <div class="bg-red-50 rounded-2xl p-4 border border-red-200 space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="font-black text-sm text-gray-800">📍 Live Location</p>
+          <p class="text-xs text-gray-500 mt-0.5" id="locStatusText">Share your location for delivery tracking</p>
+        </div>
+        <button id="locBtn" onclick="requestLocation()"
+          class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
+          Share GPS
+        </button>
+      </div>
+
+      <!-- Radius Control -->
+      <div class="bg-white rounded-xl p-3 border" id="radiusWrap">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] font-black text-gray-600 uppercase">Delivery Radius</p>
+          <span id="radiusVal" class="font-black text-red-600 text-sm">200 m</span>
+        </div>
         <div class="flex items-center gap-3">
-            <i class="fa-solid fa-clock animate-pulse text-yellow-300"></i>
-            <div>
-                <p class="text-[10px] font-black uppercase leading-none">Bhaskar Food</p>
-                <p class="text-xs font-bold">Opening Very Soon!</p>
-            </div>
+          <button onclick="changeRadius(-50)"
+            class="w-10 h-10 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-95 transition-transform">−</button>
+          <div class="flex-1 bg-gray-100 rounded-full h-2 relative">
+            <div id="radiusBar" class="bg-red-500 h-2 rounded-full transition-all" style="width:20%"></div>
+          </div>
+          <button onclick="changeRadius(+50)"
+            class="w-10 h-10 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-95 transition-transform">+</button>
         </div>
-        <button onclick="startApp()" class="bg-white text-red-600 px-4 py-1.5 rounded-full font-black text-[10px] uppercase">START ➔</button>
+        <p class="text-[10px] text-gray-400 mt-1.5 text-center">Range: 50m – 1000m</p>
+      </div>
+
+      <!-- MAP -->
+      <div id="mapWrap" class="hidden space-y-2">
+        <div id="trackMap"></div>
+        <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+          <div class="pulse-dot flex-shrink-0"></div>
+          <p class="text-xs font-bold text-green-700" id="locAddress">Getting address…</p>
+        </div>
+        <p class="text-[10px] text-gray-400 text-center">📡 Live location updates every 10 seconds</p>
+      </div>
     </div>
 
-    <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
-        <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
-        <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase">Refresh</button>
-    </header>
+    <button onclick="placeOrder()"
+      class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base">
+      🛵 Confirm Order
+    </button>
+  </div>
+</div>
 
-    <div id="customer-list" class="p-4 space-y-8"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
-        <div class="flex justify-between items-center mb-4 px-2">
-            <div>
-                <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
-                <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
-            </div>
-            <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
-        </div>
-        <div class="space-y-3">
-            <input id="custName" type="text" placeholder="Enter Your Name" class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm">
-            <div id="mode-inputs"></div>
-            <button onclick="placeOrder()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Confirm Order</button>
-        </div>
-    </div>
+const cfg = {
+  apiKey:      "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain:  "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId:   "bhaskar-food-app",
+  appId:       "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+};
+const db = getDatabase(initializeApp(cfg));
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+/* ── state ── */
+let cart      = {};
+let resData   = {};
+let myLat     = null;
+let myLng     = null;
+let myAddress = '';
+let watchId   = null;
+let trackMap  = null;
+let myMarker  = null;
+let myCircle  = null;
+let radiusM   = 200;      // default 200 m
+const MIN_R   = 50;
+const MAX_R   = 1000;
+const STEP_R  = 50;
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", 
-            authDomain: "bhaskar-food-app.firebaseapp.com", 
-            databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", 
-            projectId: "bhaskar-food-app", 
-            appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" 
-        };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+/* ── RADIUS CONTROL ── */
+window.changeRadius = (delta) => {
+  radiusM = Math.min(MAX_R, Math.max(MIN_R, radiusM + delta));
+  document.getElementById('radiusVal').textContent = radiusM + ' m';
+  // update bar width 0–100% mapped to MIN–MAX
+  const pct = ((radiusM - MIN_R) / (MAX_R - MIN_R)) * 100;
+  document.getElementById('radiusBar').style.width = pct + '%';
+  // update circle on map if visible
+  if(myCircle) myCircle.setRadius(radiusM);
+};
 
-        let cart = {}; let resData = {};
+/* ── LOCATION ── */
+window.requestLocation = () => {
+  const btn = document.getElementById('locBtn');
+  if(!navigator.geolocation){ alert('GPS not supported on this device.'); return; }
+  btn.textContent = '⏳ Getting…';
+  btn.disabled    = true;
 
-        window.startApp = () => { document.getElementById('opening-bottle').style.display = 'none'; };
+  navigator.geolocation.getCurrentPosition(pos => {
+    myLat = pos.coords.latitude;
+    myLng = pos.coords.longitude;
+    btn.textContent = '✅ Sharing';
+    btn.classList.replace('bg-red-600','bg-green-600');
+    document.getElementById('locStatusText').textContent = '✅ Live location sharing ON';
+    showMap();
+    reverseGeocode(myLat, myLng);
 
-        window.updateQty = (id, dish, price, change) => {
-            startApp();
-            if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
-            cart[id].qty += change;
-            if(cart[id].qty <= 0) delete cart[id];
-            updateUI(); renderMenu();
-        };
+    // watch position — update every ~10 sec
+    if(watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(p => {
+      myLat = p.coords.latitude;
+      myLng = p.coords.longitude;
+      updateMapPin(myLat, myLng);
+      reverseGeocode(myLat, myLng);
+    }, null, { enableHighAccuracy: true, maximumAge: 10000 });
 
-        window.cancelOrder = () => { cart = {}; updateUI(); renderMenu(); };
+  }, err => {
+    btn.textContent = 'Share GPS';
+    btn.disabled    = false;
+    alert('Location permission denied. Please allow GPS in browser settings.');
+  }, { enableHighAccuracy: true });
+};
 
-        function updateUI() {
-            const total = Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0);
-            document.getElementById('checkout-panel').style.display = total > 0 ? 'block' : 'none';
-            document.getElementById('panel-total').innerText = "₹" + total;
-        }
+function showMap(){
+  document.getElementById('mapWrap').classList.remove('hidden');
+  if(!trackMap){
+    trackMap = L.map('trackMap',{ zoomControl:true, attributionControl:false }).setView([myLat, myLng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+  }
+  updateMapPin(myLat, myLng);
+  setTimeout(()=>trackMap.invalidateSize(), 200);
+}
 
-        function renderMenu() {
-            const container = document.getElementById('customer-list'); 
-            container.innerHTML = "";
-            Object.keys(resData).forEach(resId => {
-                const res = resData[resId];
-                let menuHtml = "";
-                if(res.menu) {
-                    Object.keys(res.menu).forEach(mId => {
-                        const m = res.menu[mId];
-                        const currentQty = cart[mId] ? cart[mId].qty : 0;
-                        menuHtml += `
-                        <div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
-                            <img src="${m.dishImg}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2">
-                            <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
-                            <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
-                            <button onclick="updateQty('${mId}', '${m.dish}', '${m.price}', 1)" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase">
-                                ${currentQty > 0 ? 'Added ('+currentQty+')' : 'Add +'}
-                            </button>
-                        </div>`;
-                    });
-                }
-                container.innerHTML += `
-                <div class="bg-white rounded-[3rem] shadow-sm border overflow-hidden">
-                    <img src="${res.image}" class="w-full h-44 object-cover">
-                    <div class="p-6">
-                        <h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">${res.name}</h2>
-                        <div class="grid grid-cols-2 gap-4">${menuHtml}</div>
-                    </div>
-                </div>`;
-            });
-        }
+function updateMapPin(lat, lng){
+  if(!trackMap) return;
+  const icon = L.divIcon({
+    html: '<div class="pulse-dot"></div>',
+    iconSize: [14,14], className: ''
+  });
+  if(myMarker) myMarker.setLatLng([lat, lng]);
+  else myMarker = L.marker([lat, lng],{icon}).addTo(trackMap).bindPopup('📍 You are here');
+  if(myCircle) myCircle.setLatLng([lat, lng]).setRadius(radiusM);
+  else myCircle = L.circle([lat, lng],{
+    radius: radiusM, color:'#dc2626', fillColor:'#dc2626', fillOpacity:0.1, weight:2
+  }).addTo(trackMap);
+  trackMap.setView([lat, lng], 16);
+}
 
-        onValue(ref(db, 'restaurants'), (snap) => { resData = snap.val() || {}; renderMenu(); });
+function reverseGeocode(lat, lng){
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+    .then(r=>r.json()).then(d=>{
+      const a = d.address||{};
+      myAddress = [a.road||a.suburb||'',a.city||a.town||a.village||'',a.state||'']
+        .filter(Boolean).join(', ');
+      document.getElementById('locAddress').textContent = '📍 ' + (myAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+    }).catch(()=>{
+      myAddress = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      document.getElementById('locAddress').textContent = '📍 ' + myAddress;
+    });
+}
 
-        window.placeOrder = () => {
-            const name = document.getElementById('custName').value;
-            if(!name) return alert("Please enter your name!");
-            push(ref(db, 'orders'), {
-                customerName: name,
-                items: Object.values(cart).map(i => `${i.dish} x${i.qty}`).join(", "),
-                totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
-                status: "pending", timestamp: Date.now()
-            }).then(() => { alert("Order Sent!"); location.reload(); });
-        };
-    </script>
+/* ── CART ── */
+window.updateQty = (id, dish, price, change) => {
+  if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
+  cart[id].qty += change;
+  if(cart[id].qty <= 0) delete cart[id];
+  updateUI(); renderMenu();
+};
+window.cancelOrder = () => {
+  cart = {};
+  if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  updateUI(); renderMenu();
+};
+
+function updateUI(){
+  const total = Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
+  document.getElementById('checkout-panel').style.display = total>0 ? 'block' : 'none';
+  document.getElementById('panel-total').innerText = '₹'+total;
+}
+
+/* ── RENDER MENU ── */
+function renderMenu(){
+  const container = document.getElementById('customer-list');
+  container.innerHTML = '';
+  Object.keys(resData).forEach(resId => {
+    const res = resData[resId];
+    let menuHtml = '';
+    if(res.menu){
+      Object.keys(res.menu).forEach(mId => {
+        const m   = res.menu[mId];
+        const qty = cart[mId] ? cart[mId].qty : 0;
+        menuHtml += `
+        <div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
+          <img src="${m.dishImg}"
+               onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'"
+               class="w-full aspect-square rounded-xl object-cover mb-2"/>
+          <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
+          <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
+          <div class="w-full flex items-center justify-between gap-1">
+            ${qty > 0 ? `
+            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',-1)"
+              class="w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center">−</button>
+            <span class="font-black text-sm text-gray-800">${qty}</span>
+            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',1)"
+              class="w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center">+</button>
+            ` : `
+            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',1)"
+              class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase">Add +</button>
+            `}
+          </div>
+        </div>`;
+      });
+    }
+    container.innerHTML += `
+    <div class="bg-white rounded-[3rem] shadow-sm border overflow-hidden">
+      <img src="${res.image}" class="w-full h-44 object-cover"/>
+      <div class="p-6">
+        <h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">${res.name}</h2>
+        <div class="grid grid-cols-2 gap-4">${menuHtml}</div>
+      </div>
+    </div>`;
+  });
+}
+
+onValue(ref(db,'restaurants'), snap => { resData = snap.val()||{}; renderMenu(); });
+
+/* ── PLACE ORDER ── */
+window.placeOrder = async () => {
+  const name  = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+
+  if(!name)  { alert('⚠️ Please enter your name!'); return; }
+  if(!phone) { alert('⚠️ Please enter your phone number!'); return; }
+  if(phone.length < 10){ alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
+  if(!myLat) { alert('⚠️ Please share your live location first!'); return; }
+
+  const items = Object.values(cart).map(i=>`${i.dish} x${i.qty}`).join(', ');
+  const total = Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
+  const oid   = push(ref(db,'orders')).key;
+
+  await set(ref(db,'orders/'+oid), {
+    id:           oid,
+    customerName: name,
+    customerPhone:phone,
+    items,
+    totalAmount:  total,
+    status:       'pending',
+    lat:          myLat,
+    lng:          myLng,
+    address:      myAddress,
+    radiusMeters: radiusM,
+    timestamp:    Date.now()
+  });
+
+  // Keep location updating in Firebase while order is active
+  if(watchId){
+    navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(p => {
+      set(ref(db,`orders/${oid}/lat`), p.coords.latitude);
+      set(ref(db,`orders/${oid}/lng`), p.coords.longitude);
+    }, null, { enableHighAccuracy:true, maximumAge:8000 });
+  }
+
+  alert(`✅ Order placed!\nName: ${name}\nPhone: ${phone}\nTotal: ₹${total}\nRadius: ${radiusM}m`);
+  cart = {};
+  updateUI();
+  renderMenu();
+};
+</script>
 </body>
 </html>
