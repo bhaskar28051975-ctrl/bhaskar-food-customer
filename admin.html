@@ -23,6 +23,60 @@
     <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">💾 Save Hotel</button>
   </div>
 
+  <!-- ══ SERVICE AREA RADIUS SETTINGS ══ -->
+  <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl">📡</div>
+      <div>
+        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Service Area Radius</h2>
+        <p class="text-[10px] text-gray-400 mt-0.5">Fixed for ALL customers — they cannot change it</p>
+      </div>
+    </div>
+
+    <!-- Current Radius Display -->
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">Current Service Radius</p>
+      <p class="font-black text-4xl text-red-600" id="currentRadiusDisplay">—</p>
+      <p class="text-xs text-gray-400 mt-1">metres from order location</p>
+    </div>
+
+    <!-- +/- Controls -->
+    <div class="space-y-2">
+      <div class="flex items-center gap-3">
+        <button id="radiusMinusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 transition-transform border border-red-200">−</button>
+        <div class="flex-1">
+          <div class="bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div id="adminRadiusBar" class="bg-red-500 h-3 rounded-full transition-all" style="width:20%"></div>
+          </div>
+          <div class="flex justify-between text-[9px] text-gray-400 font-bold mt-1 px-1">
+            <span>50m</span><span>250m</span><span>500m</span><span>750m</span><span>1000m</span>
+          </div>
+        </div>
+        <button id="radiusPlusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 transition-transform border border-red-200">+</button>
+      </div>
+      <p class="text-[10px] text-gray-400 text-center">Step: 50m &nbsp;|&nbsp; Range: 50m – 1000m</p>
+    </div>
+
+    <!-- Quick Presets -->
+    <div>
+      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-2">Quick Presets</p>
+      <div class="grid grid-cols-4 gap-2" id="presetBtns">
+        <button data-r="100"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95 transition-transform">100m</button>
+        <button data-r="200"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95 transition-transform">200m</button>
+        <button data-r="500"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95 transition-transform">500m</button>
+        <button data-r="1000" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95 transition-transform">1km</button>
+      </div>
+    </div>
+
+    <button id="saveRadiusBtn" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">
+      💾 Save Service Radius
+    </button>
+
+    <div id="radiusSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">
+      ✅ Radius saved! All customers will use this setting.
+    </div>
+  </div>
+
   <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Hotels & Menus</p>
   <div id="hotelList" class="space-y-4"></div>
 </div>
@@ -84,6 +138,53 @@ const cfg = {
   appId:       "1:712053690568:web:b4d8b789e0359ebc0e95fd"
 };
 const db = getDatabase(initializeApp(cfg));
+
+/* ── RADIUS STATE ── */
+let adminRadius = 200;
+const MIN_R = 50, MAX_R = 1000, STEP_R = 50;
+
+function updateRadiusUI(r){
+  adminRadius = r;
+  document.getElementById('currentRadiusDisplay').textContent = r + 'm';
+  const pct = ((r - MIN_R) / (MAX_R - MIN_R)) * 100;
+  document.getElementById('adminRadiusBar').style.width = pct + '%';
+  // highlight active preset
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    const active = parseInt(b.dataset.r) === r;
+    b.classList.toggle('bg-red-600',  active);
+    b.classList.toggle('text-white',  active);
+    b.classList.toggle('border-red-600', active);
+    b.classList.toggle('bg-gray-50',  !active);
+    b.classList.toggle('text-gray-600', !active);
+  });
+}
+
+/* load current radius from Firebase */
+onValue(ref(db,'settings/serviceRadius'), snap => {
+  const val = parseInt(snap.val()) || 200;
+  updateRadiusUI(val);
+});
+
+/* +/- buttons */
+document.getElementById('radiusMinusBtn').addEventListener('click', () => {
+  updateRadiusUI(Math.max(MIN_R, adminRadius - STEP_R));
+});
+document.getElementById('radiusPlusBtn').addEventListener('click', () => {
+  updateRadiusUI(Math.min(MAX_R, adminRadius + STEP_R));
+});
+
+/* preset buttons */
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => updateRadiusUI(parseInt(btn.dataset.r)));
+});
+
+/* save radius to Firebase */
+document.getElementById('saveRadiusBtn').addEventListener('click', async () => {
+  await set(ref(db,'settings/serviceRadius'), adminRadius);
+  const msg = document.getElementById('radiusSavedMsg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 3000);
+});
 
 /* ── state ── */
 let activeResId   = null;
