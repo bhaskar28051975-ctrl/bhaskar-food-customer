@@ -10,12 +10,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 html{scroll-behavior:smooth}
-.dish-card{transition:transform 0.2s}
-.dish-card:active{transform:scale(0.95)}
+.dish-card{transition:transform 0.15s}.dish-card:active{transform:scale(0.95)}
 #trackMap{height:220px;width:100%;border-radius:16px;z-index:1}
-.pulse-dot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,0.4);animation:pulse 1.5s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-.radius-ring{stroke:#dc2626;stroke-width:2;fill:rgba(220,38,38,0.08)}
+.pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
+@keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
 </style>
 </head>
 <body class="bg-gray-100 pb-80 text-gray-800">
@@ -27,39 +25,30 @@ html{scroll-behavior:smooth}
 
 <div id="customer-list" class="p-4 space-y-8"></div>
 
-<!-- ══ CHECKOUT PANEL ══ -->
+<!-- CHECKOUT PANEL -->
 <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
   <div class="flex justify-between items-center mb-4 px-2">
     <div>
       <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
       <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
     </div>
-    <button onclick="cancelOrder()" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
+    <button id="cancelBtn" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
   </div>
-
   <div class="space-y-3">
-    <!-- Name -->
-    <input id="custName" type="text" placeholder="Your Full Name *"
-      class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
-    <!-- Phone -->
-    <input id="custPhone" type="tel" placeholder="Your Phone Number *"
-      class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+    <input id="custName"  type="text" placeholder="Your Full Name *"     class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+    <input id="custPhone" type="tel"  placeholder="Your Phone Number *"  class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
 
-    <!-- LOCATION SECTION -->
     <div class="bg-red-50 rounded-2xl p-4 border border-red-200 space-y-3">
       <div class="flex items-center justify-between">
         <div>
           <p class="font-black text-sm text-gray-800">📍 Live Location</p>
           <p class="text-xs text-gray-500 mt-0.5" id="locStatusText">Share your location for delivery tracking</p>
         </div>
-        <button id="locBtn" onclick="requestLocation()"
-          class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
-          Share GPS
-        </button>
+        <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
       </div>
 
-      <!-- Radius Display (set by Admin) -->
-      <div class="bg-white rounded-xl p-3 border" id="radiusWrap">
+      <!-- Radius (read-only, set by admin) -->
+      <div class="bg-white rounded-xl p-3 border">
         <div class="flex items-center justify-between">
           <p class="text-[11px] font-black text-gray-600 uppercase">📡 Service Area Radius</p>
           <span id="radiusVal" class="font-black text-red-600 text-sm">Loading…</span>
@@ -74,343 +63,260 @@ html{scroll-behavior:smooth}
       <div id="mapWrap" class="hidden space-y-2">
         <div id="trackMap"></div>
         <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-          <div class="pulse-dot flex-shrink-0"></div>
+          <div class="pdot flex-shrink-0"></div>
           <p class="text-xs font-bold text-green-700" id="locAddress">Getting address…</p>
         </div>
         <p class="text-[10px] text-gray-400 text-center">📡 Live location updates every 10 seconds</p>
       </div>
     </div>
 
-    <button onclick="placeOrder()"
-      class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base">
-      🛵 Confirm Order
-    </button>
+    <button id="placeOrderBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base">🛵 Confirm Order</button>
   </div>
 </div>
 
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const cfg = {
-  apiKey:      "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain:  "bhaskar-food-app.firebaseapp.com",
-  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId:   "bhaskar-food-app",
-  appId:       "1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const db = getDatabase(initializeApp(cfg));
+const db = getDatabase(initializeApp({
+  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain:"bhaskar-food-app.firebaseapp.com",
+  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId:"bhaskar-food-app",
+  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
+}));
 
-/* ── state ── */
-let cart        = {};
-let resData     = {};
-let myLat       = null;
-let myLng       = null;
-let myAddress   = '';
-let watchId     = null;
-let trackMap    = null;
-let myMarker    = null;
-let myCircle    = null;
-let radiusM     = 200;   // loaded from Firebase — set by admin
-const MIN_R     = 50;
-const MAX_R     = 1000;
-let orderLat    = null;
-let orderLng    = null;
-let wasOutside  = false;
-let activeOid   = null;
-let speechReady = false;
+/* ── STATE ── */
+let cart={}, resData={}, myLat=null, myLng=null, myAddress='';
+let watchId=null, trackMap=null, myMarker=null, myCircle=null;
+let radiusM=200, orderLat=null, orderLng=null, wasOutside=false;
+let activeOid=null, speechReady=false;
 
-/* ── VOICE ALERT ENGINE ── */
-function speak(text, urgent = false){
+/* ── VOICE ── */
+function speak(txt, urgent=false){
   if(!window.speechSynthesis) return;
-  // cancel any current speech
   window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang   = 'en-IN';   // Indian English accent
-  utter.rate   = urgent ? 0.85 : 0.95;
-  utter.pitch  = urgent ? 1.2 : 1.0;
-  utter.volume = 1.0;
-  // pick a voice if available
-  const voices = window.speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang.startsWith('en'));
-  if(enVoice) utter.voice = enVoice;
-  window.speechSynthesis.speak(utter);
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='en-IN'; u.rate=urgent?.85:.95; u.pitch=urgent?1.2:1; u.volume=1;
+  const v=speechSynthesis.getVoices().find(x=>x.lang.startsWith('en'));
+  if(v) u.voice=v;
+  window.speechSynthesis.speak(u);
 }
-
-// Preload voices on user gesture (required by mobile browsers)
 function initSpeech(){
-  if(speechReady) return;
-  speechReady = true;
-  window.speechSynthesis.getVoices();
-  // silent warm-up
-  const warm = new SpeechSynthesisUtterance(' ');
-  warm.volume = 0;
-  window.speechSynthesis.speak(warm);
+  if(speechReady) return; speechReady=true;
+  speechSynthesis.getVoices();
+  const w=new SpeechSynthesisUtterance(' '); w.volume=0; speechSynthesis.speak(w);
 }
-document.addEventListener('click', initSpeech, { once: true });
+document.addEventListener('click', initSpeech, {once:true});
 
-/* ── LOAD SERVICE RADIUS FROM FIREBASE (admin controlled) ── */
-onValue(ref(db,'settings/serviceRadius'), snap => {
-  const val = parseInt(snap.val()) || 200;
-  radiusM = val;
-  document.getElementById('radiusVal').textContent = val + ' m';
-  const pct = ((val - MIN_R) / (MAX_R - MIN_R)) * 100;
-  document.getElementById('radiusBar').style.width = pct + '%';
-  if(myCircle) myCircle.setRadius(val);
+function showBanner(msg, color){
+  let b=document.getElementById('cBanner');
+  if(!b){ b=document.createElement('div'); b.id='cBanner';
+    b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+    document.body.appendChild(b); }
+  b.textContent=msg; b.style.background=color==='red'?'#dc2626':'#16a34a'; b.style.color='#fff'; b.style.opacity='1';
+  clearTimeout(b._t); b._t=setTimeout(()=>b.style.opacity='0',4500);
+}
+
+/* ── RADIUS FROM FIREBASE ── */
+onValue(ref(db,'settings/serviceRadius'), snap=>{
+  const v=parseInt(snap.val())||200; radiusM=v;
+  document.getElementById('radiusVal').textContent=v+' m';
+  document.getElementById('radiusBar').style.width=((v-50)/(1000-50)*100)+'%';
+  if(myCircle) myCircle.setRadius(v);
 });
 
-/* ── LOCATION ── */
-window.requestLocation = () => {
-  const btn = document.getElementById('locBtn');
-  if(!navigator.geolocation){ alert('GPS not supported on this device.'); return; }
-  btn.textContent = '⏳ Getting…';
-  btn.disabled    = true;
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    myLat = pos.coords.latitude;
-    myLng = pos.coords.longitude;
-    btn.textContent = '✅ Sharing';
+/* ── GPS ── */
+document.getElementById('locBtn').addEventListener('click', ()=>{
+  const btn=document.getElementById('locBtn');
+  if(!navigator.geolocation){ alert('GPS not supported'); return; }
+  btn.textContent='⏳ Getting…'; btn.disabled=true;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    myLat=pos.coords.latitude; myLng=pos.coords.longitude;
+    btn.textContent='✅ Sharing'; btn.disabled=false;
     btn.classList.replace('bg-red-600','bg-green-600');
-    document.getElementById('locStatusText').textContent = '✅ Live location sharing ON';
-    showMap();
-    reverseGeocode(myLat, myLng);
-
-    // watch position — update every ~10 sec
+    document.getElementById('locStatusText').textContent='✅ Live location sharing ON';
+    showMap(); reverseGeocode(myLat,myLng);
     if(watchId) navigator.geolocation.clearWatch(watchId);
-    watchId = navigator.geolocation.watchPosition(p => {
-      myLat = p.coords.latitude;
-      myLng = p.coords.longitude;
-      updateMapPin(myLat, myLng);
-      reverseGeocode(myLat, myLng);
-      // check if customer crossed radius from order origin
-      checkRadiusBreach(myLat, myLng);
-      // push live location to Firebase if order active
-      if(activeOid){
-        set(ref(db,`orders/${activeOid}/lat`), myLat);
-        set(ref(db,`orders/${activeOid}/lng`), myLng);
-      }
-    }, null, { enableHighAccuracy: true, maximumAge: 8000 });
-
-  }, err => {
-    btn.textContent = 'Share GPS';
-    btn.disabled    = false;
-    alert('Location permission denied. Please allow GPS in browser settings.');
-  }, { enableHighAccuracy: true });
-};
+    watchId=navigator.geolocation.watchPosition(p=>{
+      myLat=p.coords.latitude; myLng=p.coords.longitude;
+      updatePin(myLat,myLng); reverseGeocode(myLat,myLng);
+      checkBreach(myLat,myLng);
+      if(activeOid){ set(ref(db,`orders/${activeOid}/lat`),myLat); set(ref(db,`orders/${activeOid}/lng`),myLng); }
+    },null,{enableHighAccuracy:true,maximumAge:8000});
+  },()=>{ btn.textContent='Share GPS'; btn.disabled=false; alert('Location denied. Please allow GPS.'); },{enableHighAccuracy:true});
+});
 
 function showMap(){
   document.getElementById('mapWrap').classList.remove('hidden');
   if(!trackMap){
-    trackMap = L.map('trackMap',{ zoomControl:true, attributionControl:false }).setView([myLat, myLng], 16);
+    trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([myLat,myLng],16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
   }
-  updateMapPin(myLat, myLng);
-  setTimeout(()=>trackMap.invalidateSize(), 200);
+  updatePin(myLat,myLng);
+  setTimeout(()=>trackMap.invalidateSize(),200);
 }
-
-function updateMapPin(lat, lng){
+function updatePin(lat,lng){
   if(!trackMap) return;
-  const icon = L.divIcon({
-    html: '<div class="pulse-dot"></div>',
-    iconSize: [14,14], className: ''
-  });
-  if(myMarker) myMarker.setLatLng([lat, lng]);
-  else myMarker = L.marker([lat, lng],{icon}).addTo(trackMap).bindPopup('📍 You are here');
-  if(myCircle) myCircle.setLatLng([lat, lng]).setRadius(radiusM);
-  else myCircle = L.circle([lat, lng],{
-    radius: radiusM, color:'#dc2626', fillColor:'#dc2626', fillOpacity:0.1, weight:2
-  }).addTo(trackMap);
-  trackMap.setView([lat, lng], 16);
+  const icon=L.divIcon({html:'<div class="pdot"></div>',iconSize:[14,14],className:''});
+  if(myMarker) myMarker.setLatLng([lat,lng]);
+  else myMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('📍 You are here');
+  if(myCircle){ myCircle.setLatLng([lat,lng]); myCircle.setRadius(radiusM); }
+  else myCircle=L.circle([lat,lng],{radius:radiusM,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.1,weight:2}).addTo(trackMap);
+  trackMap.setView([lat,lng],16);
 }
-
-function reverseGeocode(lat, lng){
+function reverseGeocode(lat,lng){
   fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
     .then(r=>r.json()).then(d=>{
-      const a = d.address||{};
-      myAddress = [a.road||a.suburb||'',a.city||a.town||a.village||'',a.state||'']
-        .filter(Boolean).join(', ');
-      document.getElementById('locAddress').textContent = '📍 ' + (myAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-    }).catch(()=>{
-      myAddress = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-      document.getElementById('locAddress').textContent = '📍 ' + myAddress;
-    });
+      const a=d.address||{};
+      myAddress=[a.road||a.suburb||'',a.city||a.town||a.village||'',a.state||''].filter(Boolean).join(', ');
+      document.getElementById('locAddress').textContent='📍 '+(myAddress||`${lat.toFixed(5)},${lng.toFixed(5)}`);
+    }).catch(()=>{ myAddress=`${lat.toFixed(5)},${lng.toFixed(5)}`; document.getElementById('locAddress').textContent='📍 '+myAddress; });
 }
 
-/* ── HAVERSINE DISTANCE (metres) ── */
-function getDistance(lat1, lng1, lat2, lng2){
-  const R = 6371000;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLng = (lng2-lng1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+/* ── HAVERSINE ── */
+function getDist(a,b,c,d){
+  const R=6371000,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;
+  const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
 }
 
-/* ── RADIUS BREACH CHECK & VOICE ALERT ── */
-function checkRadiusBreach(lat, lng){
-  if(!orderLat || !orderLng) return;   // no origin set yet
-  const dist    = getDistance(lat, lng, orderLat, orderLng);
-  const outside = dist > radiusM;
-  const bar     = document.getElementById('locStatusText');
-
-  if(outside && !wasOutside){
-    // just crossed OUTSIDE
-    wasOutside = true;
-    speak('Warning! You are crossing the service area. Please stay within the delivery zone.', true);
-    if(bar) bar.textContent = `⚠️ Outside radius! (${dist}m away)`;
-    if(bar) bar.classList.add('text-red-600');
-    // flash alert banner
-    showAlert('⚠️ You are crossing the service area!', 'red');
-  } else if(!outside && wasOutside){
-    // came back INSIDE
-    wasOutside = false;
+/* ── BREACH CHECK ── */
+function checkBreach(lat,lng){
+  if(!orderLat||!orderLng) return;
+  const dist=getDist(lat,lng,orderLat,orderLng);
+  const out=dist>radiusM;
+  const st=document.getElementById('locStatusText');
+  if(out&&!wasOutside){
+    wasOutside=true;
+    speak('Warning! You are crossing the service area. Please stay within the delivery zone.',true);
+    showBanner('⚠️ You are crossing the service area!','red');
+    if(st){ st.textContent=`⚠️ Outside radius! (${dist}m away)`; st.classList.add('text-red-600'); }
+  } else if(!out&&wasOutside){
+    wasOutside=false;
     speak('You are back in the service area. Thank you!');
-    if(bar) bar.textContent = `✅ Inside radius (${dist}m from start)`;
-    if(bar) bar.classList.remove('text-red-600');
-    showAlert('✅ You are back in the service area!', 'green');
-  } else if(outside){
-    // still outside — update distance
-    if(bar) bar.textContent = `⚠️ Outside radius! (${dist}m away)`;
-  } else {
-    if(bar) bar.textContent = `✅ Live location sharing ON (${dist}m from start)`;
+    showBanner('✅ You are back in the service area!','green');
+    if(st){ st.textContent=`✅ Inside radius (${dist}m from start)`; st.classList.remove('text-red-600'); }
+  } else if(out && st){
+    st.textContent=`⚠️ Outside radius! (${dist}m away)`;
+  } else if(st){
+    st.textContent=`✅ Live location sharing ON (${dist}m from start)`;
   }
-}
-
-/* ── ALERT BANNER ── */
-function showAlert(msg, color){
-  let banner = document.getElementById('alertBanner');
-  if(!banner){
-    banner = document.createElement('div');
-    banner.id = 'alertBanner';
-    banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;text-align:center;white-space:nowrap;max-width:90vw;transition:opacity 0.4s;box-shadow:0 4px 20px rgba(0,0,0,0.2)';
-    document.body.appendChild(banner);
-  }
-  banner.textContent  = msg;
-  banner.style.background = color==='red' ? '#dc2626' : '#16a34a';
-  banner.style.color  = '#fff';
-  banner.style.opacity = '1';
-  clearTimeout(banner._t);
-  banner._t = setTimeout(()=>{ banner.style.opacity='0'; }, 4000);
 }
 
 /* ── CART ── */
-window.updateQty = (id, dish, price, change) => {
-  if(!cart[id]) cart[id] = { dish, price: parseInt(price), qty: 0 };
+function updateQty(id, dish, price, change){
+  initSpeech();
+  const p = typeof price === 'number' ? price : parseInt(price)||0;
+  if(!cart[id]) cart[id]={dish, price:p, qty:0};
   cart[id].qty += change;
   if(cart[id].qty <= 0) delete cart[id];
-  updateUI(); renderMenu();
-};
-window.cancelOrder = () => {
-  cart = {};
+  updateUI();
+  renderMenu();
+}
+document.getElementById('cancelBtn').addEventListener('click', ()=>{
+  cart={};
   if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
   updateUI(); renderMenu();
-};
-
+});
 function updateUI(){
-  const total = Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
-  document.getElementById('checkout-panel').style.display = total>0 ? 'block' : 'none';
-  document.getElementById('panel-total').innerText = '₹'+total;
+  const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
+  document.getElementById('checkout-panel').style.display=total>0?'block':'none';
+  document.getElementById('panel-total').innerText='₹'+total;
 }
 
 /* ── RENDER MENU ── */
+const dishMap = {};   // mId → {dish, price}  — avoids HTML encoding bugs
+
 function renderMenu(){
-  const container = document.getElementById('customer-list');
-  container.innerHTML = '';
-  Object.keys(resData).forEach(resId => {
-    const res = resData[resId];
-    let menuHtml = '';
+  const container=document.getElementById('customer-list');
+  container.innerHTML='';
+  Object.keys(resData).forEach(resId=>{
+    const res=resData[resId];
+    let html='';
     if(res.menu){
-      Object.keys(res.menu).forEach(mId => {
-        const m   = res.menu[mId];
-        const qty = cart[mId] ? cart[mId].qty : 0;
-        menuHtml += `
-        <div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
-          <img src="${m.dishImg}"
-               onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'"
-               class="w-full aspect-square rounded-xl object-cover mb-2"/>
+      Object.keys(res.menu).forEach(mId=>{
+        const m=res.menu[mId], qty=cart[mId]?cart[mId].qty:0;
+        dishMap[mId]={dish:m.dish, price:parseInt(m.price)||0};  // store in JS map
+        html+=`<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
+          <img src="${m.dishImg||''}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2"/>
           <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
           <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
-          <div class="w-full flex items-center justify-between gap-1">
-            ${qty > 0 ? `
-            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',-1)"
-              class="w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center">−</button>
+          <div class="w-full flex items-center justify-between gap-1" data-mid="${mId}">
+            ${qty>0?`
+            <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
             <span class="font-black text-sm text-gray-800">${qty}</span>
-            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',1)"
-              class="w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center">+</button>
-            ` : `
-            <button onclick="updateQty('${mId}','${m.dish}','${m.price}',1)"
-              class="w-full bg-red-500 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase">Add +</button>
-            `}
+            <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>
+            `:`<button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`}
           </div>
         </div>`;
       });
     }
-    container.innerHTML += `
-    <div class="bg-white rounded-[3rem] shadow-sm border overflow-hidden">
-      <img src="${res.image}" class="w-full h-44 object-cover"/>
+    const wrap=document.createElement('div');
+    wrap.className='bg-white rounded-[3rem] shadow-sm border overflow-hidden';
+    wrap.innerHTML=`<img src="${res.image||''}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'" class="w-full h-44 object-cover"/>
       <div class="p-6">
         <h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">${res.name}</h2>
-        <div class="grid grid-cols-2 gap-4">${menuHtml}</div>
-      </div>
-    </div>`;
+        <div class="grid grid-cols-2 gap-4">${html}</div>
+      </div>`;
+    container.appendChild(wrap);
+  });
+
+  /* ── ATTACH EVENTS using JS Map (no HTML encoding issues) ── */
+  container.querySelectorAll('[data-mid]').forEach(row=>{
+    const mid = row.dataset.mid;
+    const info = dishMap[mid];
+    if(!info) return;
+    row.querySelector('.qPlus')?.addEventListener('click', e=>{
+      e.stopPropagation();
+      updateQty(mid, info.dish, info.price, 1);
+    });
+    row.querySelector('.qMinus')?.addEventListener('click', e=>{
+      e.stopPropagation();
+      updateQty(mid, info.dish, info.price, -1);
+    });
   });
 }
 
-onValue(ref(db,'restaurants'), snap => { resData = snap.val()||{}; renderMenu(); });
+onValue(ref(db,'restaurants'), snap=>{ resData=snap.val()||{}; renderMenu(); });
 
 /* ── PLACE ORDER ── */
-window.placeOrder = async () => {
-  const name  = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-
+document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
   if(!name)  { alert('⚠️ Please enter your name!'); return; }
   if(!phone) { alert('⚠️ Please enter your phone number!'); return; }
-  if(phone.length < 10){ alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
+  if(phone.replace(/\D/g,'').length<10){ alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
   if(!myLat) { alert('⚠️ Please share your live location first!'); return; }
 
-  // save order origin for radius breach detection
-  orderLat = myLat;
-  orderLng = myLng;
-  wasOutside = false;
+  orderLat=myLat; orderLng=myLng; wasOutside=false;
+  const items=Object.values(cart).map(i=>`${i.dish} x${i.qty}`).join(', ');
+  const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
+  const oid=push(ref(db,'orders')).key;
+  activeOid=oid;
 
-  const items = Object.values(cart).map(i=>`${i.dish} x${i.qty}`).join(', ');
-  const total = Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
-  const oid   = push(ref(db,'orders')).key;
-
-  await set(ref(db,'orders/'+oid), {
-    id:           oid,
-    customerName: name,
-    customerPhone:phone,
-    items,
-    totalAmount:  total,
-    status:       'pending',
-    lat:          myLat,
-    lng:          myLng,
-    address:      myAddress,
-    radiusMeters: radiusM,
-    timestamp:    Date.now()
+  await set(ref(db,'orders/'+oid),{
+    id:oid, customerName:name, customerPhone:phone,
+    items, totalAmount:total, status:'pending',
+    lat:myLat, lng:myLng, address:myAddress,
+    radiusMeters:radiusM, timestamp:Date.now()
   });
 
-  activeOid = oid;
-
-  // Keep location updating in Firebase while order is active
   if(watchId){
     navigator.geolocation.clearWatch(watchId);
-    watchId = navigator.geolocation.watchPosition(p => {
-      myLat = p.coords.latitude;
-      myLng = p.coords.longitude;
-      set(ref(db,`orders/${oid}/lat`), p.coords.latitude);
-      set(ref(db,`orders/${oid}/lng`), p.coords.longitude);
-      checkRadiusBreach(p.coords.latitude, p.coords.longitude);
-    }, null, { enableHighAccuracy:true, maximumAge:8000 });
+    watchId=navigator.geolocation.watchPosition(p=>{
+      myLat=p.coords.latitude; myLng=p.coords.longitude;
+      set(ref(db,`orders/${oid}/lat`),myLat);
+      set(ref(db,`orders/${oid}/lng`),myLng);
+      checkBreach(myLat,myLng);
+    },null,{enableHighAccuracy:true,maximumAge:8000});
   }
 
   speak('Order placed successfully! Your delivery is on the way.');
-  showAlert(`✅ Order placed! Total: ₹${total}`, 'green');
-  cart = {};
-  updateUI();
-  renderMenu();
-};
+  showBanner(`✅ Order placed! Total: ₹${total}`,'green');
+  cart={}; updateUI(); renderMenu();
+});
 </script>
 </body>
 </html>
