@@ -47,7 +47,6 @@ html{scroll-behavior:smooth}
         <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
       </div>
 
-      <!-- Radius (read-only, set by admin) -->
       <div class="bg-white rounded-xl p-3 border">
         <div class="flex items-center justify-between">
           <p class="text-[11px] font-black text-gray-600 uppercase">📡 Service Area Radius</p>
@@ -59,7 +58,6 @@ html{scroll-behavior:smooth}
         <p class="text-[10px] text-gray-400 mt-1.5 text-center">⚙️ Fixed by restaurant — cannot be changed</p>
       </div>
 
-      <!-- MAP -->
       <div id="mapWrap" class="hidden space-y-2">
         <div id="trackMap"></div>
         <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
@@ -205,30 +203,65 @@ function checkBreach(lat,lng){
   }
 }
 
+/* ── DISH MAP (JS store, not DOM) ── */
+const dishMap = {};
+
 /* ── CART ── */
-function updateQty(id, dish, price, change){
+function updateQty(id, change){
   initSpeech();
-  const p = typeof price === 'number' ? price : parseInt(price)||0;
-  if(!cart[id]) cart[id]={dish, price:p, qty:0};
+  const info = dishMap[id];
+  if(!info) return;
+  if(!cart[id]) cart[id]={ dish: info.dish, price: info.price, qty: 0 };
   cart[id].qty += change;
   if(cart[id].qty <= 0) delete cart[id];
   updateUI();
-  renderMenu();
+  updateCardQty(id);   // ← only patch the single card, no full re-render
 }
+
+/* patch only the qty controls for one dish card — no full re-render */
+function updateCardQty(id){
+  const row = document.querySelector(`[data-mid="${id}"]`);
+  if(!row) return;
+  const qty = cart[id] ? cart[id].qty : 0;
+  if(qty > 0){
+    row.innerHTML = `
+      <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
+      <span class="font-black text-sm text-gray-800">${qty}</span>
+      <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`;
+  } else {
+    row.innerHTML = `
+      <button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`;
+  }
+}
+
 document.getElementById('cancelBtn').addEventListener('click', ()=>{
   cart={};
   if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
-  updateUI(); renderMenu();
+  updateUI();
+  /* reset all visible qty controls */
+  document.querySelectorAll('[data-mid]').forEach(row=>{
+    updateCardQty(row.dataset.mid);
+  });
 });
+
 function updateUI(){
   const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
   document.getElementById('checkout-panel').style.display=total>0?'block':'none';
   document.getElementById('panel-total').innerText='₹'+total;
 }
 
-/* ── RENDER MENU ── */
-const dishMap = {};   // mId → {dish, price}  — avoids HTML encoding bugs
+/* ── EVENT DELEGATION (one listener, survives re-renders) ── */
+document.getElementById('customer-list').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const row = btn.closest('[data-mid]');
+  if(!row) return;
+  const mid = row.dataset.mid;
+  if(btn.classList.contains('qPlus'))  updateQty(mid, +1);
+  if(btn.classList.contains('qMinus')) updateQty(mid, -1);
+});
 
+/* ── RENDER MENU (builds HTML once; qty updates patch in-place) ── */
 function renderMenu(){
   const container=document.getElementById('customer-list');
   container.innerHTML='';
@@ -237,19 +270,20 @@ function renderMenu(){
     let html='';
     if(res.menu){
       Object.keys(res.menu).forEach(mId=>{
-        const m=res.menu[mId], qty=cart[mId]?cart[mId].qty:0;
-        dishMap[mId]={dish:m.dish, price:parseInt(m.price)||0};  // store in JS map
+        const m=res.menu[mId];
+        const price=parseInt(m.price)||0;
+        dishMap[mId]={ dish: m.dish, price };   // store in JS map
+        const qty = cart[mId] ? cart[mId].qty : 0;
+        const qtyHtml = qty > 0
+          ? `<button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
+             <span class="font-black text-sm text-gray-800">${qty}</span>
+             <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`
+          : `<button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`;
         html+=`<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
           <img src="${m.dishImg||''}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2"/>
           <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
           <p class="text-red-600 font-black text-xs mb-2">₹${m.price}</p>
-          <div class="w-full flex items-center justify-between gap-1" data-mid="${mId}">
-            ${qty>0?`
-            <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
-            <span class="font-black text-sm text-gray-800">${qty}</span>
-            <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>
-            `:`<button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`}
-          </div>
+          <div class="w-full flex items-center justify-between gap-1" data-mid="${mId}">${qtyHtml}</div>
         </div>`;
       });
     }
@@ -261,21 +295,6 @@ function renderMenu(){
         <div class="grid grid-cols-2 gap-4">${html}</div>
       </div>`;
     container.appendChild(wrap);
-  });
-
-  /* ── ATTACH EVENTS using JS Map (no HTML encoding issues) ── */
-  container.querySelectorAll('[data-mid]').forEach(row=>{
-    const mid = row.dataset.mid;
-    const info = dishMap[mid];
-    if(!info) return;
-    row.querySelector('.qPlus')?.addEventListener('click', e=>{
-      e.stopPropagation();
-      updateQty(mid, info.dish, info.price, 1);
-    });
-    row.querySelector('.qMinus')?.addEventListener('click', e=>{
-      e.stopPropagation();
-      updateQty(mid, info.dish, info.price, -1);
-    });
   });
 }
 
@@ -315,7 +334,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
   speak('Order placed successfully! Your delivery is on the way.');
   showBanner(`✅ Order placed! Total: ₹${total}`,'green');
-  cart={}; updateUI(); renderMenu();
+  cart={}; updateUI();
+  document.querySelectorAll('[data-mid]').forEach(row=>updateCardQty(row.dataset.mid));
 });
 </script>
 </body>
