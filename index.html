@@ -26,7 +26,6 @@ html{scroll-behavior:smooth}
 
 <div id="customer-list" class="p-4 space-y-8"></div>
 
-<!-- CHECKOUT PANEL -->
 <div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
   <div class="flex justify-between items-center mb-4 px-2">
     <div>
@@ -73,7 +72,6 @@ html{scroll-behavior:smooth}
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -213,6 +211,15 @@ function updateQty(id, change){
   const info = dishMap[id];
   if(!info) return;
   if(!cart[id]) cart[id]={ dish: info.dish, price: info.price, qty: 0 };
+  
+  const currentQty = cart[id].qty;
+  
+  // Guard check for limit cap of 20
+  if(change > 0 && currentQty >= 20) {
+    showBanner('⚠️ Maximum quantity limit is 20!', 'red');
+    return;
+  }
+  
   cart[id].qty += change;
   if(cart[id].qty <= 0) delete cart[id];
   updateUI();
@@ -224,15 +231,12 @@ function updateCardQty(id){
   const row = document.querySelector(`[data-mid="${id}"]`);
   if(!row) return;
   const qty = cart[id] ? cart[id].qty : 0;
-  if(qty > 0){
-    row.innerHTML = `
-      <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
-      <span class="font-black text-sm text-gray-800">${qty}</span>
-      <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`;
-  } else {
-    row.innerHTML = `
-      <button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`;
-  }
+  
+  // Always render the plus/minus container wrapper with current quantity metric
+  row.innerHTML = `
+    <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
+    <span class="font-black text-sm text-gray-800">${qty}</span>
+    <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">${qty >= 20 ? '✕' : '+'}</button>`;
 }
 
 document.getElementById('cancelBtn').addEventListener('click', ()=>{
@@ -290,11 +294,12 @@ function renderMenu(){
         const price=parseInt(m.price)||0;
         dishMap[mId]={ dish: m.dish, price };   // store in JS map
         const qty = cart[mId] ? cart[mId].qty : 0;
-        const qtyHtml = qty > 0
-          ? `<button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
+        
+        // Initial setup replaces base text layout layout logic with default interactive panel layout metrics
+        const qtyHtml = `<button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
              <span class="font-black text-sm text-gray-800">${qty}</span>
-             <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`
-          : `<button class="qPlus w-full bg-red-500 text-white py-2 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform">+ Add</button>`;
+             <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`;
+             
         html+=`<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm">
           <img src="${m.dishImg||''}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2"/>
           <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
