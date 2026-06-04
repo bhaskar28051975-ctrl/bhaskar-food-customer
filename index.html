@@ -11,13 +11,12 @@
 <style>
 html{scroll-behavior:smooth}
 .dish-card{transition:transform 0.15s}.dish-card:active{transform:scale(0.95)}
-#trackMap{height:220px;width:100%;border-radius:16px;z-index:1}
+#trackMap{height:200px;width:100%;border-radius:16px;z-index:1}
 .pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
 @keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-#checkout-panel{transition:transform .3s ease}
 </style>
 </head>
-<body class="bg-gray-100 text-gray-800" style="padding-bottom:80px">
+<body class="bg-gray-100 text-gray-800" style="padding-bottom:100px">
 
 <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
   <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
@@ -26,49 +25,67 @@ html{scroll-behavior:smooth}
 
 <div id="customer-list" class="p-4 space-y-8"></div>
 
-<div id="checkout-panel" class="hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] shadow-2xl p-6 border-t z-[100]">
-  <div class="flex justify-between items-center mb-4 px-2">
-    <div>
-      <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
-      <p id="panel-total" class="text-3xl font-black text-green-600">₹0</p>
-    </div>
-    <button id="cancelBtn" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-2 rounded-full">Cancel</button>
+<div id="bottom-bill-bar" class="hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 z-[90] flex justify-between items-center border-t border-gray-200">
+  <div>
+    <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Bill</p>
+    <p id="panel-total" class="text-2xl font-black text-green-600">₹0</p>
   </div>
-  <div class="space-y-3">
-    <input id="custName"  type="text" placeholder="Your Full Name *"     class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
-    <input id="custPhone" type="tel"  placeholder="Your Phone Number *"  class="w-full p-4 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+  <div class="flex items-center gap-3">
+    <button id="cancelBtn" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-3 rounded-xl active:scale-95 transition-transform">Clear</button>
+    <button id="proceedBtn" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 transition-transform flex items-center gap-2">
+      Proceed <i class="fas fa-arrow-right text-xs"></i>
+    </button>
+  </div>
+</div>
 
-    <div class="bg-red-50 rounded-2xl p-4 border border-red-200 space-y-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="font-black text-sm text-gray-800">📍 Live Location</p>
-          <p class="text-xs text-gray-500 mt-0.5" id="locStatusText">Share your location for delivery tracking</p>
-        </div>
-        <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
-      </div>
-
-      <div class="bg-white rounded-xl p-3 border">
-        <div class="flex items-center justify-between">
-          <p class="text-[11px] font-black text-gray-600 uppercase">📡 Service Area Radius</p>
-          <span id="radiusVal" class="font-black text-red-600 text-sm">Loading…</span>
-        </div>
-        <div class="bg-gray-100 rounded-full h-2 mt-2">
-          <div id="radiusBar" class="bg-red-500 h-2 rounded-full transition-all" style="width:20%"></div>
-        </div>
-        <p class="text-[10px] text-gray-400 mt-1.5 text-center">⚙️ Fixed by restaurant — cannot be changed</p>
-      </div>
-
-      <div id="mapWrap" class="hidden space-y-2">
-        <div id="trackMap"></div>
-        <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-          <div class="pdot flex-shrink-0"></div>
-          <p class="text-xs font-bold text-green-700" id="locAddress">Getting address…</p>
-        </div>
-        <p class="text-[10px] text-gray-400 text-center">📡 Live location updates every 10 seconds</p>
-      </div>
+<div id="checkout-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
+  <div class="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto transform transition-all">
+    
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+      <h3 class="text-lg font-black text-gray-800 uppercase italic">Delivery Details</h3>
+      <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 p-2"><i class="fas fa-times text-xl"></i></button>
     </div>
 
-    <button id="placeOrderBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base">🛵 Confirm Order</button>
+    <div class="space-y-4">
+      <input id="custName" type="text" placeholder="Your Full Name *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+      <input id="custPhone" type="tel" placeholder="Your Phone Number *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+
+      <div class="bg-red-50 rounded-2xl p-4 border border-red-100 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-black text-sm text-gray-800">📍 Live Location</p>
+            <p class="text-[11px] text-gray-500 mt-0.5" id="locStatusText">Share GPS coordinates for fast delivery</p>
+          </div>
+          <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform shrink-0">Share GPS</button>
+        </div>
+
+        <div class="bg-white rounded-xl p-3 border border-red-100">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-black text-gray-500 uppercase">📡 Service Radius Limit</p>
+            <span id="radiusVal" class="font-black text-red-600 text-xs">Loading…</span>
+          </div>
+          <div class="bg-gray-100 rounded-full h-1.5 mt-1.5">
+            <div id="radiusBar" class="bg-red-500 h-1.5 rounded-full transition-all" style="width:20%"></div>
+          </div>
+        </div>
+
+        <div id="mapWrap" class="hidden space-y-2">
+          <div id="trackMap"></div>
+          <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+            <div class="pdot flex-shrink-0"></div>
+            <p class="text-xs font-bold text-green-700 line-clamp-1" id="locAddress">Getting address…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <div class="flex justify-between items-center mb-3 px-1">
+          <span class="text-gray-500 font-bold text-sm">Grand Total Amount:</span>
+          <span id="modal-total" class="text-2xl font-black text-green-600">₹0</span>
+        </div>
+        <button id="placeOrderBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base tracking-wide">🛵 Confirm & Order Now</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -214,7 +231,6 @@ function updateQty(id, change){
   
   const currentQty = cart[id].qty;
   
-  // Guard check for limit cap of 20
   if(change > 0 && currentQty >= 20) {
     showBanner('⚠️ Maximum quantity limit is 20!', 'red');
     return;
@@ -223,51 +239,48 @@ function updateQty(id, change){
   cart[id].qty += change;
   if(cart[id].qty <= 0) delete cart[id];
   updateUI();
-  updateCardQty(id);   // ← only patch the single card, no full re-render
+  updateCardQty(id);
 }
 
-/* patch only the qty controls for one dish card — no full re-render */
 function updateCardQty(id){
   const row = document.querySelector(`[data-mid="${id}"]`);
   if(!row) return;
   const qty = cart[id] ? cart[id].qty : 0;
   
-  // Always render the plus/minus container wrapper with current quantity metric
   row.innerHTML = `
     <button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
     <span class="font-black text-sm text-gray-800">${qty}</span>
     <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">${qty >= 20 ? '✕' : '+'}</button>`;
 }
 
+/* Modals Trigger Visibility Actions */
+const modal = document.getElementById('checkout-modal');
+document.getElementById('proceedBtn').addEventListener('click', () => {
+  modal.classList.remove('hidden');
+  if(myLat) setTimeout(() => { if(trackMap) trackMap.invalidateSize(); }, 250);
+});
+document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
+
 document.getElementById('cancelBtn').addEventListener('click', ()=>{
   cart={};
   if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
   updateUI();
-  /* reset all visible qty controls */
+  modal.classList.add('hidden');
   document.querySelectorAll('[data-mid]').forEach(row=>{
     updateCardQty(row.dataset.mid);
   });
 });
 
-/* keep body padding = panel height so cards never hide under it */
-function syncPanelHeight(){
-  const panel=document.getElementById('checkout-panel');
-  const visible=panel.style.display!=='none';
-  document.body.style.paddingBottom=(visible ? panel.offsetHeight+20 : 80)+'px';
-}
-if(window.ResizeObserver){
-  new ResizeObserver(syncPanelHeight).observe(document.getElementById('checkout-panel'));
-}
-
 function updateUI(){
   const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
-  const panel=document.getElementById('checkout-panel');
-  panel.style.display=total>0?'block':'none';
-  document.getElementById('panel-total').innerText='₹'+total;
-  requestAnimationFrame(()=>requestAnimationFrame(syncPanelHeight));
+  const bottomBar=document.getElementById('bottom-bill-bar');
+  
+  bottomBar.style.display = total > 0 ? 'flex' : 'none';
+  document.getElementById('panel-total').innerText = '₹' + total;
+  document.getElementById('modal-total').innerText = '₹' + total;
 }
 
-/* ── EVENT DELEGATION (one listener, survives re-renders) ── */
+/* ── EVENT DELEGATION ── */
 document.getElementById('customer-list').addEventListener('click', e=>{
   const btn = e.target.closest('button');
   if(!btn) return;
@@ -276,12 +289,9 @@ document.getElementById('customer-list').addEventListener('click', e=>{
   const mid = row.dataset.mid;
   if(btn.classList.contains('qPlus'))  updateQty(mid, +1);
   if(btn.classList.contains('qMinus')) updateQty(mid, -1);
-  /* scroll the card into view so the panel doesn't cover it */
-  const card = row.closest('.dish-card');
-  if(card) setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),150);
 });
 
-/* ── RENDER MENU (builds HTML once; qty updates patch in-place) ── */
+/* ── RENDER MENU ── */
 function renderMenu(){
   const container=document.getElementById('customer-list');
   container.innerHTML='';
@@ -292,10 +302,9 @@ function renderMenu(){
       Object.keys(res.menu).forEach(mId=>{
         const m=res.menu[mId];
         const price=parseInt(m.price)||0;
-        dishMap[mId]={ dish: m.dish, price };   // store in JS map
+        dishMap[mId]={ dish: m.dish, price };
         const qty = cart[mId] ? cart[mId].qty : 0;
         
-        // Initial setup replaces base text layout layout logic with default interactive panel layout metrics
         const qtyHtml = `<button class="qMinus w-8 h-8 bg-red-100 text-red-600 rounded-lg font-black text-lg flex items-center justify-center active:scale-90">−</button>
              <span class="font-black text-sm text-gray-800">${qty}</span>
              <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">+</button>`;
@@ -356,6 +365,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   speak('Order placed successfully! Your delivery is on the way.');
   showBanner(`✅ Order placed! Total: ₹${total}`,'green');
   cart={}; updateUI();
+  modal.classList.add('hidden');
   document.querySelectorAll('[data-mid]').forEach(row=>updateCardQty(row.dataset.mid));
 });
 </script>
