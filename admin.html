@@ -77,6 +77,54 @@
     </div>
   </div>
 
+  <!-- ══ DELIVERY BOY ACCOUNTS ══ -->
+  <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">🛵</div>
+      <div>
+        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Boy Accounts</h2>
+        <p class="text-[10px] text-gray-400 mt-0.5">Create login credentials for delivery staff</p>
+      </div>
+    </div>
+
+    <!-- Add Account Form -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 space-y-3">
+      <p class="text-[10px] font-black text-blue-700 uppercase tracking-wider">➕ Create New Account</p>
+      <input id="dbFullName" type="text"     placeholder="Full Name *"          class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <input id="dbPhone"    type="tel"      placeholder="Phone Number *"       class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <input id="dbUsername" type="text"     placeholder="Username * (for login)" class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <div class="relative">
+        <input id="dbPassword" type="password" placeholder="Password *"         class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
+        <button id="toggleDbPass" class="absolute right-3 top-3 text-gray-400 text-sm font-bold">👁️</button>
+      </div>
+      <button id="saveDbBtn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 transition-transform">💾 Create Account</button>
+      <div id="dbSaveMsg" class="hidden text-center text-green-600 font-black text-xs py-1"></div>
+    </div>
+
+    <!-- Accounts List -->
+    <div>
+      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-3">All Delivery Accounts</p>
+      <div id="dbAccountsList" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- Edit Account Modal -->
+  <div id="editDbModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
+    <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-black text-gray-800 text-sm uppercase">✏️ Edit Account</h3>
+        <button id="closeEditDb" class="text-gray-400 text-2xl leading-none">✕</button>
+      </div>
+      <input id="editDbName"  type="text"     placeholder="Full Name *"     class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <input id="editDbPhone" type="tel"      placeholder="Phone Number *"  class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <div class="relative">
+        <input id="editDbPass" type="password" placeholder="New Password (leave blank to keep)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
+        <button id="toggleEditPass" class="absolute right-3 top-3 text-gray-400 text-sm font-bold">👁️</button>
+      </div>
+      <button id="updateDbBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">✅ Update Account</button>
+    </div>
+  </div>
+
   <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Hotels & Menus</p>
   <div id="hotelList" class="space-y-4"></div>
 </div>
@@ -128,7 +176,7 @@
 
 <script type="module">
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, push, remove, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, push, remove, set, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const cfg = {
   apiKey:      "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
@@ -189,8 +237,134 @@ document.getElementById('saveRadiusBtn').addEventListener('click', async () => {
 /* ── state ── */
 let activeResId   = null;
 let activeResName = '';
-let editKey       = null;   // null = new item, string = editing key
-let menuCache     = {};     // key → {dish,price,dishImg}
+let editKey       = null;
+let menuCache     = {};
+let editingDbKey  = null;   // delivery boy being edited
+
+/* ══ DELIVERY BOY ACCOUNTS ══ */
+
+// toggle password visibility
+document.getElementById('toggleDbPass').addEventListener('click', () => {
+  const inp = document.getElementById('dbPassword');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+});
+document.getElementById('toggleEditPass').addEventListener('click', () => {
+  const inp = document.getElementById('editDbPass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+});
+document.getElementById('closeEditDb').addEventListener('click', () => {
+  document.getElementById('editDbModal').classList.add('hidden');
+  editingDbKey = null;
+});
+
+// Create new account
+document.getElementById('saveDbBtn').addEventListener('click', async () => {
+  const name  = document.getElementById('dbFullName').value.trim();
+  const phone = document.getElementById('dbPhone').value.trim();
+  const user  = document.getElementById('dbUsername').value.trim().toLowerCase().replace(/\s/g,'');
+  const pass  = document.getElementById('dbPassword').value.trim();
+  const msg   = document.getElementById('dbSaveMsg');
+
+  if(!name||!phone||!user||!pass){ alert('⚠️ All fields are required!'); return; }
+  if(phone.replace(/\D/g,'').length < 10){ alert('⚠️ Enter valid 10-digit phone!'); return; }
+  if(user.length < 3){ alert('⚠️ Username must be at least 3 characters!'); return; }
+  if(pass.length < 4){ alert('⚠️ Password must be at least 4 characters!'); return; }
+
+  // check username not already taken
+  const snap = await get(ref(db, `deliveryAccounts/${user}`));
+  if(snap.exists()){ alert('⚠️ Username already taken! Choose another.'); return; }
+
+  await set(ref(db, `deliveryAccounts/${user}`), {
+    name, phone, password: pass, username: user,
+    active: true, createdAt: Date.now()
+  });
+
+  // clear form
+  ['dbFullName','dbPhone','dbUsername','dbPassword'].forEach(id => document.getElementById(id).value = '');
+  msg.textContent = `✅ Account created! Username: ${user}`;
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 4000);
+});
+
+// Listen & render accounts
+onValue(ref(db, 'deliveryAccounts'), snap => {
+  const list = document.getElementById('dbAccountsList');
+  list.innerHTML = '';
+  if(!snap.exists()){
+    list.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">No accounts yet.</p>';
+    return;
+  }
+  snap.forEach(child => {
+    const a   = child.val();
+    const key = child.key;
+    const card = document.createElement('div');
+    card.className = 'bg-gray-50 border rounded-2xl p-4 space-y-2';
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">
+            ${(a.name||'?')[0].toUpperCase()}
+          </div>
+          <div>
+            <p class="font-black text-sm text-gray-800">${a.name||'—'}</p>
+            <p class="text-blue-600 font-bold text-xs">📞 ${a.phone||'—'}</p>
+            <p class="text-gray-500 text-[10px] mt-0.5">👤 Username: <span class="font-black text-gray-700">${key}</span></p>
+            <p class="text-gray-500 text-[10px]">🔑 Password: <span class="font-black text-gray-700">${a.password||'—'}</span></p>
+          </div>
+        </div>
+        <!-- Active Toggle -->
+        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+          <div class="w-12 h-6 rounded-full cursor-pointer flex items-center px-1 transition-all ${a.active?'bg-green-500':'bg-gray-300'}" data-key="${key}" data-active="${a.active}">
+            <div class="w-4 h-4 bg-white rounded-full shadow transition-all ${a.active?'ml-auto':''}"></div>
+          </div>
+          <span class="text-[9px] font-black ${a.active?'text-green-600':'text-gray-400'}">${a.active?'Active':'Disabled'}</span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="editDbBtn flex-1 bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="${key}">✏️ Edit</button>
+        <button class="delDbBtn flex-1 bg-red-50 text-red-500 border border-red-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="${key}">🗑️ Delete</button>
+      </div>`;
+
+    // toggle active/disable
+    card.querySelector('.rounded-full[data-key]').addEventListener('click', async function(){
+      const k = this.dataset.key;
+      const cur = this.dataset.active === 'true';
+      await set(ref(db, `deliveryAccounts/${k}/active`), !cur);
+    });
+
+    // edit button
+    card.querySelector('.editDbBtn').addEventListener('click', () => {
+      editingDbKey = key;
+      document.getElementById('editDbName').value  = a.name  || '';
+      document.getElementById('editDbPhone').value = a.phone || '';
+      document.getElementById('editDbPass').value  = '';
+      document.getElementById('editDbModal').classList.remove('hidden');
+    });
+
+    // delete button
+    card.querySelector('.delDbBtn').addEventListener('click', () => {
+      if(confirm(`Delete account for ${a.name}? They will not be able to login.`))
+        remove(ref(db, `deliveryAccounts/${key}`));
+    });
+
+    list.appendChild(card);
+  });
+});
+
+// Update account
+document.getElementById('updateDbBtn').addEventListener('click', async () => {
+  if(!editingDbKey) return;
+  const name  = document.getElementById('editDbName').value.trim();
+  const phone = document.getElementById('editDbPhone').value.trim();
+  const pass  = document.getElementById('editDbPass').value.trim();
+  if(!name||!phone){ alert('⚠️ Name and phone are required!'); return; }
+  const updates = { name, phone };
+  if(pass) updates.password = pass;
+  await update(ref(db, `deliveryAccounts/${editingDbKey}`), updates);
+  document.getElementById('editDbModal').classList.add('hidden');
+  editingDbKey = null;
+  alert('✅ Account updated!');
+});
 
 /* ══ HOTEL LIST ══ */
 onValue(ref(db,'restaurants'), snap => {
