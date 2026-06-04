@@ -58,22 +58,16 @@ html{scroll-behavior:smooth}
         </button>
       </div>
 
-      <!-- Radius Control -->
+      <!-- Radius Display (set by Admin) -->
       <div class="bg-white rounded-xl p-3 border" id="radiusWrap">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[11px] font-black text-gray-600 uppercase">Delivery Radius</p>
-          <span id="radiusVal" class="font-black text-red-600 text-sm">200 m</span>
+        <div class="flex items-center justify-between">
+          <p class="text-[11px] font-black text-gray-600 uppercase">📡 Service Area Radius</p>
+          <span id="radiusVal" class="font-black text-red-600 text-sm">Loading…</span>
         </div>
-        <div class="flex items-center gap-3">
-          <button onclick="changeRadius(-50)"
-            class="w-10 h-10 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-95 transition-transform">−</button>
-          <div class="flex-1 bg-gray-100 rounded-full h-2 relative">
-            <div id="radiusBar" class="bg-red-500 h-2 rounded-full transition-all" style="width:20%"></div>
-          </div>
-          <button onclick="changeRadius(+50)"
-            class="w-10 h-10 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-95 transition-transform">+</button>
+        <div class="bg-gray-100 rounded-full h-2 mt-2">
+          <div id="radiusBar" class="bg-red-500 h-2 rounded-full transition-all" style="width:20%"></div>
         </div>
-        <p class="text-[10px] text-gray-400 mt-1.5 text-center">Range: 50m – 1000m</p>
+        <p class="text-[10px] text-gray-400 mt-1.5 text-center">⚙️ Fixed by restaurant — cannot be changed</p>
       </div>
 
       <!-- MAP -->
@@ -108,30 +102,62 @@ const cfg = {
 const db = getDatabase(initializeApp(cfg));
 
 /* ── state ── */
-let cart      = {};
-let resData   = {};
-let myLat     = null;
-let myLng     = null;
-let myAddress = '';
-let watchId   = null;
-let trackMap  = null;
-let myMarker  = null;
-let myCircle  = null;
-let radiusM   = 200;      // default 200 m
-const MIN_R   = 50;
-const MAX_R   = 1000;
-const STEP_R  = 50;
+let cart        = {};
+let resData     = {};
+let myLat       = null;
+let myLng       = null;
+let myAddress   = '';
+let watchId     = null;
+let trackMap    = null;
+let myMarker    = null;
+let myCircle    = null;
+let radiusM     = 200;   // loaded from Firebase — set by admin
+const MIN_R     = 50;
+const MAX_R     = 1000;
+let orderLat    = null;
+let orderLng    = null;
+let wasOutside  = false;
+let activeOid   = null;
+let speechReady = false;
 
-/* ── RADIUS CONTROL ── */
-window.changeRadius = (delta) => {
-  radiusM = Math.min(MAX_R, Math.max(MIN_R, radiusM + delta));
-  document.getElementById('radiusVal').textContent = radiusM + ' m';
-  // update bar width 0–100% mapped to MIN–MAX
-  const pct = ((radiusM - MIN_R) / (MAX_R - MIN_R)) * 100;
+/* ── VOICE ALERT ENGINE ── */
+function speak(text, urgent = false){
+  if(!window.speechSynthesis) return;
+  // cancel any current speech
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang   = 'en-IN';   // Indian English accent
+  utter.rate   = urgent ? 0.85 : 0.95;
+  utter.pitch  = urgent ? 1.2 : 1.0;
+  utter.volume = 1.0;
+  // pick a voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en'));
+  if(enVoice) utter.voice = enVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+// Preload voices on user gesture (required by mobile browsers)
+function initSpeech(){
+  if(speechReady) return;
+  speechReady = true;
+  window.speechSynthesis.getVoices();
+  // silent warm-up
+  const warm = new SpeechSynthesisUtterance(' ');
+  warm.volume = 0;
+  window.speechSynthesis.speak(warm);
+}
+document.addEventListener('click', initSpeech, { once: true });
+
+/* ── LOAD SERVICE RADIUS FROM FIREBASE (admin controlled) ── */
+onValue(ref(db,'settings/serviceRadius'), snap => {
+  const val = parseInt(snap.val()) || 200;
+  radiusM = val;
+  document.getElementById('radiusVal').textContent = val + ' m';
+  const pct = ((val - MIN_R) / (MAX_R - MIN_R)) * 100;
   document.getElementById('radiusBar').style.width = pct + '%';
-  // update circle on map if visible
-  if(myCircle) myCircle.setRadius(radiusM);
-};
+  if(myCircle) myCircle.setRadius(val);
+});
 
 /* ── LOCATION ── */
 window.requestLocation = () => {
@@ -156,7 +182,14 @@ window.requestLocation = () => {
       myLng = p.coords.longitude;
       updateMapPin(myLat, myLng);
       reverseGeocode(myLat, myLng);
-    }, null, { enableHighAccuracy: true, maximumAge: 10000 });
+      // check if customer crossed radius from order origin
+      checkRadiusBreach(myLat, myLng);
+      // push live location to Firebase if order active
+      if(activeOid){
+        set(ref(db,`orders/${activeOid}/lat`), myLat);
+        set(ref(db,`orders/${activeOid}/lng`), myLng);
+      }
+    }, null, { enableHighAccuracy: true, maximumAge: 8000 });
 
   }, err => {
     btn.textContent = 'Share GPS';
@@ -201,6 +234,63 @@ function reverseGeocode(lat, lng){
       myAddress = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       document.getElementById('locAddress').textContent = '📍 ' + myAddress;
     });
+}
+
+/* ── HAVERSINE DISTANCE (metres) ── */
+function getDistance(lat1, lng1, lat2, lng2){
+  const R = 6371000;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+/* ── RADIUS BREACH CHECK & VOICE ALERT ── */
+function checkRadiusBreach(lat, lng){
+  if(!orderLat || !orderLng) return;   // no origin set yet
+  const dist    = getDistance(lat, lng, orderLat, orderLng);
+  const outside = dist > radiusM;
+  const bar     = document.getElementById('locStatusText');
+
+  if(outside && !wasOutside){
+    // just crossed OUTSIDE
+    wasOutside = true;
+    speak('Warning! You are crossing the service area. Please stay within the delivery zone.', true);
+    if(bar) bar.textContent = `⚠️ Outside radius! (${dist}m away)`;
+    if(bar) bar.classList.add('text-red-600');
+    // flash alert banner
+    showAlert('⚠️ You are crossing the service area!', 'red');
+  } else if(!outside && wasOutside){
+    // came back INSIDE
+    wasOutside = false;
+    speak('You are back in the service area. Thank you!');
+    if(bar) bar.textContent = `✅ Inside radius (${dist}m from start)`;
+    if(bar) bar.classList.remove('text-red-600');
+    showAlert('✅ You are back in the service area!', 'green');
+  } else if(outside){
+    // still outside — update distance
+    if(bar) bar.textContent = `⚠️ Outside radius! (${dist}m away)`;
+  } else {
+    if(bar) bar.textContent = `✅ Live location sharing ON (${dist}m from start)`;
+  }
+}
+
+/* ── ALERT BANNER ── */
+function showAlert(msg, color){
+  let banner = document.getElementById('alertBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'alertBanner';
+    banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;text-align:center;white-space:nowrap;max-width:90vw;transition:opacity 0.4s;box-shadow:0 4px 20px rgba(0,0,0,0.2)';
+    document.body.appendChild(banner);
+  }
+  banner.textContent  = msg;
+  banner.style.background = color==='red' ? '#dc2626' : '#16a34a';
+  banner.style.color  = '#fff';
+  banner.style.opacity = '1';
+  clearTimeout(banner._t);
+  banner._t = setTimeout(()=>{ banner.style.opacity='0'; }, 4000);
 }
 
 /* ── CART ── */
@@ -278,6 +368,11 @@ window.placeOrder = async () => {
   if(phone.length < 10){ alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
   if(!myLat) { alert('⚠️ Please share your live location first!'); return; }
 
+  // save order origin for radius breach detection
+  orderLat = myLat;
+  orderLng = myLng;
+  wasOutside = false;
+
   const items = Object.values(cart).map(i=>`${i.dish} x${i.qty}`).join(', ');
   const total = Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
   const oid   = push(ref(db,'orders')).key;
@@ -296,16 +391,22 @@ window.placeOrder = async () => {
     timestamp:    Date.now()
   });
 
+  activeOid = oid;
+
   // Keep location updating in Firebase while order is active
   if(watchId){
     navigator.geolocation.clearWatch(watchId);
     watchId = navigator.geolocation.watchPosition(p => {
+      myLat = p.coords.latitude;
+      myLng = p.coords.longitude;
       set(ref(db,`orders/${oid}/lat`), p.coords.latitude);
       set(ref(db,`orders/${oid}/lng`), p.coords.longitude);
+      checkRadiusBreach(p.coords.latitude, p.coords.longitude);
     }, null, { enableHighAccuracy:true, maximumAge:8000 });
   }
 
-  alert(`✅ Order placed!\nName: ${name}\nPhone: ${phone}\nTotal: ₹${total}\nRadius: ${radiusM}m`);
+  speak('Order placed successfully! Your delivery is on the way.');
+  showAlert(`✅ Order placed! Total: ₹${total}`, 'green');
   cart = {};
   updateUI();
   renderMenu();
