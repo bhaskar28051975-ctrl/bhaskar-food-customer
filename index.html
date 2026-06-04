@@ -14,9 +14,10 @@ html{scroll-behavior:smooth}
 #trackMap{height:220px;width:100%;border-radius:16px;z-index:1}
 .pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
 @keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+#checkout-panel{transition:transform .3s ease}
 </style>
 </head>
-<body class="bg-gray-100 pb-80 text-gray-800">
+<body class="bg-gray-100 text-gray-800" style="padding-bottom:80px">
 
 <header class="bg-white p-5 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
   <h1 class="text-xl font-black text-red-600 italic uppercase">Bhaskar Food</h1>
@@ -244,10 +245,22 @@ document.getElementById('cancelBtn').addEventListener('click', ()=>{
   });
 });
 
+/* keep body padding = panel height so cards never hide under it */
+function syncPanelHeight(){
+  const panel=document.getElementById('checkout-panel');
+  const visible=panel.style.display!=='none';
+  document.body.style.paddingBottom=(visible ? panel.offsetHeight+20 : 80)+'px';
+}
+if(window.ResizeObserver){
+  new ResizeObserver(syncPanelHeight).observe(document.getElementById('checkout-panel'));
+}
+
 function updateUI(){
   const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
-  document.getElementById('checkout-panel').style.display=total>0?'block':'none';
+  const panel=document.getElementById('checkout-panel');
+  panel.style.display=total>0?'block':'none';
   document.getElementById('panel-total').innerText='₹'+total;
+  requestAnimationFrame(()=>requestAnimationFrame(syncPanelHeight));
 }
 
 /* ── EVENT DELEGATION (one listener, survives re-renders) ── */
@@ -259,6 +272,9 @@ document.getElementById('customer-list').addEventListener('click', e=>{
   const mid = row.dataset.mid;
   if(btn.classList.contains('qPlus'))  updateQty(mid, +1);
   if(btn.classList.contains('qMinus')) updateQty(mid, -1);
+  /* scroll the card into view so the panel doesn't cover it */
+  const card = row.closest('.dish-card');
+  if(card) setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),150);
 });
 
 /* ── RENDER MENU (builds HTML once; qty updates patch in-place) ── */
