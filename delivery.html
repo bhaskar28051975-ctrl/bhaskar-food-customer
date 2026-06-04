@@ -9,92 +9,106 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-.pulse{width:14px;height:14px;background:#2563eb;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,0.4);animation:pl 1.5s infinite}
-@keyframes pl{0%{box-shadow:0 0 0 0 rgba(37,99,235,0.4)}70%{box-shadow:0 0 0 12px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
-.cpulse{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,0.4);animation:cp 1.5s infinite}
-@keyframes cp{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-.map-box{height:260px;width:100%;border-radius:16px;z-index:1}
+.dpulse{width:14px;height:14px;background:#2563eb;border-radius:50%;border:3px solid #fff;animation:dp 1.5s infinite}
+@keyframes dp{0%{box-shadow:0 0 0 0 rgba(37,99,235,.4)}70%{box-shadow:0 0 0 12px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.cpulse{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;animation:cp 1.5s infinite}
+@keyframes cp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.mbox{height:260px;width:100%;border-radius:16px;z-index:1}
 .sheet{animation:su .3s ease}
 @keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.overlay{background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)}
+.ov{background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
+/* hide main app until logged in */
+#mainApp{display:none}
 </style>
 </head>
-<body class="bg-blue-50 pb-28 p-4">
+<body class="bg-blue-50 pb-28">
+
+<!-- ══ LOADING SCREEN ══ -->
+<div id="loadingScreen" class="fixed inset-0 bg-blue-600 z-[300] flex flex-col items-center justify-center">
+  <div class="text-6xl mb-4">🛵</div>
+  <p class="text-white font-black text-xl uppercase">Bhaskar Food</p>
+  <p class="text-blue-200 text-sm mt-2">Delivery Partner App</p>
+  <div class="mt-6 flex gap-2">
+    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:0s"></div>
+    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.15s"></div>
+    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.3s"></div>
+  </div>
+</div>
 
 <!-- ══ LOGIN SCREEN ══ -->
-<div id="loginScreen" class="hidden fixed inset-0 bg-blue-600 z-[200] flex items-center justify-center p-6">
-  <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl">
-    <h2 class="text-2xl font-black text-blue-600 mb-1 uppercase italic">🛵 Driver Login</h2>
-    <p class="text-[10px] text-gray-400 font-bold mb-6 uppercase">Enter your details to start delivering</p>
-    <input id="drName"  type="text" placeholder="Your Full Name *"   class="w-full p-4 mb-3 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none"/>
-    <input id="drPhone" type="tel"  placeholder="Phone Number *"     class="w-full p-4 mb-6 border rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none"/>
-    <button onclick="saveDriver()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase">🚀 Start Delivering</button>
+<div id="loginScreen" class="hidden fixed inset-0 bg-gradient-to-br from-blue-700 to-blue-500 z-[200] flex items-center justify-center p-6">
+  <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl space-y-4">
+    <div class="text-center mb-2">
+      <div class="text-5xl mb-3">🛵</div>
+      <h2 class="text-2xl font-black text-blue-600 uppercase">Delivery Login</h2>
+      <p class="text-[10px] text-gray-400 font-bold uppercase mt-1">Use credentials given by Admin</p>
+    </div>
+    <div id="loginError" class="hidden bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 font-bold text-xs text-center"></div>
+    <input id="loginUser" type="text"     placeholder="Username *"
+      class="w-full p-4 border-2 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-blue-500"/>
+    <div class="relative">
+      <input id="loginPass" type="password" placeholder="Password *"
+        class="w-full p-4 border-2 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-blue-500 pr-14"/>
+      <button id="togglePass" class="absolute right-4 top-4 text-gray-400 text-lg">👁️</button>
+    </div>
+    <button id="loginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase active:scale-95 transition-transform text-base">
+      🚀 Login & Start Delivering
+    </button>
+    <p class="text-center text-[10px] text-gray-400 font-bold">Contact your admin if you don't have credentials</p>
   </div>
 </div>
 
 <!-- ══ TRACK MAP MODAL ══ -->
-<div id="trackModal" class="overlay fixed inset-0 z-[150] hidden flex items-end justify-center">
+<div id="trackModal" class="ov fixed inset-0 z-[150] hidden flex items-end justify-center">
   <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-5" style="max-height:92vh;overflow-y:auto">
     <div class="flex justify-between items-center mb-4">
       <h3 class="font-black text-gray-800 text-sm uppercase">📍 Live Customer Tracking</h3>
-      <button onclick="closeTrackModal()" class="text-gray-400 text-2xl leading-none">✕</button>
+      <button id="closeTrackBtn" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
-
-    <!-- Customer Info -->
-    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200 mb-4">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0" id="tAvatar">?</div>
+    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200 mb-4 space-y-2">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl flex-shrink-0" id="tAvatar">?</div>
         <div>
           <p class="font-black text-gray-800 text-sm" id="tName">—</p>
           <p class="text-blue-600 font-bold text-xs" id="tPhone">—</p>
-          <p class="text-gray-500 text-xs" id="tAddress">—</p>
+          <p class="text-gray-500 text-xs mt-0.5" id="tAddress">—</p>
         </div>
       </div>
-      <!-- Radius Info -->
       <div class="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border">
-        <span class="text-sm">📡</span>
-        <p class="text-xs font-bold text-gray-600">Delivery Radius: <span id="tRadius" class="text-blue-600">—</span></p>
+        <span>📡</span>
+        <p class="text-xs font-bold text-gray-600">Delivery Radius: <span id="tRadius" class="text-blue-600 font-black">—</span></p>
       </div>
     </div>
-
-    <!-- MAP -->
-    <div id="trackMap" class="map-box mb-3"></div>
-
-    <!-- Map Legend -->
-    <div class="flex gap-4 mb-4 text-xs font-bold">
-      <span class="flex items-center gap-1"><div class="pulse flex-shrink-0"></div> You (Delivery Boy)</span>
-      <span class="flex items-center gap-1"><div class="cpulse flex-shrink-0"></div> Customer</span>
+    <div id="trackMap" class="mbox mb-3"></div>
+    <div class="flex gap-6 mb-3 text-xs font-bold px-1">
+      <span class="flex items-center gap-2"><div class="dpulse flex-shrink-0"></div>You (Delivery)</span>
+      <span class="flex items-center gap-2"><div class="cpulse flex-shrink-0"></div>Customer</span>
     </div>
-
-    <!-- Distance -->
-    <div class="bg-green-50 border border-green-200 rounded-2xl p-3 mb-4 text-center">
-      <p class="text-[10px] font-black text-gray-500 uppercase">Distance to Customer</p>
-      <p class="font-black text-2xl text-green-600" id="tDistance">Calculating…</p>
-      <p class="text-[10px] text-gray-400 mt-1" id="tDistanceNote">—</p>
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center">
+      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider">Distance to Customer</p>
+      <p class="font-black text-3xl text-green-600 mt-1" id="tDistance">Calculating…</p>
+      <p class="text-xs text-gray-500 mt-1 font-bold" id="tDistNote">—</p>
     </div>
-
-    <!-- ORDER DETAILS -->
     <div class="bg-white rounded-2xl border p-4 mb-4 space-y-2">
-      <p class="font-black text-xs text-gray-500 uppercase mb-2">🧾 Order Details</p>
-      <div id="tItems" class="space-y-1"></div>
-      <div class="border-t pt-2 mt-2 flex justify-between items-center">
+      <p class="font-black text-xs text-gray-500 uppercase mb-3">🧾 Order Details</p>
+      <div id="tItems" class="space-y-1.5"></div>
+      <div class="border-t pt-3 mt-2 flex justify-between items-center">
         <p class="font-black text-sm text-gray-700">💰 Cash on Delivery</p>
-        <p class="font-black text-xl text-red-600" id="tTotal">₹0</p>
+        <p class="font-black text-2xl text-red-600" id="tTotal">₹0</p>
       </div>
-      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
-        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect Cash from Customer on Delivery</p>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2.5">
+        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect exact cash from customer on delivery</p>
       </div>
     </div>
-
-    <!-- ACTIONS -->
     <div class="space-y-2">
-      <a id="callBtn" href="" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase text-center block active:scale-95 transition-transform">📞 Call Customer</a>
-      <button id="deliverBtn" onclick="markDelivered()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase active:scale-95 transition-transform">✅ Mark as Delivered & Collected Cash</button>
+      <a id="callBtn" href="#" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-sm uppercase text-center block active:scale-95">📞 Call Customer</a>
+      <button id="deliverBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase active:scale-95 transition-transform">✅ Mark as Delivered & Cash Collected</button>
     </div>
   </div>
 </div>
 
 <!-- ══ MAIN APP ══ -->
+<div id="mainApp" class="p-4">
 <div class="max-w-md mx-auto space-y-5">
 
   <!-- EARNINGS HEADER -->
@@ -103,17 +117,19 @@
       <div class="flex justify-between items-start">
         <div>
           <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Today's Earnings</p>
-          <h1 id="myEarnings" class="text-4xl font-black italic">₹0.00</h1>
+          <h1 id="myEarnings" class="text-4xl font-black italic mt-1">₹0.00</h1>
           <p class="text-[10px] opacity-60 mt-1" id="ordersCount">0 deliveries completed</p>
         </div>
-        <button onclick="settleEarnings()" title="Settle Earnings"
-          class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90">
+        <button id="settleBtn" title="Settle Earnings" class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90">
           <i class="fa-solid fa-rotate text-xl"></i>
         </button>
       </div>
-      <p id="dispName" class="text-[11px] mt-3 font-bold opacity-80 uppercase bg-white/10 rounded-xl px-3 py-1.5 inline-block"></p>
+      <div class="flex items-center justify-between mt-4">
+        <p id="dispName" class="text-[11px] font-bold opacity-80 uppercase bg-white/10 rounded-xl px-3 py-1.5"></p>
+        <button id="logoutBtn" class="text-[10px] text-white/60 font-bold uppercase underline">Logout</button>
+      </div>
     </div>
-    <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl"><i class="fa-solid fa-motorcycle"></i></div>
+    <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
 
   <!-- SEARCH BY PHONE -->
@@ -121,9 +137,8 @@
     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🔍 Find Order by Customer Phone</p>
     <div class="flex gap-2">
       <input id="searchPhone" type="tel" placeholder="Enter customer phone number"
-        class="flex-1 p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
-      <button onclick="searchByPhone()"
-        class="bg-blue-600 text-white px-4 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Search</button>
+        class="flex-1 p-3 border-2 rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
+      <button id="searchBtn" class="bg-blue-600 text-white px-5 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Search</button>
     </div>
     <div id="searchResult"></div>
   </div>
@@ -132,369 +147,507 @@
   <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📦 Orders Ready for Pickup</p>
   <div id="deliveryList" class="space-y-4"></div>
 
-  <hr class="border-blue-100"/>
+  <hr class="border-blue-100 my-2"/>
 
   <!-- HISTORY -->
   <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✅ Today's Completed Deliveries</p>
-  <div id="deliveryHistory" class="space-y-3"></div>
+  <div id="deliveryHistory" class="space-y-3 pb-6"></div>
 
 </div>
+</div>
 
+<!-- BANNER -->
+<div id="dBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl font-black text-sm text-white text-center max-w-xs w-[90vw] shadow-xl opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+<!-- Firebase SDK -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, update, get, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const cfg = {
+const db = getDatabase(initializeApp({
   apiKey:      "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
   authDomain:  "bhaskar-food-app.firebaseapp.com",
   databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
   projectId:   "bhaskar-food-app",
   appId:       "1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const db = getDatabase(initializeApp(cfg));
+}));
 
-/* ── STATE ── */
-let myPhone          = localStorage.getItem('dr_p') || '';
-let myName           = localStorage.getItem('dr_n') || '';
-let completedKeys    = [];
-let currentRate      = 10;   // commission %
-let activeOrderId    = null; // order being tracked
-let trackMap         = null;
-let myMarker         = null;
-let custMarker       = null;
-let custCircle       = null;
-let myWatchId        = null;
-let custListener     = null;
-let myLat            = null;
-let myLng            = null;
-let allOrders        = {};   // cache all orders
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+let myPhone='', myName='', myUsername='';
+let completedKeys=[], currentRate=10;
+let activeOrderId=null, trackMap=null;
+let myMarker=null, custMarker=null, custCircle=null;
+let myWatchId=null, custListenerOff=null;
+let myLat=null, myLng=null, allOrders={};
+let knownKeys=new Set(), wasNearby=false;
+let voicesLoaded=false;
 
-/* ── LOGIN ── */
-if(!myPhone) document.getElementById('loginScreen').classList.remove('hidden');
-else document.getElementById('dispName').textContent = '🛵 ' + myName;
+/* ════════════════════════════════
+   VOICE
+════════════════════════════════ */
+function loadVoices(){
+  if(voicesLoaded) return;
+  const list=speechSynthesis.getVoices();
+  if(list.length>0){ voicesLoaded=true; return; }
+  speechSynthesis.onvoiceschanged=()=>{ voicesLoaded=true; };
+}
+function speak(text, urgent=false){
+  if(!window.speechSynthesis) return;
+  loadVoices();
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-IN'; u.volume=1;
+  u.rate=urgent ? 0.85 : 0.95;
+  u.pitch=urgent ? 1.2 : 1.0;
+  const voices=speechSynthesis.getVoices();
+  const pick=voices.find(v=>v.lang.startsWith('en-IN'))||voices.find(v=>v.lang.startsWith('en'))||voices[0];
+  if(pick) u.voice=pick;
+  speechSynthesis.speak(u);
+}
+// preload voices on first interaction
+document.addEventListener('click',  loadVoices, {once:false});
+document.addEventListener('touchend', loadVoices, {once:false});
 
-window.saveDriver = () => {
-  const n = document.getElementById('drName').value.trim();
-  const p = document.getElementById('drPhone').value.trim();
-  if(!n||!p){ alert('Please enter Name and Phone'); return; }
-  localStorage.setItem('dr_n', n);
-  localStorage.setItem('dr_p', p);
-  location.reload();
-};
+/* ════════════════════════════════
+   BANNER
+════════════════════════════════ */
+function showBanner(msg, color='blue'){
+  const b=document.getElementById('dBanner');
+  b.textContent=msg;
+  b.style.background = color==='red'?'#dc2626' : color==='green'?'#16a34a' : '#2563eb';
+  b.style.opacity='1';
+  clearTimeout(b._t);
+  b._t=setTimeout(()=>{ b.style.opacity='0'; }, 5000);
+}
 
-/* ── COMMISSION RATE ── */
-onValue(ref(db,'settings/commission'), s => { currentRate = parseFloat(s.val())||10; });
-
-/* ── LIVE ORDERS ── */
-onValue(ref(db,'orders'), snap => {
-  allOrders = {};
-  const list    = document.getElementById('deliveryList');
-  const history = document.getElementById('deliveryHistory');
-  list.innerHTML = '';
-  history.innerHTML = '';
-  completedKeys = [];
-  let totalComm = 0, delivCount = 0;
-
-  snap.forEach(child => {
-    const o   = child.val();
-    const key = child.key;
-    allOrders[key] = { ...o, key };
-
-    const comm = ((parseFloat(o.totalAmount||0) * currentRate) / 100).toFixed(2);
-
-    if(o.status === 'pending' || o.status === 'ready_for_pickup') {
-      // Parse items for display
-      const itemLines = (o.items||'').split(',').map(i=>i.trim()).filter(Boolean);
-
-      list.innerHTML += `
-      <div class="bg-white rounded-[2rem] border-l-[8px] border-blue-500 shadow p-5 space-y-3">
-
-        <!-- Customer Info -->
-        <div class="flex items-start justify-between gap-2">
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black flex-shrink-0">
-              ${(o.customerName||'?')[0].toUpperCase()}
-            </div>
-            <div>
-              <p class="font-black text-gray-800 text-sm">${o.customerName||'—'}</p>
-              <a href="tel:${o.customerPhone||''}" class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</a>
-            </div>
-          </div>
-          <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-black uppercase flex-shrink-0">Earn ₹${comm}</span>
-        </div>
-
-        <!-- Address -->
-        ${o.address ? `<div class="flex items-start gap-2 bg-gray-50 rounded-xl px-3 py-2">
-          <span class="text-sm mt-0.5">📍</span>
-          <p class="text-xs text-gray-600 font-bold">${o.address}</p>
-        </div>` : ''}
-
-        <!-- Radius -->
-        ${o.radiusMeters ? `<p class="text-[10px] text-blue-500 font-bold">📡 Delivery Radius: ${o.radiusMeters}m</p>` : ''}
-
-        <!-- Dishes -->
-        <div class="bg-orange-50 rounded-xl p-3 border border-orange-100 space-y-1">
-          <p class="text-[10px] font-black text-gray-500 uppercase mb-2">🍽️ Order Items</p>
-          ${itemLines.map(item=>`
-            <div class="flex justify-between items-center">
-              <p class="text-xs font-bold text-gray-700">• ${item}</p>
-            </div>`).join('')}
-        </div>
-
-        <!-- Total + COD -->
-        <div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">
-          <div>
-            <p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>
-            <p class="font-black text-2xl text-red-600">₹${o.totalAmount||0}</p>
-          </div>
-          <div class="text-right">
-            <p class="text-[10px] text-gray-400">Cash on Delivery</p>
-            <p class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-lg mt-1">Your cut: ₹${comm}</p>
-          </div>
-        </div>
-
-        <!-- BUTTONS -->
-        <div class="grid grid-cols-2 gap-2">
-          <button data-key="${key}" class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
-            🗺️ Track Customer
-          </button>
-          <button data-key="${key}" class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">
-            ✅ Mark Delivered
-          </button>
-        </div>
-      </div>`;
-    }
-
-    else if(o.status === 'completed' && o.driverPhone === myPhone) {
-      const paid = parseFloat(o.commissionPaid||comm);
-      totalComm += paid;
-      delivCount++;
-      completedKeys.push(key);
-
-      history.innerHTML += `
-      <div class="bg-white rounded-2xl p-4 border shadow-sm space-y-2">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
-            <p class="text-blue-600 text-xs font-bold">${o.customerPhone||'—'}</p>
-          </div>
-          <span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl">+₹${paid.toFixed(2)}</span>
-        </div>
-        <div class="bg-gray-50 rounded-xl px-3 py-2">
-          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Items Delivered</p>
-          ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-600">• ${i.trim()}</p>`).join('')}
-        </div>
-        <div class="flex justify-between text-xs font-bold text-gray-500">
-          <span>💰 Collected: ₹${o.totalAmount||0}</span>
-          <span class="text-green-600">✅ Delivered</span>
-        </div>
-      </div>`;
-    }
-  });
-
-  document.getElementById('myEarnings').textContent  = '₹' + totalComm.toFixed(2);
-  document.getElementById('ordersCount').textContent  = delivCount + ' deliver' + (delivCount===1?'y':'ies') + ' completed';
-
-  if(!list.innerHTML) list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No pending orders right now.</p>';
-  if(!history.innerHTML) history.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
-
-  /* attach button events */
-  document.querySelectorAll('.trackBtn').forEach(btn =>
-    btn.addEventListener('click', () => openTrackModal(btn.dataset.key))
-  );
-  document.querySelectorAll('.pickBtn').forEach(btn =>
-    btn.addEventListener('click', () => markDeliveredById(btn.dataset.key))
-  );
+/* ════════════════════════════════
+   LOGIN / AUTH
+════════════════════════════════ */
+// show/hide password toggle
+document.getElementById('togglePass').addEventListener('click', ()=>{
+  const f=document.getElementById('loginPass');
+  f.type = f.type==='password' ? 'text' : 'password';
 });
 
-/* ══ SEARCH BY PHONE ══ */
-window.searchByPhone = () => {
-  const ph = document.getElementById('searchPhone').value.trim();
-  const res = document.getElementById('searchResult');
-  if(!ph){ res.innerHTML = '<p class="text-xs text-red-500 font-bold">Enter a phone number</p>'; return; }
+async function tryAutoLogin(){
+  const savedUser=localStorage.getItem('db_username');
+  const savedPass=localStorage.getItem('db_password');
+  if(!savedUser||!savedPass){ showLogin(); return; }
+  try {
+    const snap=await get(ref(db,`deliveryAccounts/${savedUser}`));
+    if(snap.exists()){
+      const acc=snap.val();
+      if(acc.active && acc.password===savedPass){
+        myUsername=savedUser; myName=acc.name||''; myPhone=acc.phone||'';
+        showMainApp();
+        return;
+      }
+    }
+    // invalid — clear and show login
+    localStorage.removeItem('db_username');
+    localStorage.removeItem('db_password');
+    showLogin();
+  } catch(e){
+    console.error('Auto login error:',e);
+    showLogin();
+  }
+}
 
-  const found = Object.values(allOrders).filter(o =>
-    (o.customerPhone||'').replace(/\s/g,'') === ph.replace(/\s/g,'') &&
-    o.status !== 'settled'
-  );
+function showLogin(){
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
 
-  if(!found.length){
-    res.innerHTML = '<p class="text-xs text-red-500 font-bold py-2">❌ No order found for this phone number.</p>';
-    return;
+function showMainApp(){
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('dispName').textContent='🛵 '+myName+' ('+myUsername+')';
+  initApp();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const user=document.getElementById('loginUser').value.trim().toLowerCase();
+  const pass=document.getElementById('loginPass').value.trim();
+  const errEl=document.getElementById('loginError');
+  errEl.classList.add('hidden');
+
+  if(!user||!pass){
+    errEl.textContent='⚠️ Please enter username and password';
+    errEl.classList.remove('hidden'); return;
   }
 
-  res.innerHTML = found.map(o => `
-    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-2 space-y-2">
-      <div class="flex justify-between items-center">
-        <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
-        <span class="text-[10px] font-black px-2 py-1 rounded-full ${o.status==='completed'?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700'} uppercase">${o.status}</span>
-      </div>
-      <p class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</p>
-      ${o.address?`<p class="text-xs text-gray-500 font-bold">📍 ${o.address}</p>`:''}
-      <div class="bg-white rounded-xl p-3 border">
-        ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-700 font-bold">• ${i.trim()}</p>`).join('')}
-        <p class="font-black text-red-600 text-base mt-2">💰 ₹${o.totalAmount||0} Cash on Delivery</p>
-      </div>
-      ${o.status==='pending'||o.status==='ready_for_pickup' ? `
-      <div class="grid grid-cols-2 gap-2">
-        <button data-key="${o.key}" class="trackBtnS bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>
-        <button data-key="${o.key}" class="pickBtnS bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>
-      </div>` : ''}
-    </div>`).join('');
+  // show loading state
+  const btn=document.getElementById('loginBtn');
+  btn.textContent='⏳ Verifying…'; btn.disabled=true;
 
-  document.querySelectorAll('.trackBtnS').forEach(b => b.addEventListener('click', () => openTrackModal(b.dataset.key)));
-  document.querySelectorAll('.pickBtnS').forEach(b => b.addEventListener('click', () => markDeliveredById(b.dataset.key)));
-};
-
-/* ══ TRACK MODAL ══ */
-window.openTrackModal = (key) => {
-  activeOrderId = key;
-  const o = allOrders[key];
-  if(!o){ alert('Order not found!'); return; }
-
-  /* fill customer info */
-  document.getElementById('tAvatar').textContent  = (o.customerName||'?')[0].toUpperCase();
-  document.getElementById('tName').textContent    = o.customerName||'—';
-  document.getElementById('tPhone').textContent   = '📞 '+( o.customerPhone||'—');
-  document.getElementById('tAddress').textContent = o.address||'Location not set';
-  document.getElementById('tRadius').textContent  = (o.radiusMeters||200)+'m';
-  document.getElementById('tTotal').textContent   = '₹'+(o.totalAmount||0);
-  document.getElementById('callBtn').href         = 'tel:'+(o.customerPhone||'');
-
-  /* fill items */
-  const items = (o.items||'').split(',').map(i=>i.trim()).filter(Boolean);
-  document.getElementById('tItems').innerHTML = items.map(i=>
-    `<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0">
-       <span class="text-sm">🍽️</span>
-       <p class="text-sm font-bold text-gray-700">${i}</p>
-     </div>`
-  ).join('');
-
-  document.getElementById('trackModal').classList.remove('hidden');
-  document.getElementById('tDistance').textContent = 'Getting location…';
-
-  /* init map */
-  setTimeout(() => {
-    if(!trackMap){
-      trackMap = L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([20.5937,78.9629],5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+  try {
+    const snap=await get(ref(db,`deliveryAccounts/${user}`));
+    if(!snap.exists()){
+      errEl.textContent='❌ Username not found. Contact your admin.';
+      errEl.classList.remove('hidden');
+      btn.textContent='🚀 Login & Start Delivering'; btn.disabled=false; return;
     }
-    trackMap.invalidateSize();
+    const acc=snap.val();
+    if(acc.password!==pass){
+      errEl.textContent='❌ Wrong password. Try again.';
+      errEl.classList.remove('hidden');
+      btn.textContent='🚀 Login & Start Delivering'; btn.disabled=false; return;
+    }
+    if(!acc.active){
+      errEl.textContent='❌ Your account is disabled. Contact admin.';
+      errEl.classList.remove('hidden');
+      btn.textContent='🚀 Login & Start Delivering'; btn.disabled=false; return;
+    }
+    // SUCCESS
+    localStorage.setItem('db_username', user);
+    localStorage.setItem('db_password', pass);
+    myUsername=user; myName=acc.name||''; myPhone=acc.phone||'';
+    showMainApp();
+  } catch(e){
+    errEl.textContent='❌ Connection error. Check internet and try again.';
+    errEl.classList.remove('hidden');
+    btn.textContent='🚀 Login & Start Delivering'; btn.disabled=false;
+  }
+});
 
-    /* plot customer location if available */
-    if(o.lat && o.lng) plotCustomer(o.lat, o.lng, o.radiusMeters||200);
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  if(confirm('Logout from this device?')){
+    localStorage.removeItem('db_username');
+    localStorage.removeItem('db_password');
+    location.reload();
+  }
+});
 
-    /* get MY location */
-    navigator.geolocation.getCurrentPosition(pos => {
-      myLat = pos.coords.latitude;
-      myLng = pos.coords.longitude;
-      plotMe(myLat, myLng);
-      if(o.lat && o.lng) updateDistance(myLat, myLng, o.lat, o.lng);
-      fitBounds();
-    }, null, {enableHighAccuracy:true});
+/* ════════════════════════════════
+   MAIN APP INIT
+════════════════════════════════ */
+function initApp(){
+  onValue(ref(db,'settings/commission'), s=>{ currentRate=parseFloat(s.val())||10; });
+  listenOrders();
+  setupSearch();
+  setupSettle();
+  setupTrackModal();
+}
 
-    /* watch MY movement */
-    if(myWatchId) navigator.geolocation.clearWatch(myWatchId);
-    myWatchId = navigator.geolocation.watchPosition(pos => {
-      myLat = pos.coords.latitude;
-      myLng = pos.coords.longitude;
-      plotMe(myLat, myLng);
-      const cur = allOrders[activeOrderId];
-      if(cur && cur.lat && cur.lng) updateDistance(myLat, myLng, cur.lat, cur.lng);
-    }, null, {enableHighAccuracy:true, maximumAge:8000});
+/* ════════════════════════════════
+   ORDERS
+════════════════════════════════ */
+function listenOrders(){
+  onValue(ref(db,'orders'), snap=>{
+    allOrders={};
+    const list=document.getElementById('deliveryList');
+    const hist=document.getElementById('deliveryHistory');
+    list.innerHTML=''; hist.innerHTML='';
+    completedKeys=[]; let totalComm=0, delivCount=0, newFound=false;
 
-    /* listen to customer location updates in Firebase */
-    if(custListener) custListener();
-    custListener = onValue(ref(db,`orders/${key}`), snap => {
-      const d = snap.val();
-      if(!d) return;
-      allOrders[key] = { ...d, key };
-      if(d.lat && d.lng){
-        plotCustomer(d.lat, d.lng, d.radiusMeters||200);
-        document.getElementById('tAddress').textContent = d.address||'Tracking…';
-        if(myLat && myLng) updateDistance(myLat, myLng, d.lat, d.lng);
+    if(!snap.exists()){
+      list.innerHTML='<p class="text-center text-gray-400 text-sm py-8">No pending orders right now.</p>';
+      hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
+      updateEarnings(0,0); return;
+    }
+
+    snap.forEach(child=>{
+      const o=child.val(), key=child.key;
+      allOrders[key]={...o,key};
+      const comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
+
+      if(o.status==='pending'||o.status==='ready_for_pickup'){
+        // detect new order
+        if(!knownKeys.has(key)){ newFound=true; knownKeys.add(key); }
+        list.appendChild(buildOrderCard(o, key, comm));
+      }
+      else if(o.status==='completed' && o.driverPhone===myPhone){
+        const paid=parseFloat(o.commissionPaid||0);
+        totalComm+=paid; delivCount++; completedKeys.push(key);
+        hist.appendChild(buildHistoryCard(o, paid));
       }
     });
 
-  }, 300);
-};
+    updateEarnings(totalComm, delivCount);
 
-window.closeTrackModal = () => {
+    // ── NEW ORDER VOICE ALERT ──
+    if(newFound){
+      setTimeout(()=>{
+        speak('Attention! A new order has arrived. Please check your orders now.', true);
+        showBanner('🛵 New Order Arrived! Check below.', 'blue');
+      }, 800);
+    }
+
+    if(!list.innerHTML) list.innerHTML='<p class="text-center text-gray-400 text-sm py-8">No pending orders right now.</p>';
+    if(!hist.innerHTML) hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
+  });
+}
+
+function updateEarnings(total, count){
+  document.getElementById('myEarnings').textContent='₹'+total.toFixed(2);
+  document.getElementById('ordersCount').textContent=count+' deliver'+(count===1?'y':'ies')+' completed';
+}
+
+function buildOrderCard(o, key, comm){
+  const items=(o.items||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const div=document.createElement('div');
+  div.className='bg-white rounded-[2rem] border-l-[8px] border-blue-500 shadow-md p-5 space-y-3';
+  div.innerHTML=`
+    <div class="flex items-start justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">
+          ${(o.customerName||'?')[0].toUpperCase()}
+        </div>
+        <div>
+          <p class="font-black text-gray-800 text-sm">${o.customerName||'—'}</p>
+          <a href="tel:${o.customerPhone||''}" class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</a>
+        </div>
+      </div>
+      <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹${comm}</span>
+    </div>
+    ${o.address?`<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span class="mt-0.5">📍</span><p class="text-xs text-gray-600 font-bold">${o.address}</p></div>`:''}
+    ${o.radiusMeters?`<p class="text-[10px] text-blue-500 font-bold">📡 Delivery Radius: ${o.radiusMeters}m</p>`:''}
+    <div class="bg-orange-50 rounded-xl p-3 border border-orange-200">
+      <p class="text-[10px] font-black text-gray-500 uppercase mb-2">🍽️ Order Items</p>
+      ${items.map(i=>`<p class="text-xs font-bold text-gray-700 py-0.5">• ${i}</p>`).join('')}
+    </div>
+    <div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">
+      <div>
+        <p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>
+        <p class="font-black text-2xl text-red-600">₹${o.totalAmount||0}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-[10px] text-gray-400">Cash on Delivery</p>
+        <p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg mt-1 border border-green-200">Your cut: ₹${comm}</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <button class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">🗺️ Track Customer</button>
+      <button class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">✅ Mark Delivered</button>
+    </div>`;
+  div.querySelector('.trackBtn').addEventListener('click', ()=>openTrack(key));
+  div.querySelector('.pickBtn').addEventListener('click',  ()=>markDelivered(key));
+  return div;
+}
+
+function buildHistoryCard(o, paid){
+  const div=document.createElement('div');
+  div.className='bg-white rounded-2xl p-4 border shadow-sm space-y-2';
+  div.innerHTML=`
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+        <p class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</p>
+      </div>
+      <span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl border border-green-200">+₹${paid.toFixed(2)}</span>
+    </div>
+    <div class="bg-gray-50 rounded-xl px-3 py-2">
+      <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Items Delivered</p>
+      ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-600 py-0.5">• ${i.trim()}</p>`).join('')}
+    </div>
+    <div class="flex justify-between text-xs font-bold text-gray-500 pt-1">
+      <span>💰 Cash Collected: ₹${o.totalAmount||0}</span>
+      <span class="text-green-600 font-black">✅ Delivered</span>
+    </div>`;
+  return div;
+}
+
+/* ════════════════════════════════
+   SEARCH
+════════════════════════════════ */
+function setupSearch(){
+  document.getElementById('searchBtn').addEventListener('click', ()=>{
+    const ph=document.getElementById('searchPhone').value.trim().replace(/\D/g,'');
+    const res=document.getElementById('searchResult');
+    if(ph.length<10){ res.innerHTML='<p class="text-xs text-red-500 font-bold py-1">⚠️ Enter a valid 10-digit phone number</p>'; return; }
+    const found=Object.values(allOrders).filter(o=>(o.customerPhone||'').replace(/\D/g,'')===ph && o.status!=='settled');
+    if(!found.length){ res.innerHTML='<p class="text-xs text-red-500 font-bold py-2">❌ No active order found for this number.</p>'; return; }
+    res.innerHTML='';
+    found.forEach(o=>{
+      const div=document.createElement('div');
+      div.className='bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-2 space-y-2';
+      const comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
+      div.innerHTML=`
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+            <p class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</p>
+            ${o.address?`<p class="text-xs text-gray-500 font-bold mt-0.5">📍 ${o.address}</p>`:''}
+          </div>
+          <span class="text-[10px] font-black px-2 py-1 rounded-full ${o.status==='completed'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'} uppercase">${o.status}</span>
+        </div>
+        <div class="bg-white rounded-xl p-3 border space-y-1">
+          ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-700 font-bold">• ${i.trim()}</p>`).join('')}
+          <p class="font-black text-red-600 text-lg mt-2">💰 ₹${o.totalAmount||0} Cash on Delivery</p>
+          <p class="text-[10px] text-green-600 font-bold">Your commission: ₹${comm}</p>
+        </div>
+        ${(o.status==='pending'||o.status==='ready_for_pickup')?`
+        <div class="grid grid-cols-2 gap-2">
+          <button class="sTrk bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>
+          <button class="sPik bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>
+        </div>`:``}`;
+      div.querySelector('.sTrk')?.addEventListener('click', ()=>openTrack(o.key));
+      div.querySelector('.sPik')?.addEventListener('click', ()=>markDelivered(o.key));
+      res.appendChild(div);
+    });
+  });
+}
+
+/* ════════════════════════════════
+   SETTLE EARNINGS
+════════════════════════════════ */
+function setupSettle(){
+  document.getElementById('settleBtn').addEventListener('click', ()=>{
+    if(!completedKeys.length){ alert('No earnings to settle!'); return; }
+    if(!confirm('Confirm settlement? This will archive your earnings.')) return;
+    const upd={};
+    completedKeys.forEach(k=>{ upd[`orders/${k}/status`]='settled'; });
+    update(ref(db), upd).then(()=>{
+      showBanner('✅ Earnings settled!','green');
+    });
+  });
+}
+
+/* ════════════════════════════════
+   TRACK MODAL
+════════════════════════════════ */
+function setupTrackModal(){
+  document.getElementById('closeTrackBtn').addEventListener('click', closeTrack);
+  document.getElementById('deliverBtn').addEventListener('click', ()=>{ if(activeOrderId) markDelivered(activeOrderId); });
+}
+
+function openTrack(key){
+  const o=allOrders[key];
+  if(!o){ alert('Order not found!'); return; }
+  activeOrderId=key; wasNearby=false;
+
+  document.getElementById('tAvatar').textContent  = (o.customerName||'?')[0].toUpperCase();
+  document.getElementById('tName').textContent    = o.customerName||'—';
+  document.getElementById('tPhone').textContent   = '📞 '+(o.customerPhone||'—');
+  document.getElementById('tAddress').textContent = o.address||'—';
+  document.getElementById('tRadius').textContent  = (o.radiusMeters||200)+'m';
+  document.getElementById('tTotal').textContent   = '₹'+(o.totalAmount||0);
+  document.getElementById('callBtn').href         = 'tel:'+(o.customerPhone||'');
+  document.getElementById('tItems').innerHTML     = (o.items||'').split(',')
+    .map(i=>`<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0">
+      <span>🍽️</span><p class="text-sm font-bold text-gray-700">${i.trim()}</p></div>`).join('');
+
+  document.getElementById('trackModal').classList.remove('hidden');
+  document.getElementById('tDistance').textContent='Getting your location…';
+
+  setTimeout(()=>{
+    if(!trackMap){
+      trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([20.59,78.96],5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+    }
+    trackMap.invalidateSize();
+    if(o.lat&&o.lng) plotCust(o.lat,o.lng,o.radiusMeters||200);
+
+    navigator.geolocation.getCurrentPosition(pos=>{
+      myLat=pos.coords.latitude; myLng=pos.coords.longitude;
+      plotMe(myLat,myLng);
+      const cur=allOrders[activeOrderId];
+      if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
+      fitMap();
+    },err=>{ document.getElementById('tDistance').textContent='GPS denied'; },
+    {enableHighAccuracy:true,timeout:10000});
+
+    if(myWatchId) navigator.geolocation.clearWatch(myWatchId);
+    myWatchId=navigator.geolocation.watchPosition(pos=>{
+      myLat=pos.coords.latitude; myLng=pos.coords.longitude;
+      plotMe(myLat,myLng);
+      const cur=allOrders[activeOrderId];
+      if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
+    },null,{enableHighAccuracy:true,maximumAge:6000});
+
+    if(custListenerOff) custListenerOff();
+    custListenerOff=onValue(ref(db,`orders/${key}`),snap=>{
+      const d=snap.val(); if(!d) return;
+      allOrders[key]={...d,key};
+      if(d.lat&&d.lng){
+        plotCust(d.lat,d.lng,d.radiusMeters||200);
+        document.getElementById('tAddress').textContent=d.address||'Tracking…';
+        if(myLat&&myLng) calcDist(myLat,myLng,d.lat,d.lng);
+      }
+    });
+  },400);
+}
+
+function closeTrack(){
   document.getElementById('trackModal').classList.add('hidden');
   if(myWatchId){ navigator.geolocation.clearWatch(myWatchId); myWatchId=null; }
-  if(custListener){ custListener(); custListener=null; }
-  activeOrderId = null;
-};
+  if(custListenerOff){ custListenerOff(); custListenerOff=null; }
+  activeOrderId=null;
+}
 
-function plotMe(lat, lng){
+function plotMe(lat,lng){
   if(!trackMap) return;
-  const icon = L.divIcon({html:'<div class="pulse"></div>',iconSize:[14,14],className:''});
+  const icon=L.divIcon({html:'<div class="dpulse"></div>',iconSize:[14,14],className:''});
   if(myMarker) myMarker.setLatLng([lat,lng]);
-  else myMarker = L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🛵 You');
+  else myMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🛵 You (Delivery Boy)');
 }
-
-function plotCustomer(lat, lng, radius){
+function plotCust(lat,lng,r){
   if(!trackMap) return;
-  const icon = L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});
+  const icon=L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});
   if(custMarker) custMarker.setLatLng([lat,lng]);
-  else custMarker = L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();
-  if(custCircle){ custCircle.setLatLng([lat,lng]); custCircle.setRadius(radius); }
-  else custCircle = L.circle([lat,lng],{radius,color:'#dc2626',fillColor:'#dc2626',fillOpacity:0.08,weight:2}).addTo(trackMap);
+  else custMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();
+  if(custCircle){ custCircle.setLatLng([lat,lng]); custCircle.setRadius(r); }
+  else custCircle=L.circle([lat,lng],{radius:r,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.08,weight:2}).addTo(trackMap);
 }
-
-function fitBounds(){
+function fitMap(){
   if(!trackMap) return;
-  const pts = [];
+  const pts=[];
   if(myMarker)   pts.push(myMarker.getLatLng());
   if(custMarker) pts.push(custMarker.getLatLng());
-  if(pts.length === 2) trackMap.fitBounds(L.latLngBounds(pts).pad(0.3));
-  else if(pts.length === 1) trackMap.setView(pts[0], 16);
+  if(pts.length===2) trackMap.fitBounds(L.latLngBounds(pts).pad(.35));
+  else if(pts.length===1) trackMap.setView(pts[0],16);
+}
+function haversine(a,b,c,d){
+  const R=6371000,dl=(c-a)*Math.PI/180,dg=(d-b)*Math.PI/180;
+  const x=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dg/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
+}
+function calcDist(a,b,c,d){
+  const dist=haversine(a,b,c,d);
+  const o=allOrders[activeOrderId], r=o?(o.radiusMeters||200):200;
+  document.getElementById('tDistance').textContent=dist>=1000?(dist/1000).toFixed(2)+' km':dist+' m';
+  if(dist<=r){
+    document.getElementById('tDistNote').textContent='✅ You are within customer delivery radius!';
+    if(!wasNearby){
+      wasNearby=true;
+      speak('You have reached the customer. Please hand over the order and collect the cash.',true);
+      showBanner('✅ You have reached the customer!','green');
+    }
+  } else {
+    document.getElementById('tDistNote').textContent=`⚠️ ${dist-r}m outside radius – keep moving toward customer`;
+    wasNearby=false;
+  }
 }
 
-function updateDistance(lat1, lng1, lat2, lng2){
-  const R=6371000;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  const dist=Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
-  const o = allOrders[activeOrderId];
-  const radius = o ? (o.radiusMeters||200) : 200;
-  document.getElementById('tDistance').textContent = dist >= 1000 ? (dist/1000).toFixed(1)+' km' : dist+' m';
-  if(dist <= radius)
-    document.getElementById('tDistanceNote').textContent = '✅ Customer is within delivery radius!';
-  else
-    document.getElementById('tDistanceNote').textContent = `⚠️ ${dist-radius}m outside radius – keep moving`;
-}
-
-/* ══ MARK DELIVERED ══ */
-window.markDelivered = () => { if(activeOrderId) markDeliveredById(activeOrderId); };
-
-window.markDeliveredById = (key) => {
-  if(!confirm('Confirm delivery & cash collected?')) return;
-  get(ref(db,`orders/${key}`)).then(snap => {
+/* ════════════════════════════════
+   MARK DELIVERED
+════════════════════════════════ */
+function markDelivered(key){
+  if(!confirm('Confirm: Order delivered and cash collected?')) return;
+  get(ref(db,`orders/${key}`)).then(snap=>{
     if(!snap.exists()) return;
-    const o    = snap.val();
-    const comm = (parseFloat(o.totalAmount||0)*currentRate/100);
+    const o=snap.val();
+    const comm=(parseFloat(o.totalAmount||0)*currentRate/100);
     update(ref(db,`orders/${key}`),{
-      status:        'completed',
-      deliveredBy:   myName,
-      driverPhone:   myPhone,
-      commissionPaid:comm,
-      deliveredAt:   Date.now()
+      status:'completed', deliveredBy:myName,
+      driverPhone:myPhone, commissionPaid:comm,
+      deliveredAt:Date.now()
+    }).then(()=>{
+      speak(`Order delivered successfully! You earned rupees ${Math.round(comm)} as commission.`);
+      showBanner(`🎉 Delivered! Cash: ₹${o.totalAmount} | Commission: ₹${comm.toFixed(2)}`,'green');
+      closeTrack();
     });
-    closeTrackModal();
-    alert(`✅ Delivered!\nCash collected: ₹${o.totalAmount}\nYour commission: ₹${comm.toFixed(2)}`);
   });
-};
+}
 
-/* ══ SETTLE ══ */
-window.settleEarnings = () => {
-  if(!completedKeys.length){ alert('No earnings to settle!'); return; }
-  if(!confirm('Confirm settlement? This will clear your earnings display.')){ return; }
-  const upd = {};
-  completedKeys.forEach(k => { upd[`orders/${k}/status`] = 'settled'; });
-  update(ref(db), upd).then(() => alert('✅ Settled! Earnings reset to ₹0'));
-};
+/* ════════════════════════════════
+   START
+════════════════════════════════ */
+// Run auto-login check on page load
+tryAutoLogin();
 </script>
 </body>
 </html>
