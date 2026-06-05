@@ -41,6 +41,46 @@ html{scroll-behavior:smooth}
     </button>
     <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-2 rounded-full uppercase">Refresh</button>
   </div>
+
+<!-- WHATSAPP SHARE POPUP -->
+<div id="waPopup" class="hidden fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-6 backdrop-blur-sm">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 bg-[#25D366] rounded-full flex items-center justify-center">
+          <i class="fab fa-whatsapp text-white text-lg"></i>
+        </div>
+        <div>
+          <p class="font-black text-gray-800 text-sm">Share App Link</p>
+          <p class="text-[10px] text-gray-400 font-bold">via WhatsApp</p>
+        </div>
+      </div>
+      <button id="waPopupClose" class="text-gray-400 p-1 active:scale-90"><i class="fas fa-times text-lg"></i></button>
+    </div>
+
+    <div class="bg-gray-50 rounded-2xl p-3 border">
+      <p class="text-[10px] font-black text-gray-400 uppercase mb-1">App Link to Share</p>
+      <p id="waAppLinkDisplay" class="text-xs font-bold text-blue-600 break-all"></p>
+    </div>
+
+    <div class="space-y-2">
+      <p class="text-xs font-black text-gray-600 uppercase">Enter Mobile Number</p>
+      <div class="flex gap-2">
+        <div class="flex items-center bg-gray-50 border rounded-xl px-3 gap-1">
+          <span class="text-sm">🇮🇳</span>
+          <span class="text-xs font-black text-gray-500">+91</span>
+        </div>
+        <input id="waPopupNumber" type="tel" maxlength="10" placeholder="10-digit number"
+          class="flex-1 p-3 border rounded-xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-green-400 tracking-widest text-center"/>
+      </div>
+      <p class="text-[10px] text-gray-400 text-center">Number doesn't need to be in your contacts</p>
+    </div>
+
+    <button id="waPopupSend" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 text-sm">
+      <i class="fab fa-whatsapp text-lg"></i> Send App Link
+    </button>
+  </div>
+</div>
 </header>
 
 <div id="customer-list" class="p-4 space-y-8"></div>
@@ -593,8 +633,28 @@ function renderMenu(){
 
 onValue(ref(db,'restaurants'), snap=>{ resData=snap.val()||{}; renderMenu(); });
 
-/* ── SHARE APP LINK ── */
+/* ── SHARE APP LINK POPUP ── */
+const waPopup = document.getElementById('waPopup');
+
 document.getElementById('waShareAppBtn').addEventListener('click', ()=>{
+  const appUrl = window.location.href.split('?')[0];
+  document.getElementById('waAppLinkDisplay').textContent = appUrl;
+  document.getElementById('waPopupNumber').value = '';
+  waPopup.classList.remove('hidden');
+});
+
+document.getElementById('waPopupClose').addEventListener('click', ()=>{
+  waPopup.classList.add('hidden');
+});
+
+// close on backdrop tap
+waPopup.addEventListener('click', e=>{
+  if(e.target === waPopup) waPopup.classList.add('hidden');
+});
+
+document.getElementById('waPopupSend').addEventListener('click', ()=>{
+  const num = document.getElementById('waPopupNumber').value.replace(/\D/g,'');
+  if(num.length !== 10){ showBanner('⚠️ Enter a valid 10-digit number','red'); return; }
   const appUrl = window.location.href.split('?')[0];
   const msg =
     '🍽️ *Bhaskar Food App*\n\n' +
@@ -602,7 +662,9 @@ document.getElementById('waShareAppBtn').addEventListener('click', ()=>{
     '🔗 ' + appUrl + '\n\n' +
     '📞 Contact: 9154095125\n' +
     '_Tap the link to open & order now!_ 🛵';
-  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/91' + num + '?text=' + encodeURIComponent(msg), '_blank');
+  waPopup.classList.add('hidden');
+  showBanner('✅ Opening WhatsApp…','green');
 });
 </script>
 </body>
