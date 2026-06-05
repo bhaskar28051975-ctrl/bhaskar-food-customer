@@ -84,7 +84,21 @@ html{scroll-behavior:smooth}
 </div>
 </header>
 
-<div id="customer-list" class="p-4 space-y-8"></div>
+<!-- DEBUG BANNER (auto-hides when menu loads) -->
+<div id="debugBanner" class="mx-4 mt-3 bg-blue-50 border border-blue-200 rounded-2xl p-3 text-center">
+  <p class="text-xs font-black text-blue-600 uppercase">🔍 Connecting to Firebase…</p>
+  <p id="debugMsg" class="text-[10px] text-blue-400 mt-1 font-bold">Checking database…</p>
+</div>
+
+<div id="customer-list" class="p-4 space-y-8">
+  <!-- Loading skeleton -->
+  <div id="loadingSkeleton" class="space-y-6">
+    <div class="flex flex-col items-center justify-center py-16 gap-4">
+      <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm font-black text-gray-400 uppercase tracking-widest">Loading Menu…</p>
+    </div>
+  </div>
+</div>
 
 <!-- BOTTOM BILL BAR -->
 <div id="bottom-bill-bar" class="hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 z-[90] flex justify-between items-center border-t border-gray-200">
@@ -643,7 +657,7 @@ document.getElementById('customer-list').addEventListener('click', e=>{
 /* ── RENDER MENU ── */
 function renderMenu(){
   const container=document.getElementById('customer-list');
-  container.innerHTML='';
+  container.innerHTML=''; // clears skeleton
   Object.keys(resData).forEach(resId=>{
     const res=resData[resId];
     let html='';
@@ -676,7 +690,82 @@ function renderMenu(){
   });
 }
 
-onValue(ref(db,'restaurants'), snap=>{ resData=snap.val()||{}; renderMenu(); });
+/* ── MENU LOADER with timeout + error handling ── */
+let menuLoaded = false;
+
+// Timeout: if no data after 8s, show error
+const menuTimeout = setTimeout(()=>{
+  if(!menuLoaded){
+    const dbBanner2 = document.getElementById('debugBanner');
+    const dbMsg2 = document.getElementById('debugMsg');
+    if(dbBanner2 && dbMsg2){
+      dbBanner2.className = 'mx-4 mt-3 bg-red-50 border border-red-200 rounded-2xl p-3 text-center';
+      dbMsg2.textContent = 'Timeout after 8s — no response from Firebase.';
+      dbMsg2.className = 'text-[10px] text-red-500 mt-1 font-bold';
+    }
+    document.getElementById('customer-list').innerHTML = `
+      <div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center">
+        <div class="text-5xl">😕</div>
+        <p class="font-black text-gray-700 text-lg">Menu Not Loading</p>
+        <p class="text-sm text-gray-400 font-bold">Could not connect to server. Please check your internet and try again.</p>
+        <button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase shadow active:scale-95 transition-transform">
+          🔄 Retry
+        </button>
+        <p class="text-[10px] text-gray-300 font-bold">Or call us: <a href="tel:9154095125" class="text-red-500">9154095125</a></p>
+      </div>`;
+  }
+}, 8000);
+
+onValue(ref(db,'restaurants'), snap=>{
+  menuLoaded = true;
+  clearTimeout(menuTimeout);
+  resData = snap.val() || {};
+  
+  /* update debug banner */
+  const dbBanner = document.getElementById('debugBanner');
+  const dbMsg = document.getElementById('debugMsg');
+  if(dbBanner && dbMsg){
+    const keys = Object.keys(resData);
+    if(keys.length > 0){
+      dbBanner.style.display = 'none'; // hide when loaded
+    } else {
+      dbMsg.textContent = 'Firebase connected ✅ but no restaurants found in database.';
+      dbBanner.className = 'mx-4 mt-3 bg-yellow-50 border border-yellow-200 rounded-2xl p-3 text-center';
+      dbMsg.className = 'text-[10px] text-yellow-600 mt-1 font-bold';
+    }
+  }
+
+  if(Object.keys(resData).length === 0){
+    document.getElementById('customer-list').innerHTML = `
+      <div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center">
+        <div class="text-5xl">🍽️</div>
+        <p class="font-black text-gray-700 text-lg">Menu Coming Soon</p>
+        <p class="text-sm text-gray-400 font-bold">No items available right now. Please check back later.</p>
+        <p class="text-[11px] text-gray-300 mt-2">Call us: <a href="tel:9154095125" class="text-red-500 font-bold">9154095125</a></p>
+      </div>`;
+    return;
+  }
+  renderMenu();
+}, err=>{
+  menuLoaded = true;
+  clearTimeout(menuTimeout);
+  const dbBanner = document.getElementById('debugBanner');
+  const dbMsg = document.getElementById('debugMsg');
+  if(dbBanner && dbMsg){
+    dbBanner.className = 'mx-4 mt-3 bg-red-50 border border-red-200 rounded-2xl p-3 text-center';
+    dbMsg.textContent = 'Firebase error: ' + (err.message || err.code || 'unknown');
+    dbMsg.className = 'text-[10px] text-red-500 mt-1 font-bold';
+  }
+  document.getElementById('customer-list').innerHTML = `
+    <div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center">
+      <div class="text-5xl">⚠️</div>
+      <p class="font-black text-gray-700 text-lg">Connection Error</p>
+      <p class="text-sm text-gray-400 font-bold">${err.message || 'Unable to load menu. Please try again.'}</p>
+      <button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase shadow active:scale-95 transition-transform">
+        🔄 Retry
+      </button>
+    </div>`;
+});
 
 /* ── SHARE APP LINK POPUP ── */
 const waPopup = document.getElementById('waPopup');
