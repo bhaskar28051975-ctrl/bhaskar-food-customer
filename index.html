@@ -135,7 +135,10 @@ html{scroll-behavior:smooth}
                 <p class="font-black text-sm text-gray-800">📍 Live Location</p>
                 <p class="text-[11px] text-gray-500 mt-0.5" id="locStatusText">Share GPS coordinates for fast delivery</p>
               </div>
-              <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform shrink-0">Share GPS</button>
+              <div class="flex gap-2 shrink-0">
+                <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
+                <button id="stopLocBtn" class="hidden bg-gray-200 text-gray-600 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Stop</button>
+              </div>
             </div>
             <div class="bg-white rounded-xl p-3 border border-red-100">
               <div class="flex items-center justify-between">
@@ -285,15 +288,9 @@ const UPI_APPS = [
 ];
 
 function buildUpiUrl(app, amount){
-  const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Bhaskar Food Order')}`;
-  // deep-link intents for Android
-  const intents = {
-    phonepe: `intent://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR#Intent;scheme=phonepe;package=com.phonepe.app;end`,
-    gpay:    `intent://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;end`,
-    paytm:   `intent://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR#Intent;scheme=paytmmp;package=net.one97.paytm;end`,
-    bhim:    base,
-  };
-  return intents[app.pkg] || base;
+  // Simple universal UPI deep-link — phone shows app chooser or opens specific app
+  const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Bhaskar Food Order')}`;
+  return upiUrl;
 }
 
 function renderUpiApps(amount){
@@ -364,7 +361,8 @@ document.getElementById('locBtn').addEventListener('click', ()=>{
   navigator.geolocation.getCurrentPosition(pos=>{
     myLat=pos.coords.latitude; myLng=pos.coords.longitude;
     btn.textContent='✅ Sharing'; btn.disabled=false;
-    btn.classList.replace('bg-red-600','bg-green-600');
+    btn.className='bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform';
+    document.getElementById('stopLocBtn').classList.remove('hidden');
     document.getElementById('locStatusText').textContent='✅ Live location sharing ON';
     showMap(); reverseGeocode(myLat,myLng);
     if(watchId) navigator.geolocation.clearWatch(watchId);
@@ -375,6 +373,22 @@ document.getElementById('locBtn').addEventListener('click', ()=>{
       if(activeOid){ set(ref(db,`orders/${activeOid}/lat`),myLat); set(ref(db,`orders/${activeOid}/lng`),myLng); }
     },null,{enableHighAccuracy:true,maximumAge:8000});
   },()=>{ btn.textContent='Share GPS'; btn.disabled=false; alert('Location denied. Please allow GPS.'); },{enableHighAccuracy:true});
+});
+
+/* ── STOP LOCATION BUTTON ── */
+document.getElementById('stopLocBtn').addEventListener('click', ()=>{
+  if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  myLat=null; myLng=null;
+  const btn   = document.getElementById('locBtn');
+  const stop  = document.getElementById('stopLocBtn');
+  const mapW  = document.getElementById('mapWrap');
+  btn.textContent='Share GPS';
+  btn.disabled=false;
+  btn.className='bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform';
+  stop.classList.add('hidden');
+  mapW.classList.add('hidden');
+  document.getElementById('locStatusText').textContent='Share GPS coordinates for fast delivery';
+  showBanner('📍 Location sharing stopped','red');
 });
 
 function showMap(){
