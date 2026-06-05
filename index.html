@@ -19,6 +19,7 @@ html{scroll-behavior:smooth}
 .upi-app-btn{transition:all .15s;border:2px solid transparent}
 .upi-app-btn:active{transform:scale(0.93)}
 .upi-app-btn.selected{border-color:#16a34a;background:#f0fdf4}
+.webview-warn{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #f59e0b;border-radius:1rem;padding:1rem;margin-bottom:.75rem}
 #qrcode img,#qrcode canvas{width:160px!important;height:160px!important;border-radius:12px}
 </style>
 </head>
@@ -509,9 +510,39 @@ document.getElementById('goToPayBtn').addEventListener('click', ()=>{
   renderUpiApps(total);
   generateQR(total);
   setStep(2);
+
+  /* detect WebView (WhatsApp/Instagram/Facebook in-app browser) */
+  const ua = navigator.userAgent || '';
+  const isWebView = /FBAN|FBAV|Instagram|WhatsApp|wv|WebView/.test(ua) || 
+                    (/(iPhone|iPod|iPad)/.test(ua) && !/Safari/.test(ua)) ||
+                    (window.Android !== undefined);
+  const warnEl = document.getElementById('webviewWarn');
+  if(isWebView){
+    warnEl.classList.remove('hidden');
+  } else {
+    warnEl.classList.add('hidden');
+  }
 });
 
 /* Copy UPI ID */
+/* ── OPEN IN EXTERNAL BROWSER ── */
+document.getElementById('openInBrowserBtn').addEventListener('click', ()=>{
+  const url = window.location.href;
+  // Try to open in Chrome on Android
+  const chromeUrl = 'googlechrome://' + url.replace(/^https?:\/\//, '');
+  const a = document.createElement('a');
+  a.href = chromeUrl;
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // Fallback: copy link and instruct user
+  setTimeout(()=>{
+    navigator.clipboard.writeText(url).catch(()=>{});
+    showBanner('🔗 Link copied! Paste in Chrome or browser to pay','green');
+  }, 800);
+});
+
 document.getElementById('copyUpiBtn').addEventListener('click', ()=>{
   navigator.clipboard.writeText(UPI_ID).then(()=>showBanner('✅ UPI ID copied!','green')).catch(()=>showBanner('UPI ID: '+UPI_ID,'green'));
 });
