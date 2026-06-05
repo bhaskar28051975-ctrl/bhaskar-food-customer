@@ -35,7 +35,12 @@ html{scroll-behavior:smooth}
       <span class="text-[11px] font-black text-green-600 tracking-wide">9154095125</span>
     </a>
   </div>
-  <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-1 rounded-full uppercase self-center shrink-0 ml-4">Refresh</button>
+  <div class="flex items-center gap-2 shrink-0 ml-3">
+    <button id="waShareAppBtn" class="flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] font-black px-3 py-2 rounded-full uppercase active:scale-95 transition-transform">
+      <i class="fab fa-whatsapp text-sm"></i> Share
+    </button>
+    <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-2 rounded-full uppercase">Refresh</button>
+  </div>
 </header>
 
 <div id="customer-list" class="p-4 space-y-8"></div>
@@ -587,6 +592,18 @@ function renderMenu(){
 }
 
 onValue(ref(db,'restaurants'), snap=>{ resData=snap.val()||{}; renderMenu(); });
+
+/* ── SHARE APP LINK ── */
+document.getElementById('waShareAppBtn').addEventListener('click', ()=>{
+  const appUrl = window.location.href.split('?')[0];
+  const msg =
+    '🍽️ *Bhaskar Food App*\n\n' +
+    'Order food online with live GPS delivery tracking!\n\n' +
+    '🔗 ' + appUrl + '\n\n' +
+    '📞 Contact: 9154095125\n' +
+    '_Tap the link to open & order now!_ 🛵';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+});
 </script>
 </body>
 </html>
