@@ -14,8 +14,8 @@ html{scroll-behavior:smooth}
 #trackMap{height:200px;width:100%;border-radius:16px;z-index:1}
 .pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
 @keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-/* Fix Leaflet control overlay issues */
 .leaflet-control-container { z-index: 10 !important; }
+.pay-btn.active{border-color:#dc2626;background-color:#fef2f2}
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800" style="padding-bottom:100px">
@@ -27,7 +27,12 @@ html{scroll-behavior:smooth}
       Delivery Services At <span class="text-red-600 font-bold">Where You Are.</span>
     </p>
   </div>
-  <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-2 rounded-full uppercase shrink-0 hover:bg-gray-200 transition-colors">Refresh</button>
+  <div class="flex items-center gap-2 shrink-0">
+    <button id="shareAppBtn" class="text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-full uppercase flex items-center gap-1 hover:bg-red-100 transition-colors">
+      <i class="fas fa-share-alt"></i> Share App
+    </button>
+    <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-2 rounded-full uppercase hover:bg-gray-200 transition-colors">Refresh</button>
+  </div>
 </header>
 
 <div id="customer-list" class="p-4 space-y-8"></div>
@@ -42,6 +47,29 @@ html{scroll-behavior:smooth}
     <button id="proceedBtn" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 transition-transform flex items-center gap-2">
       Proceed <i class="fas fa-arrow-right text-xs"></i>
     </button>
+  </div>
+</div>
+
+<div id="share-modal" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl transform transition-all">
+    <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <h3 class="text-base font-black text-gray-800 uppercase italic flex items-center gap-2">
+        <i class="fas fa-paper-plane text-red-600"></i> Share App Link
+      </h3>
+      <button id="closeShareBtn" class="text-gray-400 hover:text-gray-600 p-1"><i class="fas fa-times text-lg"></i></button>
+    </div>
+    <div class="space-y-4">
+      <p class="text-xs font-medium text-gray-500">Enter the phone number below to share the customer food ordering application portal link.</p>
+      <input id="sharePhone" type="tel" placeholder="Enter 10-Digit Mobile Number *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button id="sendWhatsAppBtn" class="bg-green-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-transform">
+          <i class="fab fa-whatsapp text-sm"></i> WhatsApp
+        </button>
+        <button id="sendSMSBtn" class="bg-blue-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-transform">
+          <i class="fas fa-sms text-sm"></i> Direct SMS
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -85,6 +113,27 @@ html{scroll-behavior:smooth}
         </div>
       </div>
 
+      <div class="border border-gray-200 rounded-2xl p-4 bg-gray-50/50 space-y-2">
+        <p class="text-xs font-black text-gray-500 uppercase tracking-wider mb-1"><i class="fas fa-credit-card text-red-500"></i> Select UPI Payment App</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="selectUPI('phonepe')" id="pay-phonepe" class="pay-btn border border-gray-200 rounded-xl bg-white p-2 flex items-center gap-2 font-bold text-xs hover:border-purple-400 transition-all">
+            <img src="https://img.icons8.com/color/48/phonepe.png" class="w-5 h-5 object-contain" alt="PhonePe"/> PhonePe
+          </button>
+          <button type="button" onclick="selectUPI('gpay')" id="pay-gpay" class="pay-btn border border-gray-200 rounded-xl bg-white p-2 flex items-center gap-2 font-bold text-xs hover:border-blue-400 transition-all">
+            <img src="https://img.icons8.com/color/48/google-pay.png" class="w-5 h-5 object-contain" alt="GPay"/> Google Pay
+          </button>
+          <button type="button" onclick="selectUPI('paytm')" id="pay-paytm" class="pay-btn border border-gray-200 rounded-xl bg-white p-2 flex items-center gap-2 font-bold text-xs hover:border-cyan-400 transition-all">
+            <img src="https://img.icons8.com/color/48/paytm.png" class="w-5 h-5 object-contain" alt="Paytm"/> Paytm
+          </button>
+          <button type="button" onclick="selectUPI('bhim')" id="pay-bhim" class="pay-btn border border-gray-200 rounded-xl bg-white p-2 flex items-center gap-2 font-bold text-xs hover:border-orange-400 transition-all">
+            <img src="https://img.icons8.com/images/30/BHIM-Logo.png" class="w-5 h-5 object-contain" alt="BHIM"/> BHIM UPI
+          </button>
+        </div>
+        <button type="button" onclick="selectUPI('cod')" id="pay-cod" class="pay-btn w-full mt-1 border border-gray-200 rounded-xl bg-white p-2.5 flex items-center justify-center gap-2 font-bold text-xs active:scale-[0.99] transition-all">
+          📦 Pay on Delivery (Cash / UPI at Doorstep)
+        </button>
+      </div>
+
       <div class="pt-2">
         <div class="flex justify-between items-center mb-3 px-1">
           <span class="text-gray-500 font-bold text-sm">Grand Total Amount:</span>
@@ -115,7 +164,39 @@ const db = getDatabase(app);
 let cart={}, resData={}, myLat=null, myLng=null, myAddress='';
 let watchId=null, trackMap=null, myMarker=null, myCircle=null;
 let radiusM=200, orderLat=null, orderLng=null, wasOutside=false;
-let activeOid=null, speechReady=false;
+let activeOid=null, speechReady=false, selectedPaymentMethod='cod';
+
+// Expose UPI function globally to inline onclick tags
+window.selectUPI = function(method) {
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active', 'border-red-600', 'bg-red-50'));
+  const activeBtn = document.getElementById('pay-' + method);
+  if(activeBtn) {
+    activeBtn.classList.add('active', 'border-red-600', 'bg-red-50');
+  }
+};
+// Select COD by default initially
+window.selectUPI('cod');
+
+/* ── MODAL WORKFLOW ACTIONS ── */
+const shareModal = document.getElementById('share-modal');
+document.getElementById('shareAppBtn').addEventListener('click', () => shareModal.classList.remove('hidden'));
+document.getElementById('closeShareBtn').addEventListener('click', () => shareModal.classList.add('hidden'));
+
+// Send App Portals via Core Intents
+function getShareText() {
+  return encodeURIComponent("Order fresh meals tracking your driver in real-time! Access Bhaskar Food Application portal here: " + window.location.href);
+}
+document.getElementById('sendWhatsAppBtn').addEventListener('click', () => {
+  const p = document.getElementById('sharePhone').value.trim().replace(/\D/g,'');
+  if(!p || p.length < 10) { alert('Please enter a valid mobile number.'); return; }
+  window.open(`https://api.whatsapp.com/send?phone=91${p}&text=${getShareText()}`, '_blank');
+});
+document.getElementById('sendSMSBtn').addEventListener('click', () => {
+  const p = document.getElementById('sharePhone').value.trim().replace(/\D/g,'');
+  if(!p || p.length < 10) { alert('Please enter a valid mobile number.'); return; }
+  window.open(`sms:+91${p}?&body=${getShareText()}`, '_blank');
+});
 
 /* ── VOICE ── */
 function speak(txt, urgent=false){
@@ -192,7 +273,6 @@ function updatePin(lat,lng){
   trackMap.setView([lat,lng],16);
 }
 function reverseGeocode(lat,lng){
-  // Added standard user-agent parameter mapping to avoid Nominatim blacklisting blocks
   fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`)
     .then(r=>r.json()).then(d=>{
       const a=d.address||{};
@@ -210,7 +290,6 @@ function getDist(a,b,c,d){
 
 /* ── BREACH CHECK ── */
 function checkBreach(lat,lng){
-  // Safe validation check added to prevent app crashes before an order is confirmed
   if(!orderLat||!orderLng) return;
   const dist=getDist(lat,lng,orderLat,orderLng);
   const out=dist>radiusM;
@@ -232,7 +311,7 @@ function checkBreach(lat,lng){
   }
 }
 
-/* ── DISH MAP (JS store, not DOM) ── */
+/* ── DISH MAP ── */
 const dishMap = {};
 
 /* ── CART ── */
@@ -266,7 +345,6 @@ function updateCardQty(id){
     <button class="qPlus w-8 h-8 bg-red-500 text-white rounded-lg font-black text-lg flex items-center justify-center active:scale-90">${qty >= 20 ? '✕' : '+'}</button>`;
 }
 
-/* Modals Trigger Visibility Actions */
 const modal = document.getElementById('checkout-modal');
 document.getElementById('proceedBtn').addEventListener('click', () => {
   modal.classList.remove('hidden');
@@ -343,7 +421,7 @@ function renderMenu(){
 
 onValue(ref(db,'restaurants'), snap=>{ resData=snap.val()||{}; renderMenu(); });
 
-/* ── PLACE ORDER ── */
+/* ── PLACE ORDER & RUN UPI INTENT ── */
 document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
@@ -358,10 +436,12 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const oid=push(ref(db,'orders')).key;
   activeOid=oid;
 
+  // Save full contextual parameters to Realtime Database
   await set(ref(db,'orders/'+oid),{
     id:oid, customerName:name, customerPhone:phone,
     items, totalAmount:total, status:'pending',
     lat:myLat, lng:myLng, address:myAddress,
+    paymentMethod:selectedPaymentMethod,
     radiusMeters:radiusM, timestamp:Date.now()
   });
 
@@ -373,6 +453,12 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       set(ref(db,`orders/${oid}/lng`),myLng);
       checkBreach(myLat,myLng);
     },null,{enableHighAccuracy:true,maximumAge:8000});
+  }
+
+  // Handle live smartphone deep links if UPI payment target is checked
+  if(selectedPaymentMethod !== 'cod' && total > 0) {
+    const upiUri = `upi://pay?pa=9154095125@ybl&pn=Bhaskar%20Food&am=${total}&cu=INR&tn=Order%20${oid}`;
+    window.location.href = upiUri;
   }
 
   speak('Order placed successfully! Your delivery is on the way.');
