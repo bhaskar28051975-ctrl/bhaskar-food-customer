@@ -54,6 +54,17 @@ html{scroll-behavior:smooth}
   </div>
 </header>
 
+<!-- GPS STATUS BAR (visible on main page when GPS is sharing) -->
+<div id="gpsBar" class="hidden sticky top-[73px] z-40 bg-green-600 text-white px-4 py-2 flex items-center justify-between gap-2 shadow-sm">
+  <div class="flex items-center gap-2 min-w-0">
+    <div class="pdot shrink-0" style="background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.4)"></div>
+    <p class="text-xs font-black truncate" id="gpsBarText">📍 Live location ON</p>
+  </div>
+  <button id="gpsBarStopBtn" class="shrink-0 bg-white text-green-700 px-3 py-1 rounded-full font-black text-[10px] uppercase active:scale-95 transition-transform flex items-center gap-1">
+    <i class="fas fa-stop-circle"></i> Stop GPS
+  </button>
+</div>
+
 <!-- MENU LIST -->
 <div id="customer-list" class="p-4 space-y-8">
   <div class="flex flex-col items-center justify-center py-16 gap-4">
@@ -126,18 +137,26 @@ html{scroll-behavior:smooth}
           </div>
           <div class="flex gap-2 shrink-0">
             <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
-            <button id="stopLocBtn" class="hidden bg-gray-200 text-gray-600 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Stop</button>
+            <button id="stopLocBtn" class="hidden bg-gray-200 text-gray-600 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1"><i class="fas fa-stop-circle"></i> Stop</button>
           </div>
         </div>
-        <div class="bg-white rounded-xl p-3 border border-red-100">
+
+        <!-- Zone info pulled from Firebase -->
+        <div class="bg-white rounded-xl p-3 border border-red-100 space-y-1">
           <div class="flex items-center justify-between">
-            <p class="text-[10px] font-black text-gray-500 uppercase">📡 Service Radius Limit</p>
-            <span id="radiusVal" class="font-black text-red-600 text-xs">Loading…</span>
+            <p class="text-[10px] font-black text-gray-500 uppercase">📡 Active Delivery Zone</p>
+            <span id="zoneNameDisplay" class="font-black text-red-600 text-[10px]">Loading…</span>
           </div>
-          <div class="bg-gray-100 rounded-full h-1.5 mt-1.5">
+          <div class="flex items-center justify-between mt-1">
+            <p class="text-[10px] text-gray-400 font-bold">Radius</p>
+            <span id="radiusVal" class="font-black text-red-600 text-xs">…</span>
+          </div>
+          <div class="bg-gray-100 rounded-full h-1.5 mt-1">
             <div id="radiusBar" class="bg-red-500 h-1.5 rounded-full transition-all" style="width:20%"></div>
           </div>
+          <p class="text-[10px] text-gray-400 text-center mt-1">⚙️ Set by restaurant</p>
         </div>
+
         <div id="mapWrap" class="hidden space-y-2">
           <div id="trackMap"></div>
           <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
@@ -263,11 +282,41 @@ document.getElementById('sendSMSBtn').addEventListener('click', ()=>{
   shareModal.classList.add('hidden');
 });
 
-/* ── RADIUS ── */
+/* ── ZONE FROM FIREBASE ── */
+let zoneCenterLat=null, zoneCenterLng=null, zoneCircleCustomer=null;
+
+onValue(ref(db,'zones'), snap=>{
+  const zones = snap.val()||{};
+  const keys = Object.keys(zones);
+  if(keys.length===0) return;
+  // Use the most recently updated zone
+  const latest = keys.map(k=>zones[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  radiusM = latest.radius || 200;
+  zoneCenterLat = latest.lat;
+  zoneCenterLng = latest.lng;
+  const nm = latest.name || 'Delivery Zone';
+  const displayR = radiusM>=1000?(radiusM/1000).toFixed(1)+' km':radiusM+' m';
+  document.getElementById('radiusVal').textContent = displayR;
+  document.getElementById('radiusBar').style.width = ((radiusM-50)/(2000-50)*100)+'%';
+  const znEl = document.getElementById('zoneNameDisplay');
+  if(znEl) znEl.textContent = nm;
+  if(myCircle) myCircle.setRadius(radiusM);
+  // Draw zone circle on customer map if map is open
+  if(trackMap && zoneCenterLat){
+    if(zoneCircleCustomer) zoneCircleCustomer.setLatLng([zoneCenterLat,zoneCenterLng]).setRadius(radiusM);
+    else zoneCircleCustomer = L.circle([zoneCenterLat,zoneCenterLng],{
+      radius:radiusM, color:'#7c3aed', fillColor:'#7c3aed',
+      fillOpacity:0.08, weight:2, dashArray:'8,5'
+    }).addTo(trackMap).bindPopup('🟣 '+nm+' ('+displayR+')');
+  }
+});
+
+// Fallback: legacy serviceRadius
 onValue(ref(db,'settings/serviceRadius'), snap=>{
+  if(zoneCenterLat) return; // already loaded from zones
   const v=parseInt(snap.val())||200; radiusM=v;
   document.getElementById('radiusVal').textContent=v+' m';
-  document.getElementById('radiusBar').style.width=((v-50)/(1000-50)*100)+'%';
+  document.getElementById('radiusBar').style.width=((v-50)/(2000-50)*100)+'%';
   if(myCircle) myCircle.setRadius(v);
 });
 
@@ -282,6 +331,9 @@ document.getElementById('locBtn').addEventListener('click', ()=>{
     btn.className='bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform';
     document.getElementById('stopLocBtn').classList.remove('hidden');
     document.getElementById('locStatusText').textContent='✅ Live location sharing ON';
+    // Show GPS bar on main page
+    const gpsBar=document.getElementById('gpsBar');
+    if(gpsBar) gpsBar.classList.remove('hidden');
     showMap(); reverseGeocode(myLat,myLng);
     if(watchId) navigator.geolocation.clearWatch(watchId);
     watchId=navigator.geolocation.watchPosition(p=>{
@@ -292,23 +344,37 @@ document.getElementById('locBtn').addEventListener('click', ()=>{
   },()=>{ btn.textContent='Share GPS'; btn.disabled=false; alert('Location denied. Please allow GPS.'); },{enableHighAccuracy:true});
 });
 
-document.getElementById('stopLocBtn').addEventListener('click', ()=>{
+function stopGPS(){
   if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
   myLat=null; myLng=null;
   const btn=document.getElementById('locBtn');
-  btn.textContent='Share GPS'; btn.disabled=false;
-  btn.className='bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform';
-  document.getElementById('stopLocBtn').classList.add('hidden');
-  document.getElementById('mapWrap').classList.add('hidden');
+  if(btn){ btn.textContent='Share GPS'; btn.disabled=false;
+    btn.className='bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform'; }
+  document.getElementById('stopLocBtn')?.classList.add('hidden');
+  document.getElementById('mapWrap')?.classList.add('hidden');
   document.getElementById('locStatusText').textContent='Share GPS coordinates for fast delivery';
+  const gpsBar=document.getElementById('gpsBar');
+  if(gpsBar) gpsBar.classList.add('hidden');
   showBanner('📍 Location sharing stopped','red');
-});
+}
+document.getElementById('stopLocBtn').addEventListener('click', stopGPS);
+document.getElementById('gpsBarStopBtn').addEventListener('click', stopGPS);
 
 function showMap(){
   document.getElementById('mapWrap').classList.remove('hidden');
   if(!trackMap){
     trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([myLat,myLng],16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+    // Draw zone circle from Firebase if available
+    if(zoneCenterLat && zoneCenterLng){
+      const displayR = radiusM>=1000?(radiusM/1000).toFixed(1)+' km':radiusM+' m';
+      const znEl=document.getElementById('zoneNameDisplay');
+      const nm = znEl?znEl.textContent:'Delivery Zone';
+      zoneCircleCustomer = L.circle([zoneCenterLat,zoneCenterLng],{
+        radius:radiusM, color:'#7c3aed', fillColor:'#7c3aed',
+        fillOpacity:0.08, weight:2, dashArray:'8,5'
+      }).addTo(trackMap).bindPopup('🟣 '+nm+' ('+displayR+')');
+    }
   }
   updatePin(myLat,myLng);
   setTimeout(()=>trackMap.invalidateSize(),200);
@@ -340,10 +406,15 @@ function getDist(a,b,c,d){
 
 /* ── BREACH CHECK ── */
 function checkBreach(lat,lng){
-  if(!orderLat||!orderLng) return;
-  const dist=getDist(lat,lng,orderLat,orderLng);
-  const out=dist>radiusM;
-  const st=document.getElementById('locStatusText');
+  // Use zone center from Firebase if set, else fallback to order start point
+  const checkLat = zoneCenterLat || orderLat;
+  const checkLng = zoneCenterLng || orderLng;
+  if(!checkLat||!checkLng) return;
+  const dist=getDist(lat,lng,checkLat,checkLng);
+  const out = dist > radiusM;
+  const st = document.getElementById('locStatusText');
+  const gpsBarText = document.getElementById('gpsBarText');
+  if(gpsBarText) gpsBarText.textContent = out ? `⚠️ Outside zone! (${dist}m away)` : `📍 Live location ON · ${dist}m from zone`;
   if(out&&!wasOutside){
     wasOutside=true;
     speak('Warning! You are crossing the service area.',true);
