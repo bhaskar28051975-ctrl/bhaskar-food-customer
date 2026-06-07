@@ -4,8 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <title>Street Food</title>
-
-<!-- PWA Meta Tags -->
 <meta name="application-name" content="Street Food"/>
 <meta name="description" content="Order fresh food with live GPS delivery tracking. Bhaskar Food — Delivery Services At Where You Are."/>
 <meta name="theme-color" content="#dc2626"/>
@@ -13,12 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Street Food"/>
-
-<!-- App Icons (inline SVG converted to data URI) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%20fill%3D%27%2523dc2626%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27300%27%20font-size%3D%27260%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%27%3E%F0%9F%8D%9C%3C%2Ftext%3E%3Crect%20x%3D%2760%27%20y%3D%27370%27%20width%3D%27392%27%20height%3D%2718%27%20rx%3D%279%27%20fill%3D%27%2523fff%27%20opacity%3D%270.3%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27460%27%20font-size%3D%2762%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%20Black%27%20font-weight%3D%27900%27%20fill%3D%27white%27%3ESTREET%20FOOD%3C%2Ftext%3E%3C%2Fsvg%3E"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%20fill%3D%27%2523dc2626%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27300%27%20font-size%3D%27260%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%27%3E%F0%9F%8D%9C%3C%2Ftext%3E%3Crect%20x%3D%2760%27%20y%3D%27370%27%20width%3D%27392%27%20height%3D%2718%27%20rx%3D%279%27%20fill%3D%27%2523fff%27%20opacity%3D%270.3%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27460%27%20font-size%3D%2762%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%20Black%27%20font-weight%3D%27900%27%20fill%3D%27white%27%3ESTREET%20FOOD%3C%2Ftext%3E%3C%2Fsvg%3E"/>
-
-<!-- PWA Manifest (inline) -->
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Bhaskar%20Food%22%2C%22short_name%22%3A%22Bhaskar%20Food%22%2C%22description%22%3A%22Order%20fresh%20food%20with%20live%20GPS%20delivery%20tracking%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f4f6%22%2C%22theme_color%22%3A%22%23dc2626%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520512%2520512'%253E%253Crect%2520width%3D'512'%2520height%3D'512'%2520rx%3D'80'%2520fill%3D'%2523dc2626'%2F%253E%253Ctext%2520x%3D'256'%2520y%3D'340'%2520font-size%3D'280'%2520text-anchor%3D'middle'%2520fill%3D'white'%253E%25F0%259F%258D%259B%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
@@ -30,6 +24,8 @@ html{scroll-behavior:smooth}
 #trackMap{height:200px;width:100%;border-radius:16px;z-index:1}
 .pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
 @keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+/* Stop GPS button disabled state */
+#stopLocBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800" style="padding-bottom:100px">
@@ -130,14 +126,21 @@ html{scroll-behavior:smooth}
 
       <!-- GPS -->
       <div class="bg-red-50 rounded-2xl p-4 border border-red-100 space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
             <p class="font-black text-sm text-gray-800">📍 Live Location</p>
             <p class="text-[11px] text-gray-500 mt-0.5" id="locStatusText">Share GPS coordinates for fast delivery</p>
           </div>
+          <!-- BOTH BUTTONS ALWAYS VISIBLE SIDE BY SIDE -->
           <div class="flex gap-2 shrink-0">
-            <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Share GPS</button>
-            <button id="stopLocBtn" class="hidden bg-gray-200 text-gray-600 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1"><i class="fas fa-stop-circle"></i> Stop</button>
+            <button id="locBtn"
+              class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1">
+              <i class="fas fa-location-arrow text-[10px]"></i> Share GPS
+            </button>
+            <button id="stopLocBtn" disabled
+              class="bg-gray-200 text-gray-400 px-3 py-2 rounded-xl font-black text-xs uppercase transition-transform flex items-center gap-1">
+              <i class="fas fa-stop-circle text-[10px]"></i> Stop
+            </button>
           </div>
         </div>
 
@@ -289,7 +292,6 @@ onValue(ref(db,'zones'), snap=>{
   const zones = snap.val()||{};
   const keys = Object.keys(zones);
   if(keys.length===0) return;
-  // Use the most recently updated zone
   const latest = keys.map(k=>zones[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
   radiusM = latest.radius || 200;
   zoneCenterLat = latest.lat;
@@ -301,7 +303,6 @@ onValue(ref(db,'zones'), snap=>{
   const znEl = document.getElementById('zoneNameDisplay');
   if(znEl) znEl.textContent = nm;
   if(myCircle) myCircle.setRadius(radiusM);
-  // Draw zone circle on customer map if map is open
   if(trackMap && zoneCenterLat){
     if(zoneCircleCustomer) zoneCircleCustomer.setLatLng([zoneCenterLat,zoneCenterLng]).setRadius(radiusM);
     else zoneCircleCustomer = L.circle([zoneCenterLat,zoneCenterLng],{
@@ -311,27 +312,49 @@ onValue(ref(db,'zones'), snap=>{
   }
 });
 
-// Fallback: legacy serviceRadius
 onValue(ref(db,'settings/serviceRadius'), snap=>{
-  if(zoneCenterLat) return; // already loaded from zones
+  if(zoneCenterLat) return;
   const v=parseInt(snap.val())||200; radiusM=v;
   document.getElementById('radiusVal').textContent=v+' m';
   document.getElementById('radiusBar').style.width=((v-50)/(2000-50)*100)+'%';
   if(myCircle) myCircle.setRadius(v);
 });
 
+/* ── GPS BUTTON STATES ── */
+function setGpsActive(){
+  const locBtn = document.getElementById('locBtn');
+  const stopLocBtn = document.getElementById('stopLocBtn');
+  // Share GPS → green "✅ Sharing", disable it
+  locBtn.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Sharing';
+  locBtn.disabled = true;
+  locBtn.className = 'bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase transition-transform flex items-center gap-1 opacity-80 cursor-not-allowed';
+  // Stop GPS → red, enabled
+  stopLocBtn.disabled = false;
+  stopLocBtn.className = 'bg-red-600 text-white px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1';
+}
+
+function setGpsInactive(){
+  const locBtn = document.getElementById('locBtn');
+  const stopLocBtn = document.getElementById('stopLocBtn');
+  // Share GPS → red, enabled
+  locBtn.innerHTML = '<i class="fas fa-location-arrow text-[10px]"></i> Share GPS';
+  locBtn.disabled = false;
+  locBtn.className = 'bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1';
+  // Stop GPS → grey, disabled
+  stopLocBtn.disabled = true;
+  stopLocBtn.className = 'bg-gray-200 text-gray-400 px-3 py-2 rounded-xl font-black text-xs uppercase transition-transform flex items-center gap-1';
+}
+
 /* ── GPS ── */
 document.getElementById('locBtn').addEventListener('click', ()=>{
-  const btn=document.getElementById('locBtn');
+  const locBtn=document.getElementById('locBtn');
   if(!navigator.geolocation){ alert('GPS not supported'); return; }
-  btn.textContent='⏳ Getting…'; btn.disabled=true;
+  locBtn.innerHTML='<i class="fas fa-spinner fa-spin text-[10px]"></i> Getting…';
+  locBtn.disabled=true;
   navigator.geolocation.getCurrentPosition(pos=>{
     myLat=pos.coords.latitude; myLng=pos.coords.longitude;
-    btn.textContent='✅ Sharing'; btn.disabled=false;
-    btn.className='bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform';
-    document.getElementById('stopLocBtn').classList.remove('hidden');
+    setGpsActive();
     document.getElementById('locStatusText').textContent='✅ Live location sharing ON';
-    // Show GPS bar on main page
     const gpsBar=document.getElementById('gpsBar');
     if(gpsBar) gpsBar.classList.remove('hidden');
     showMap(); reverseGeocode(myLat,myLng);
@@ -341,16 +364,16 @@ document.getElementById('locBtn').addEventListener('click', ()=>{
       updatePin(myLat,myLng); reverseGeocode(myLat,myLng); checkBreach(myLat,myLng);
       if(activeOid){ set(ref(db,`orders/${activeOid}/lat`),myLat); set(ref(db,`orders/${activeOid}/lng`),myLng); }
     },null,{enableHighAccuracy:true,maximumAge:8000});
-  },()=>{ btn.textContent='Share GPS'; btn.disabled=false; alert('Location denied. Please allow GPS.'); },{enableHighAccuracy:true});
+  },()=>{
+    setGpsInactive();
+    alert('Location denied. Please allow GPS.');
+  },{enableHighAccuracy:true});
 });
 
 function stopGPS(){
   if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }
   myLat=null; myLng=null;
-  const btn=document.getElementById('locBtn');
-  if(btn){ btn.textContent='Share GPS'; btn.disabled=false;
-    btn.className='bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform'; }
-  document.getElementById('stopLocBtn')?.classList.add('hidden');
+  setGpsInactive();
   document.getElementById('mapWrap')?.classList.add('hidden');
   document.getElementById('locStatusText').textContent='Share GPS coordinates for fast delivery';
   const gpsBar=document.getElementById('gpsBar');
@@ -365,7 +388,6 @@ function showMap(){
   if(!trackMap){
     trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([myLat,myLng],16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
-    // Draw zone circle from Firebase if available
     if(zoneCenterLat && zoneCenterLng){
       const displayR = radiusM>=1000?(radiusM/1000).toFixed(1)+' km':radiusM+' m';
       const znEl=document.getElementById('zoneNameDisplay');
@@ -406,7 +428,6 @@ function getDist(a,b,c,d){
 
 /* ── BREACH CHECK ── */
 function checkBreach(lat,lng){
-  // Use zone center from Firebase if set, else fallback to order start point
   const checkLat = zoneCenterLat || orderLat;
   const checkLng = zoneCenterLng || orderLng;
   if(!checkLat||!checkLng) return;
@@ -584,7 +605,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     },null,{enableHighAccuracy:true,maximumAge:8000});
   }
 
-  /* show success modal */
   document.getElementById('successMsg').textContent=`Thank you, ${name}! Your order is confirmed.`;
   document.getElementById('successTotal').textContent='₹'+total;
   document.getElementById('successPhone').textContent=phone;
@@ -612,7 +632,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   </div>
 </div>
 
-<!-- iOS INSTALL INSTRUCTIONS (shown only on Safari/iOS) -->
+<!-- iOS INSTALL INSTRUCTIONS -->
 <div id="iosBanner" class="hidden fixed bottom-0 left-0 right-0 z-[200] p-4">
   <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl max-w-md mx-auto space-y-2">
     <div class="flex justify-between items-center">
@@ -629,7 +649,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 </div>
 
 <script>
-/* ── SERVICE WORKER (offline cache) ── */
 if('serviceWorker' in navigator){
   const swCode = `
     const CACHE = 'street-food-v1';
@@ -651,12 +670,10 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register(swUrl).catch(()=>{});
 }
 
-/* ── INSTALL PROMPT (Android Chrome) ── */
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Show banner after 3 seconds
   setTimeout(() => {
     if(!localStorage.getItem('installDismissed')){
       document.getElementById('installBanner').classList.remove('hidden');
@@ -678,7 +695,6 @@ document.getElementById('dismissInstall').addEventListener('click', () => {
   localStorage.setItem('installDismissed','1');
 });
 
-/* ── iOS Safari Install hint ── */
 const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isInStandalone = ('standalone' in navigator) && navigator.standalone;
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -690,7 +706,6 @@ document.getElementById('dismissIos').addEventListener('click', () => {
   localStorage.setItem('iosDismissed','1');
 });
 
-/* Already installed? hide banners */
 window.addEventListener('appinstalled', () => {
   document.getElementById('installBanner').classList.add('hidden');
   localStorage.setItem('installDismissed','1');
