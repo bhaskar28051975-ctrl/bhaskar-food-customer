@@ -1,73 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Financial Report</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports – Bhaskar Food</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 </head>
 <body class="bg-gray-50 pb-24 p-4">
-    <div class="max-w-md mx-auto space-y-4">
-        <h1 class="text-2xl font-black uppercase italic text-gray-800">📊 Profit Report</h1>
-        
-        <div class="grid grid-cols-1 gap-3">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex justify-between items-center">
-                <span class="text-[10px] font-black text-gray-400 uppercase">Gross Sales</span>
-                <span id="grossSales" class="text-xl font-black text-blue-600">₹0</span>
-            </div>
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex justify-between items-center">
-                <span class="text-[10px] font-black text-red-400 uppercase">Delivery Commissions</span>
-                <span id="totalComm" class="text-xl font-black text-red-500">- ₹0</span>
-            </div>
-            <div class="bg-green-600 p-6 rounded-[2.5rem] shadow-lg flex justify-between items-center text-white">
-                <span class="text-xs font-black uppercase">Net Profit</span>
-                <span id="netProfit" class="text-2xl font-black">₹0</span>
-            </div>
-        </div>
+<div class="max-w-md mx-auto space-y-5">
 
-        <div class="bg-white p-6 rounded-[2rem] border shadow-sm mt-6">
-            <h2 class="text-[10px] font-black uppercase mb-4 text-gray-400 tracking-widest text-center">Order Breakdown</h2>
-            <div id="report-list" class="space-y-3"></div>
-        </div>
+  <h1 class="text-2xl font-black text-gray-700 italic uppercase">📊 Reports</h1>
+
+  <!-- SUMMARY CARDS -->
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-green-600 text-white p-5 rounded-3xl shadow">
+      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Total Revenue</p>
+      <p class="font-black text-3xl mt-1" id="rRevenue">₹0</p>
+      <p class="text-[10px] opacity-70 mt-1" id="rOrderCount">0 orders</p>
     </div>
+    <div class="bg-blue-600 text-white p-5 rounded-3xl shadow">
+      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Completed</p>
+      <p class="font-black text-3xl mt-1" id="rCompleted">0</p>
+      <p class="text-[10px] opacity-70 mt-1">delivered orders</p>
+    </div>
+    <div class="bg-red-500 text-white p-5 rounded-3xl shadow">
+      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Cancelled</p>
+      <p class="font-black text-3xl mt-1" id="rCancelled">0</p>
+      <p class="text-[10px] opacity-70 mt-1" id="rCancelledBy">0 by customer</p>
+    </div>
+    <div class="bg-orange-500 text-white p-5 rounded-3xl shadow">
+      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Pending</p>
+      <p class="font-black text-3xl mt-1" id="rPending">0</p>
+      <p class="text-[10px] opacity-70 mt-1">active orders</p>
+    </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const firebaseConfig = { apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA", authDomain: "bhaskar-food-app.firebaseapp.com", databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com", projectId: "bhaskar-food-app", appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd" };
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  <!-- COD INFO -->
+  <div class="bg-orange-50 border border-orange-200 rounded-3xl p-5 flex items-center gap-4">
+    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl shrink-0">💵</div>
+    <div>
+      <p class="font-black text-gray-800">Cash on Delivery</p>
+      <p class="text-[10px] text-gray-500 mt-0.5">All orders are paid in cash at delivery</p>
+      <p class="font-black text-orange-600 text-lg mt-1" id="rCodTotal">₹0 collected</p>
+    </div>
+  </div>
 
-        onValue(ref(db, 'orders'), (snap) => {
-            let gross = 0; let commissionTotal = 0;
-            const list = document.getElementById('report-list'); list.innerHTML = "";
+  <!-- CANCELLED ORDERS DETAIL -->
+  <div id="cancelledSection" class="hidden space-y-3">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center text-sm">❌</div>
+      <p class="font-black text-gray-700 text-sm uppercase tracking-wide">Cancelled Orders Detail</p>
+    </div>
+    <div id="cancelledList" class="space-y-2"></div>
+  </div>
 
-            snap.forEach(child => {
-                const o = child.val();
-                if(o.status === 'completed') {
-                    const sale = parseFloat(o.totalAmount || 0);
-                    const comm = parseFloat(o.commissionPaid || 0);
-                    
-                    gross += sale;
-                    commissionTotal += comm;
+  <!-- ALL ORDERS -->
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <p class="font-black text-gray-700 text-sm uppercase tracking-wide">All Orders</p>
+      <select id="filterStatus" class="text-xs font-bold border rounded-xl px-3 py-2 bg-white focus:outline-none">
+        <option value="all">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="preparing">Preparing</option>
+        <option value="ready_for_pickup">Ready</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="settled">Settled</option>
+      </select>
+    </div>
+    <div id="allOrdersList" class="space-y-2"></div>
+  </div>
+</div>
 
-                    list.innerHTML += `
-                        <div class="flex justify-between items-center text-[10px] font-bold border-b pb-2">
-                            <div>
-                                <p class="text-gray-800">${o.customerName}</p>
-                                <p class="text-gray-400 font-normal">By: ${o.deliveredBy}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-blue-600">₹${sale}</p>
-                                <p class="text-red-400">-₹${comm.toFixed(2)}</p>
-                            </div>
-                        </div>`;
-                }
-            });
+<!-- BOTTOM NAV -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
+  <a href="admin.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
+  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
+  <a href="reports.html" class="flex flex-col items-center gap-1 text-indigo-600"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
+</div>
 
-            const net = gross - commissionTotal;
-            document.getElementById('grossSales').innerText = "₹" + gross.toFixed(2);
-            document.getElementById('totalComm').innerText = "- ₹" + commissionTotal.toFixed(2);
-            document.getElementById('netProfit').innerText = "₹" + net.toFixed(2);
-        });
-    </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const db = getDatabase(initializeApp({
+  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain:"bhaskar-food-app.firebaseapp.com",
+  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId:"bhaskar-food-app",
+  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
+}));
+
+function timeAgo(ts){
+  if(!ts) return '';
+  const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1) return 'just now';if(m<60) return m+'m ago';
+  const h=Math.floor(m/60);if(h<24) return h+'h '+m%60+'m ago';
+  return Math.floor(h/24)+'d ago';
+}
+
+function statusBadge(s){
+  const map={
+    pending:'bg-red-100 text-red-600',
+    preparing:'bg-orange-100 text-orange-600',
+    ready_for_pickup:'bg-yellow-100 text-yellow-700',
+    completed:'bg-green-100 text-green-700',
+    settled:'bg-gray-100 text-gray-600',
+    cancelled:'bg-red-50 text-red-500 border border-red-200'
+  };
+  return `<span class="text-[9px] font-black px-2 py-1 rounded-full uppercase ${map[s]||'bg-gray-100 text-gray-600'}">${s.replace('_',' ')}</span>`;
+}
+
+let allOrders=[];
+const filterEl=document.getElementById('filterStatus');
+filterEl.addEventListener('change',renderOrders);
+
+onValue(ref(db,'orders'),snap=>{
+  allOrders=[];
+  let revenue=0,completed=0,cancelled=0,cancelByCust=0,pending=0,codTotal=0;
+
+  snap.forEach(c=>{
+    const o={id:c.key,...c.val()};
+    allOrders.push(o);
+    const amt=parseFloat(o.totalAmount||0);
+    if(o.status==='completed'||o.status==='settled'){revenue+=amt;completed++;codTotal+=amt;}
+    else if(o.status==='cancelled'){cancelled++;if(o.cancelledBy==='customer') cancelByCust++;}
+    else if(o.status==='pending'||o.status==='preparing'||o.status==='ready_for_pickup') pending++;
+  });
+
+  allOrders.reverse();
+
+  document.getElementById('rRevenue').textContent='₹'+revenue;
+  document.getElementById('rOrderCount').textContent=allOrders.length+' total orders';
+  document.getElementById('rCompleted').textContent=completed;
+  document.getElementById('rCancelled').textContent=cancelled;
+  document.getElementById('rCancelledBy').textContent=cancelByCust+' by customer';
+  document.getElementById('rPending').textContent=pending;
+  document.getElementById('rCodTotal').textContent='₹'+codTotal+' collected';
+
+  // Cancelled detail
+  const cancelledOrders=allOrders.filter(o=>o.status==='cancelled');
+  const cancelSection=document.getElementById('cancelledSection');
+  const cancelList=document.getElementById('cancelledList');
+  if(cancelledOrders.length){
+    cancelSection.classList.remove('hidden');
+    cancelList.innerHTML=cancelledOrders.map(o=>`
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+            <p class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</p>
+            <p class="text-[10px] text-gray-500 mt-1 truncate max-w-[200px]">${o.items||'—'}</p>
+          </div>
+          <div class="text-right shrink-0 ml-2">
+            <p class="font-black text-red-500">₹${o.totalAmount||0}</p>
+            <p class="text-[9px] text-gray-400 mt-1">${timeAgo(o.cancelledAt||o.timestamp)}</p>
+          </div>
+        </div>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-[9px] font-black px-2 py-1 rounded-full ${o.cancelledBy==='customer'?'bg-orange-100 text-orange-600':'bg-red-100 text-red-600'}">
+            ${o.cancelledBy==='customer'?'Cancelled by customer':'Cancelled by kitchen'}
+          </span>
+        </div>
+      </div>`).join('');
+  } else cancelSection.classList.add('hidden');
+
+  renderOrders();
+});
+
+function renderOrders(){
+  const filter=filterEl.value;
+  const filtered=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
+  const list=document.getElementById('allOrdersList');
+  if(!filtered.length){list.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No orders found.</p>';return;}
+  list.innerHTML=filtered.map(o=>`
+    <div class="bg-white rounded-2xl border p-4 space-y-2 ${o.status==='cancelled'?'opacity-75':''}">
+      <div class="flex justify-between items-start gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
+            ${statusBadge(o.status)}
+            ${o.status==='cancelled'&&o.cancelledBy==='customer'?'<span class="text-[9px] bg-orange-50 text-orange-500 border border-orange-200 px-2 py-0.5 rounded-full font-bold">by customer</span>':''}
+          </div>
+          <p class="text-blue-600 text-xs font-bold mt-0.5">📞 ${o.customerPhone||'—'}</p>
+          <p class="text-[10px] text-gray-500 truncate mt-0.5">${o.items||'—'}</p>
+        </div>
+        <div class="text-right shrink-0">
+          <p class="font-black text-gray-800">₹${o.totalAmount||0}</p>
+          <p class="text-[10px] text-orange-500 font-bold">💵 COD</p>
+          <p class="text-[10px] text-gray-400 mt-1">${timeAgo(o.timestamp)}</p>
+        </div>
+      </div>
+    </div>`).join('');
+}
+</script>
 </body>
 </html>
