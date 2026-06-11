@@ -9,74 +9,101 @@
 <body class="bg-gray-50 pb-24 p-4">
 <div class="max-w-md mx-auto space-y-5">
 
-  <h1 class="text-2xl font-black text-gray-700 italic uppercase">📊 Reports</h1>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black text-gray-700 italic uppercase">📊 Reports</h1>
+      <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Live business overview</p>
+    </div>
+    <span id="lastUpdated" class="text-[9px] text-gray-400 font-bold">Connecting…</span>
+  </div>
 
   <!-- SUMMARY CARDS -->
   <div class="grid grid-cols-2 gap-3">
-    <div class="bg-green-600 text-white p-5 rounded-3xl shadow">
+    <div class="bg-green-600 text-white p-5 rounded-3xl shadow-lg">
       <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Total Revenue</p>
       <p class="font-black text-3xl mt-1" id="rRevenue">₹0</p>
-      <p class="text-[10px] opacity-70 mt-1" id="rOrderCount">0 orders</p>
+      <p class="text-[10px] opacity-70 mt-1" id="rTotalOrders">0 total orders</p>
     </div>
-    <div class="bg-blue-600 text-white p-5 rounded-3xl shadow">
+    <div class="bg-blue-600 text-white p-5 rounded-3xl shadow-lg">
       <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Completed</p>
       <p class="font-black text-3xl mt-1" id="rCompleted">0</p>
       <p class="text-[10px] opacity-70 mt-1">delivered orders</p>
     </div>
-    <div class="bg-red-500 text-white p-5 rounded-3xl shadow">
+    <div class="bg-orange-500 text-white p-5 rounded-3xl shadow-lg">
+      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Active Now</p>
+      <p class="font-black text-3xl mt-1" id="rActive">0</p>
+      <p class="text-[10px] opacity-70 mt-1">pending/preparing</p>
+    </div>
+    <div class="bg-red-500 text-white p-5 rounded-3xl shadow-lg">
       <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Cancelled</p>
       <p class="font-black text-3xl mt-1" id="rCancelled">0</p>
-      <p class="text-[10px] opacity-70 mt-1" id="rCancelledBy">0 by customer</p>
-    </div>
-    <div class="bg-orange-500 text-white p-5 rounded-3xl shadow">
-      <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Pending</p>
-      <p class="font-black text-3xl mt-1" id="rPending">0</p>
-      <p class="text-[10px] opacity-70 mt-1">active orders</p>
+      <p class="text-[10px] opacity-70 mt-1" id="rCancelledSub">0 by customer</p>
     </div>
   </div>
 
-  <!-- COD INFO -->
+  <!-- COD CARD -->
   <div class="bg-orange-50 border border-orange-200 rounded-3xl p-5 flex items-center gap-4">
     <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl shrink-0">💵</div>
     <div>
       <p class="font-black text-gray-800">Cash on Delivery</p>
-      <p class="text-[10px] text-gray-500 mt-0.5">All orders are paid in cash at delivery</p>
-      <p class="font-black text-orange-600 text-lg mt-1" id="rCodTotal">₹0 collected</p>
+      <p class="text-[10px] text-gray-500 mt-0.5">All payments collected in cash at doorstep</p>
+      <p class="font-black text-orange-600 text-xl mt-1" id="rCodCollected">₹0 collected</p>
     </div>
   </div>
 
-  <!-- CANCELLED ORDERS DETAIL -->
+  <!-- DELIVERY STATS -->
+  <div class="bg-white rounded-3xl border p-5 space-y-3">
+    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🛵 Delivery Stats</p>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-blue-50 border border-blue-100 rounded-2xl p-3 text-center">
+        <p class="font-black text-2xl text-blue-600" id="rOutForDelivery">0</p>
+        <p class="text-[10px] text-gray-500 font-bold mt-1">Out for Delivery</p>
+      </div>
+      <div class="bg-green-50 border border-green-100 rounded-2xl p-3 text-center">
+        <p class="font-black text-2xl text-green-600" id="rReadyPickup">0</p>
+        <p class="text-[10px] text-gray-500 font-bold mt-1">Ready for Pickup</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCELLED DETAIL -->
   <div id="cancelledSection" class="hidden space-y-3">
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center text-sm">❌</div>
+      <div class="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center text-xs">❌</div>
       <p class="font-black text-gray-700 text-sm uppercase tracking-wide">Cancelled Orders Detail</p>
     </div>
     <div id="cancelledList" class="space-y-2"></div>
   </div>
 
-  <!-- ALL ORDERS -->
+  <!-- FILTER + ALL ORDERS -->
   <div class="space-y-3">
-    <div class="flex items-center justify-between">
-      <p class="font-black text-gray-700 text-sm uppercase tracking-wide">All Orders</p>
-      <select id="filterStatus" class="text-xs font-bold border rounded-xl px-3 py-2 bg-white focus:outline-none">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs">📋</div>
+        <p class="font-black text-gray-700 text-sm uppercase tracking-wide">All Orders</p>
+      </div>
+      <select id="filterStatus" class="text-xs font-bold border-2 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-400">
         <option value="all">All Status</option>
-        <option value="pending">Pending</option>
-        <option value="preparing">Preparing</option>
-        <option value="ready_for_pickup">Ready</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
-        <option value="settled">Settled</option>
+        <option value="pending">🔴 Pending</option>
+        <option value="preparing">🟡 Preparing</option>
+        <option value="ready_for_pickup">🟢 Ready</option>
+        <option value="out_for_delivery">🚚 Out for Delivery</option>
+        <option value="completed">✅ Completed</option>
+        <option value="cancelled">❌ Cancelled</option>
+        <option value="settled">📦 Settled</option>
       </select>
     </div>
     <div id="allOrdersList" class="space-y-2"></div>
   </div>
+
 </div>
 
 <!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
-  <a href="admin.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
-  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
-  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-[100] shadow-lg">
+  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
+  <a href="admin.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
+  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
   <a href="reports.html" class="flex flex-col items-center gap-1 text-indigo-600"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
 
@@ -93,23 +120,21 @@ const db = getDatabase(initializeApp({
 }));
 
 function timeAgo(ts){
-  if(!ts) return '';
-  const m=Math.floor((Date.now()-ts)/60000);
-  if(m<1) return 'just now';if(m<60) return m+'m ago';
-  const h=Math.floor(m/60);if(h<24) return h+'h '+m%60+'m ago';
-  return Math.floor(h/24)+'d ago';
+  if(!ts)return'';const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1)return'just now';if(m<60)return m+'m ago';
+  const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';
 }
-
 function statusBadge(s){
-  const map={
-    pending:'bg-red-100 text-red-600',
-    preparing:'bg-orange-100 text-orange-600',
-    ready_for_pickup:'bg-yellow-100 text-yellow-700',
-    completed:'bg-green-100 text-green-700',
-    settled:'bg-gray-100 text-gray-600',
-    cancelled:'bg-red-50 text-red-500 border border-red-200'
+  const cfg={
+    pending:       'bg-red-100 text-red-600',
+    preparing:     'bg-orange-100 text-orange-600',
+    ready_for_pickup: 'bg-yellow-100 text-yellow-700',
+    out_for_delivery: 'bg-blue-100 text-blue-700',
+    completed:     'bg-green-100 text-green-700',
+    settled:       'bg-gray-100 text-gray-500',
+    cancelled:     'bg-red-50 text-red-500 border border-red-200'
   };
-  return `<span class="text-[9px] font-black px-2 py-1 rounded-full uppercase ${map[s]||'bg-gray-100 text-gray-600'}">${s.replace('_',' ')}</span>`;
+  return `<span class="text-[9px] font-black px-2 py-1 rounded-full uppercase whitespace-nowrap ${cfg[s]||'bg-gray-100 text-gray-600'}">${s.replace(/_/g,' ')}</span>`;
 }
 
 let allOrders=[];
@@ -118,75 +143,85 @@ filterEl.addEventListener('change',renderOrders);
 
 onValue(ref(db,'orders'),snap=>{
   allOrders=[];
-  let revenue=0,completed=0,cancelled=0,cancelByCust=0,pending=0,codTotal=0;
+  let revenue=0,completed=0,active=0,cancelled=0,cancelByCust=0,cancelByKitchen=0,
+      codCollected=0,outForDelivery=0,readyPickup=0;
 
-  snap.forEach(c=>{
-    const o={id:c.key,...c.val()};
-    allOrders.push(o);
-    const amt=parseFloat(o.totalAmount||0);
-    if(o.status==='completed'||o.status==='settled'){revenue+=amt;completed++;codTotal+=amt;}
-    else if(o.status==='cancelled'){cancelled++;if(o.cancelledBy==='customer') cancelByCust++;}
-    else if(o.status==='pending'||o.status==='preparing'||o.status==='ready_for_pickup') pending++;
-  });
+  if(snap.exists()){
+    snap.forEach(c=>{
+      const o={id:c.key,...c.val()};
+      allOrders.push(o);
+      const amt=parseFloat(o.totalAmount||0);
+      const s=o.status;
+
+      if(s==='completed'||s==='settled'){revenue+=amt;completed++;codCollected+=amt;}
+      else if(s==='cancelled'){cancelled++;if(o.cancelledBy==='customer')cancelByCust++;else cancelByKitchen++;}
+      else if(s==='pending'||s==='preparing')active++;
+      else if(s==='out_for_delivery'){active++;outForDelivery++;}
+      else if(s==='ready_for_pickup'){active++;readyPickup++;}
+    });
+  }
 
   allOrders.reverse();
 
+  /* Update summary cards */
   document.getElementById('rRevenue').textContent='₹'+revenue;
-  document.getElementById('rOrderCount').textContent=allOrders.length+' total orders';
+  document.getElementById('rTotalOrders').textContent=allOrders.length+' total orders';
   document.getElementById('rCompleted').textContent=completed;
+  document.getElementById('rActive').textContent=active;
   document.getElementById('rCancelled').textContent=cancelled;
-  document.getElementById('rCancelledBy').textContent=cancelByCust+' by customer';
-  document.getElementById('rPending').textContent=pending;
-  document.getElementById('rCodTotal').textContent='₹'+codTotal+' collected';
+  document.getElementById('rCancelledSub').textContent=cancelByCust+' by customer · '+cancelByKitchen+' by kitchen';
+  document.getElementById('rCodCollected').textContent='₹'+codCollected+' collected';
+  document.getElementById('rOutForDelivery').textContent=outForDelivery;
+  document.getElementById('rReadyPickup').textContent=readyPickup;
+  document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-  // Cancelled detail
+  /* Cancelled detail */
   const cancelledOrders=allOrders.filter(o=>o.status==='cancelled');
-  const cancelSection=document.getElementById('cancelledSection');
+  const cancelSec=document.getElementById('cancelledSection');
   const cancelList=document.getElementById('cancelledList');
   if(cancelledOrders.length){
-    cancelSection.classList.remove('hidden');
+    cancelSec.classList.remove('hidden');
     cancelList.innerHTML=cancelledOrders.map(o=>`
-      <div class="bg-red-50 border border-red-200 rounded-2xl p-4">
-        <div class="flex justify-between items-start">
-          <div>
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-2">
+        <div class="flex justify-between items-start gap-2">
+          <div class="min-w-0 flex-1">
             <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
-            <p class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</p>
-            <p class="text-[10px] text-gray-500 mt-1 truncate max-w-[200px]">${o.items||'—'}</p>
+            <a href="tel:${o.customerPhone||''}" class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</a>
+            <p class="text-[10px] text-gray-500 mt-1 truncate">${o.items||'—'}</p>
           </div>
           <div class="text-right shrink-0 ml-2">
             <p class="font-black text-red-500">₹${o.totalAmount||0}</p>
             <p class="text-[9px] text-gray-400 mt-1">${timeAgo(o.cancelledAt||o.timestamp)}</p>
           </div>
         </div>
-        <div class="mt-2 flex items-center gap-2">
-          <span class="text-[9px] font-black px-2 py-1 rounded-full ${o.cancelledBy==='customer'?'bg-orange-100 text-orange-600':'bg-red-100 text-red-600'}">
-            ${o.cancelledBy==='customer'?'Cancelled by customer':'Cancelled by kitchen'}
-          </span>
-        </div>
+        <span class="inline-block text-[9px] font-black px-2 py-1 rounded-full ${o.cancelledBy==='customer'?'bg-orange-100 text-orange-600':'bg-red-100 text-red-600'}">
+          Cancelled by ${o.cancelledBy==='customer'?'Customer':'Kitchen'}
+        </span>
       </div>`).join('');
-  } else cancelSection.classList.add('hidden');
+  } else cancelSec.classList.add('hidden');
 
   renderOrders();
 });
 
 function renderOrders(){
   const filter=filterEl.value;
-  const filtered=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
   const list=document.getElementById('allOrdersList');
-  if(!filtered.length){list.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No orders found.</p>';return;}
+  const filtered=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
+  if(!filtered.length){list.innerHTML='<p class="text-center text-gray-400 text-sm py-6 font-bold">No orders found.</p>';return;}
   list.innerHTML=filtered.map(o=>`
-    <div class="bg-white rounded-2xl border p-4 space-y-2 ${o.status==='cancelled'?'opacity-75':''}">
+    <div class="bg-white rounded-2xl border p-4 space-y-2 ${o.status==='cancelled'?'opacity-80':''}">
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
             <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
             ${statusBadge(o.status)}
             ${o.status==='cancelled'&&o.cancelledBy==='customer'?'<span class="text-[9px] bg-orange-50 text-orange-500 border border-orange-200 px-2 py-0.5 rounded-full font-bold">by customer</span>':''}
           </div>
-          <p class="text-blue-600 text-xs font-bold mt-0.5">📞 ${o.customerPhone||'—'}</p>
+          <a href="tel:${o.customerPhone||''}" class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</a>
           <p class="text-[10px] text-gray-500 truncate mt-0.5">${o.items||'—'}</p>
+          ${o.assignedTo?`<p class="text-[10px] text-blue-600 font-bold mt-0.5">🛵 ${o.assignedName||o.assignedTo}</p>`:''}
         </div>
-        <div class="text-right shrink-0">
+        <div class="text-right shrink-0 ml-2">
           <p class="font-black text-gray-800">₹${o.totalAmount||0}</p>
           <p class="text-[10px] text-orange-500 font-bold">💵 COD</p>
           <p class="text-[10px] text-gray-400 mt-1">${timeAgo(o.timestamp)}</p>
