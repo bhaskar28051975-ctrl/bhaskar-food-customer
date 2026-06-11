@@ -62,16 +62,18 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const db = getDatabase(initializeApp({
+const firebaseConfig = {
   apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
   authDomain:"bhaskar-food-app.firebaseapp.com",
   databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
   projectId:"bhaskar-food-app",
   appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
-}));
+};
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const db = getDatabase(app);
 
 /* ── STATUS UPDATE ── */
 window.updateStatus=(id,s)=>update(ref(db,`orders/${id}`),{status:s});
