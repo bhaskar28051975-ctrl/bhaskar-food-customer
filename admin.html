@@ -13,63 +13,60 @@
 .sheet{animation:su .3s ease}
 @keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 #zoneMap{height:300px;width:100%;border-radius:1rem;z-index:1}
-.oos-toggle{width:48px;height:26px;border-radius:99px;cursor:pointer;display:flex;align-items:center;padding:3px;transition:background .25s;flex-shrink:0}
-.oos-toggle .knob{width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .25s}
+.oos-toggle{width:52px;height:28px;border-radius:99px;cursor:pointer;display:flex;align-items:center;padding:3px;transition:background .25s;flex-shrink:0}
+.oos-toggle .knob{width:22px;height:22px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .25s}
 .oos-toggle.oos-on{background:#dc2626}
-.oos-toggle.oos-on .knob{transform:translateX(22px)}
+.oos-toggle.oos-on .knob{transform:translateX(24px)}
 .oos-toggle.oos-off{background:#22c55e}
 </style>
 </head>
 <body class="bg-red-50 pb-28 p-4">
 <div class="max-w-md mx-auto space-y-5">
 
+  <!-- HEADER -->
+  <div class="bg-white rounded-3xl p-5 shadow-sm border flex items-center gap-4">
+    <div class="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center text-3xl shrink-0">🏪</div>
+    <div>
+      <h1 class="font-black text-gray-800 text-lg uppercase italic">Bhaskar Food</h1>
+      <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Admin Panel</p>
+    </div>
+  </div>
+
   <!-- ADD HOTEL -->
   <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-3">
-    <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">🏨 Add New Hotel</h2>
-    <input id="resName" type="text" placeholder="Hotel Name *" class="w-full p-3 border rounded-xl bg-gray-50 text-sm"/>
-    <input id="resImg"  type="text" placeholder="Hotel Image URL (optional)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm"/>
+    <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest flex items-center gap-2">🏨 Add New Hotel</h2>
+    <input id="resName" type="text" placeholder="Hotel Name *" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-red-400"/>
+    <input id="resImg"  type="text" placeholder="Hotel Image URL (optional)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
     <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">💾 Save Hotel</button>
   </div>
 
-  <!-- SERVICE AREA RADIUS -->
+  <!-- SERVICE RADIUS -->
   <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl">📡</div>
-      <div>
-        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Service Area Radius</h2>
-        <p class="text-[10px] text-gray-400 mt-0.5">Fixed for ALL customers — they cannot change it</p>
-      </div>
+      <div><h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Service Area Radius</h2>
+        <p class="text-[10px] text-gray-400 mt-0.5">Fixed for ALL customers</p></div>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">Current Service Radius</p>
+      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">Current Radius</p>
       <p class="font-black text-4xl text-red-600" id="currentRadiusDisplay">—</p>
       <p class="text-xs text-gray-400 mt-1">metres from order location</p>
     </div>
-    <div class="space-y-2">
-      <div class="flex items-center gap-3">
-        <button id="radiusMinusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 transition-transform border border-red-200">−</button>
-        <div class="flex-1">
-          <div class="bg-gray-100 rounded-full h-3 overflow-hidden">
-            <div id="adminRadiusBar" class="bg-red-500 h-3 rounded-full transition-all" style="width:20%"></div>
-          </div>
-          <div class="flex justify-between text-[9px] text-gray-400 font-bold mt-1 px-1">
-            <span>50m</span><span>250m</span><span>500m</span><span>750m</span><span>1000m</span>
-          </div>
-        </div>
-        <button id="radiusPlusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 transition-transform border border-red-200">+</button>
+    <div class="flex items-center gap-3">
+      <button id="radiusMinusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 border border-red-200">−</button>
+      <div class="flex-1">
+        <div class="bg-gray-100 rounded-full h-3 overflow-hidden"><div id="adminRadiusBar" class="bg-red-500 h-3 rounded-full transition-all" style="width:20%"></div></div>
+        <div class="flex justify-between text-[9px] text-gray-400 font-bold mt-1 px-1"><span>50m</span><span>250m</span><span>500m</span><span>750m</span><span>1000m</span></div>
       </div>
-      <p class="text-[10px] text-gray-400 text-center">Step: 50m &nbsp;|&nbsp; Range: 50m – 1000m</p>
+      <button id="radiusPlusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 border border-red-200">+</button>
     </div>
-    <div>
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-2">Quick Presets</p>
-      <div class="grid grid-cols-4 gap-2" id="presetBtns">
-        <button data-r="100"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">100m</button>
-        <button data-r="200"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">200m</button>
-        <button data-r="500"  class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">500m</button>
-        <button data-r="1000" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">1km</button>
-      </div>
+    <div class="grid grid-cols-4 gap-2" id="presetBtns">
+      <button data-r="100" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">100m</button>
+      <button data-r="200" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">200m</button>
+      <button data-r="500" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">500m</button>
+      <button data-r="1000" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">1km</button>
     </div>
-    <button id="saveRadiusBtn" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">💾 Save Service Radius</button>
+    <button id="saveRadiusBtn" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Radius</button>
     <div id="radiusSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">✅ Radius saved!</div>
   </div>
 
@@ -77,39 +74,28 @@
   <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-xl">🗺️</div>
-      <div>
-        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Zone Manager</h2>
-        <p class="text-[10px] text-gray-400 mt-0.5">Set center point + radius on map</p>
-      </div>
+      <div><h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Zone Manager</h2>
+        <p class="text-[10px] text-gray-400 mt-0.5">Set center point + radius on map</p></div>
     </div>
     <div class="rounded-2xl overflow-hidden border border-gray-200"><div id="zoneMap"></div></div>
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
       <div class="flex-1 bg-gray-50 border rounded-xl p-2">
         <p class="text-[10px] font-black text-gray-400 uppercase">Center Point</p>
         <p id="zoneCoordsText" class="text-xs font-black text-gray-600 font-mono">Tap map to set</p>
       </div>
-      <button id="useMyLocZoneBtn" class="bg-purple-600 text-white px-4 py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1 shrink-0">
-        <i class="fas fa-crosshairs"></i> My Location
-      </button>
+      <button id="useMyLocZoneBtn" class="bg-purple-600 text-white px-4 py-3 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1 shrink-0"><i class="fas fa-crosshairs"></i> My Location</button>
     </div>
-    <div class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="font-black text-sm text-gray-700">Zone Radius</p>
-        <div class="flex items-center gap-2">
-          <button id="zoneRadiusDown" class="w-9 h-9 bg-purple-100 text-purple-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-90">−</button>
-          <span id="zoneRadiusDisplay" class="font-black text-base text-purple-600 w-20 text-center">200 m</span>
-          <button id="zoneRadiusUp" class="w-9 h-9 bg-purple-600 text-white rounded-xl font-black text-xl flex items-center justify-center active:scale-90">+</button>
-        </div>
+    <div class="flex items-center justify-between">
+      <p class="font-black text-sm text-gray-700">Zone Radius</p>
+      <div class="flex items-center gap-2">
+        <button id="zoneRadiusDown" class="w-9 h-9 bg-purple-100 text-purple-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-90">−</button>
+        <span id="zoneRadiusDisplay" class="font-black text-base text-purple-600 w-20 text-center">200 m</span>
+        <button id="zoneRadiusUp" class="w-9 h-9 bg-purple-600 text-white rounded-xl font-black text-xl flex items-center justify-center active:scale-90">+</button>
       </div>
-      <input type="range" id="zoneRadiusSlider" min="50" max="2000" value="200" step="50" class="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-purple-600"/>
     </div>
-    <div>
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">Zone Name</p>
-      <input id="zoneNameInput" type="text" placeholder="e.g. Main Market, Station Road…" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-purple-400"/>
-    </div>
-    <button id="saveZoneBtn" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform flex items-center justify-center gap-2">
-      <i class="fas fa-save"></i> Save Zone
-    </button>
+    <input type="range" id="zoneRadiusSlider" min="50" max="2000" value="200" step="50" class="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-purple-600"/>
+    <input id="zoneNameInput" type="text" placeholder="Zone Name e.g. Main Market…" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-purple-400"/>
+    <button id="saveZoneBtn" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Save Zone</button>
     <div id="zoneSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">✅ Zone saved!</div>
     <div>
       <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-2">Saved Zones</p>
@@ -121,10 +107,8 @@
   <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">🛵</div>
-      <div>
-        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Boy Accounts</h2>
-        <p class="text-[10px] text-gray-400 mt-0.5">Create login credentials for delivery staff</p>
-      </div>
+      <div><h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Boy Accounts</h2>
+        <p class="text-[10px] text-gray-400 mt-0.5">Create login credentials for delivery staff</p></div>
     </div>
     <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 space-y-3">
       <p class="text-[10px] font-black text-blue-700 uppercase tracking-wider">➕ Create New Account</p>
@@ -133,9 +117,9 @@
       <input id="dbUsername" type="text"     placeholder="Username * (for login)" class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
       <div class="relative">
         <input id="dbPassword" type="password" placeholder="Password *"           class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
-        <button id="toggleDbPass" class="absolute right-3 top-3 text-gray-400 text-sm font-bold">👁️</button>
+        <button id="toggleDbPass" class="absolute right-3 top-3 text-gray-400 text-sm">👁️</button>
       </div>
-      <button id="saveDbBtn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 transition-transform">💾 Create Account</button>
+      <button id="saveDbBtn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95">💾 Create Account</button>
       <div id="dbSaveMsg" class="hidden text-center text-green-600 font-black text-xs py-1"></div>
     </div>
     <div>
@@ -154,10 +138,10 @@
       <input id="editDbName"  type="text" placeholder="Full Name *"    class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
       <input id="editDbPhone" type="tel"  placeholder="Phone Number *" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
       <div class="relative">
-        <input id="editDbPass" type="password" placeholder="New Password (leave blank to keep)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
-        <button id="toggleEditPass" class="absolute right-3 top-3 text-gray-400 text-sm font-bold">👁️</button>
+        <input id="editDbPass" type="password" placeholder="New Password (blank = keep)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
+        <button id="toggleEditPass" class="absolute right-3 top-3 text-gray-400 text-sm">👁️</button>
       </div>
-      <button id="updateDbBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">✅ Update Account</button>
+      <button id="updateDbBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">✅ Update Account</button>
     </div>
   </div>
 
@@ -174,7 +158,7 @@
     </div>
   </div>
 
-  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Hotels & Menus</p>
+  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">🏨 Hotels & Menus</p>
   <div id="hotelList" class="space-y-4"></div>
 </div>
 
@@ -186,7 +170,7 @@
       <button onclick="closeMenuModal()" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
     <div class="p-4 pb-2">
-      <button onclick="openItemForm(null)" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">➕ Add New Dish</button>
+      <button onclick="openItemForm(null)" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">➕ Add New Dish</button>
     </div>
     <div id="menuList" class="overflow-y-auto p-4 pt-2 space-y-3 flex-1"></div>
   </div>
@@ -199,26 +183,31 @@
       <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
       <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
-    <div class="space-y-3">
-      <div>
-        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
-        <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-      </div>
-      <div>
-        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Price (₹) *</label>
-        <input id="fPrice" type="number" placeholder="e.g. 250" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-      </div>
-      <div>
-        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Image URL</label>
-        <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-        <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
-      </div>
-      <div id="previewWrap" class="hidden rounded-xl overflow-hidden border">
-        <img id="previewImg" src="" class="w-full h-36 object-cover"/>
-      </div>
+    <div>
+      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
+      <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
     </div>
-    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">💾 Save Dish</button>
+    <div>
+      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Price (₹) *</label>
+      <input id="fPrice" type="number" placeholder="e.g. 250" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+    </div>
+    <div>
+      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Image URL</label>
+      <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+      <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
+    </div>
+    <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImg" src="" class="w-full h-36 object-cover"/></div>
+    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
   </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-[100] shadow-lg">
+  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
+  <a href="admin.html" class="flex flex-col items-center gap-1 text-red-600"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
+  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
+  <a href="reports.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
 
 <script type="module">
@@ -233,14 +222,18 @@ const db = getDatabase(initializeApp({
   appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
 }));
 
+function showToast(msg){
+  let t=document.getElementById('adminToast');
+  if(!t){t=document.createElement('div');t.id='adminToast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;background:#1f2937;color:#fff;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.25)';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3000);
+}
+
 /* ── RADIUS ── */
-let adminRadius=200;
-const MIN_R=50,MAX_R=1000,STEP_R=50;
+let adminRadius=200;const MIN_R=50,MAX_R=1000,STEP_R=50;
 function updateRadiusUI(r){
   adminRadius=r;
   document.getElementById('currentRadiusDisplay').textContent=r+'m';
-  const pct=((r-MIN_R)/(MAX_R-MIN_R))*100;
-  document.getElementById('adminRadiusBar').style.width=pct+'%';
+  document.getElementById('adminRadiusBar').style.width=((r-MIN_R)/(MAX_R-MIN_R)*100)+'%';
   document.querySelectorAll('.preset-btn').forEach(b=>{
     const a=parseInt(b.dataset.r)===r;
     b.classList.toggle('bg-red-600',a);b.classList.toggle('text-white',a);
@@ -253,13 +246,11 @@ document.getElementById('radiusPlusBtn').addEventListener('click',()=>updateRadi
 document.querySelectorAll('.preset-btn').forEach(btn=>btn.addEventListener('click',()=>updateRadiusUI(parseInt(btn.dataset.r))));
 document.getElementById('saveRadiusBtn').addEventListener('click',async()=>{
   await set(ref(db,'settings/serviceRadius'),adminRadius);
-  const msg=document.getElementById('radiusSavedMsg');
-  msg.classList.remove('hidden');setTimeout(()=>msg.classList.add('hidden'),3000);
+  const m=document.getElementById('radiusSavedMsg');m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3000);
 });
 
-/* ── ZONE MANAGER ── */
-let zoneLat=17.3850,zoneLng=78.4867,zoneRadius=200;
-let zoneMap,zoneCenterMarker,zoneCircleLayer;
+/* ── ZONE ── */
+let zoneLat=17.385,zoneLng=78.4867,zoneRadius=200,zoneMap,zoneCenterMarker,zoneCircleLayer;
 let editingZoneId=null,deleteZoneTargetId=null;
 setTimeout(()=>{
   zoneMap=L.map('zoneMap',{zoomControl:true,attributionControl:false}).setView([zoneLat,zoneLng],14);
@@ -271,11 +262,8 @@ function drawZoneOnMap(lat,lng,radius){
   zoneLat=lat;zoneLng=lng;
   document.getElementById('zoneCoordsText').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
   const icon=L.divIcon({html:`<div style="width:16px;height:16px;background:#7c3aed;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>`,iconSize:[16,16],className:''});
-  if(zoneCenterMarker) zoneCenterMarker.setLatLng([lat,lng]);
-  else{
-    zoneCenterMarker=L.marker([lat,lng],{icon,draggable:true}).addTo(zoneMap).bindPopup('📍 Zone Center');
-    zoneCenterMarker.on('dragend',e=>{const p=e.target.getLatLng();drawZoneOnMap(p.lat,p.lng,zoneRadius);});
-  }
+  if(zoneCenterMarker)zoneCenterMarker.setLatLng([lat,lng]);
+  else{zoneCenterMarker=L.marker([lat,lng],{icon,draggable:true}).addTo(zoneMap).bindPopup('📍 Zone Center');zoneCenterMarker.on('dragend',e=>{const p=e.target.getLatLng();drawZoneOnMap(p.lat,p.lng,zoneRadius);});}
   if(zoneCircleLayer){zoneCircleLayer.setLatLng([lat,lng]);zoneCircleLayer.setRadius(radius);}
   else zoneCircleLayer=L.circle([lat,lng],{radius,color:'#7c3aed',fillColor:'#7c3aed',fillOpacity:0.12,weight:2.5,dashArray:'6,4'}).addTo(zoneMap);
   zoneMap.setView([lat,lng],15);
@@ -284,25 +272,20 @@ function updateZoneRadius(val){
   zoneRadius=Math.min(2000,Math.max(50,val));
   document.getElementById('zoneRadiusSlider').value=zoneRadius;
   document.getElementById('zoneRadiusDisplay').textContent=zoneRadius>=1000?(zoneRadius/1000).toFixed(1)+' km':zoneRadius+' m';
-  if(zoneCircleLayer) zoneCircleLayer.setRadius(zoneRadius);
+  if(zoneCircleLayer)zoneCircleLayer.setRadius(zoneRadius);
 }
 document.getElementById('zoneRadiusSlider').addEventListener('input',e=>updateZoneRadius(parseInt(e.target.value)));
 document.getElementById('zoneRadiusUp').addEventListener('click',()=>updateZoneRadius(zoneRadius+50));
 document.getElementById('zoneRadiusDown').addEventListener('click',()=>updateZoneRadius(zoneRadius-50));
 document.getElementById('useMyLocZoneBtn').addEventListener('click',()=>{
   if(!navigator.geolocation){alert('GPS not supported');return;}
-  const btn=document.getElementById('useMyLocZoneBtn');
-  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
-  navigator.geolocation.getCurrentPosition(pos=>{
-    drawZoneOnMap(pos.coords.latitude,pos.coords.longitude,zoneRadius);
-    btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';
-  },()=>{btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';alert('Location denied');},{enableHighAccuracy:true});
+  const btn=document.getElementById('useMyLocZoneBtn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+  navigator.geolocation.getCurrentPosition(pos=>{drawZoneOnMap(pos.coords.latitude,pos.coords.longitude,zoneRadius);btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';},()=>{btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';alert('Location denied');},{enableHighAccuracy:true});
 });
 document.getElementById('saveZoneBtn').addEventListener('click',async()=>{
   if(!zoneCenterMarker){alert('⚠️ Tap the map to set a center point first!');return;}
   const name=document.getElementById('zoneNameInput').value.trim()||'Delivery Zone';
-  const btn=document.getElementById('saveZoneBtn');
-  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…';btn.disabled=true;
+  const btn=document.getElementById('saveZoneBtn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…';btn.disabled=true;
   const data={name,lat:zoneLat,lng:zoneLng,radius:zoneRadius,updatedAt:Date.now()};
   if(editingZoneId){await set(ref(db,'zones/'+editingZoneId),{...data,id:editingZoneId});editingZoneId=null;btn.innerHTML='<i class="fas fa-save"></i> Save Zone';}
   else{const nr=push(ref(db,'zones'));await set(nr,{...data,id:nr.key});}
@@ -310,7 +293,7 @@ document.getElementById('saveZoneBtn').addEventListener('click',async()=>{
   await set(ref(db,'settings/zoneCenter'),{lat:zoneLat,lng:zoneLng});
   document.getElementById('zoneNameInput').value='';
   btn.innerHTML='<i class="fas fa-save"></i> Save Zone';btn.disabled=false;
-  const msg=document.getElementById('zoneSavedMsg');msg.classList.remove('hidden');setTimeout(()=>msg.classList.add('hidden'),3000);
+  const m=document.getElementById('zoneSavedMsg');m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3000);
 });
 onValue(ref(db,'zones'),snap=>{
   const zones=snap.val()||{},list=document.getElementById('savedZonesList'),keys=Object.keys(zones);
@@ -318,40 +301,21 @@ onValue(ref(db,'zones'),snap=>{
   list.innerHTML='';
   keys.forEach(id=>{
     const z=zones[id],rD=z.radius>=1000?(z.radius/1000).toFixed(1)+' km':z.radius+' m';
-    const card=document.createElement('div');
-    card.className='bg-purple-50 border border-purple-200 rounded-2xl p-3 flex items-center gap-3';
+    const card=document.createElement('div');card.className='bg-purple-50 border border-purple-200 rounded-2xl p-3 flex items-center gap-3';
     card.innerHTML=`<div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-lg shrink-0">📍</div>
       <div class="flex-1 min-w-0"><p class="font-black text-sm text-gray-800 truncate">${z.name}</p>
-        <p class="text-[10px] text-gray-500 font-bold mt-0.5">Radius: <span class="text-purple-600">${rD}</span> · <span class="font-mono">${z.lat.toFixed(4)}, ${z.lng.toFixed(4)}</span></p></div>
+        <p class="text-[10px] text-gray-500 font-bold mt-0.5">Radius: <span class="text-purple-600">${rD}</span></p></div>
       <div class="flex gap-1.5 shrink-0">
         <button class="editZoneBtn w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="${id}"><i class="fas fa-edit"></i></button>
         <button class="delZoneBtn w-9 h-9 bg-red-100 text-red-500 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="${id}"><i class="fas fa-trash"></i></button>
       </div>`;
-    card.querySelector('.editZoneBtn').addEventListener('click',()=>{
-      editingZoneId=id;document.getElementById('zoneNameInput').value=z.name;
-      updateZoneRadius(z.radius);drawZoneOnMap(z.lat,z.lng,z.radius);
-      document.getElementById('saveZoneBtn').innerHTML='<i class="fas fa-edit"></i> Update Zone';
-      document.getElementById('saveZoneBtn').scrollIntoView({behavior:'smooth',block:'center'});
-      showToast('📝 Editing: '+z.name);
-    });
-    card.querySelector('.delZoneBtn').addEventListener('click',()=>{
-      deleteZoneTargetId=id;document.getElementById('deleteZoneNameText').textContent='"'+z.name+'"';
-      document.getElementById('deleteZoneModal').classList.remove('hidden');
-    });
+    card.querySelector('.editZoneBtn').addEventListener('click',()=>{editingZoneId=id;document.getElementById('zoneNameInput').value=z.name;updateZoneRadius(z.radius);drawZoneOnMap(z.lat,z.lng,z.radius);document.getElementById('saveZoneBtn').innerHTML='<i class="fas fa-edit"></i> Update Zone';document.getElementById('saveZoneBtn').scrollIntoView({behavior:'smooth',block:'center'});showToast('📝 Editing: '+z.name);});
+    card.querySelector('.delZoneBtn').addEventListener('click',()=>{deleteZoneTargetId=id;document.getElementById('deleteZoneNameText').textContent='"'+z.name+'"';document.getElementById('deleteZoneModal').classList.remove('hidden');});
     list.appendChild(card);
   });
 });
 document.getElementById('cancelDeleteZone').addEventListener('click',()=>{document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;});
-document.getElementById('confirmDeleteZone').addEventListener('click',async()=>{
-  if(!deleteZoneTargetId) return;
-  await remove(ref(db,'zones/'+deleteZoneTargetId));
-  document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;showToast('🗑️ Zone deleted');
-});
-function showToast(msg){
-  let t=document.getElementById('adminToast');
-  if(!t){t=document.createElement('div');t.id='adminToast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;background:#1f2937;color:#fff;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.25)';document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3000);
-}
+document.getElementById('confirmDeleteZone').addEventListener('click',async()=>{if(!deleteZoneTargetId)return;await remove(ref(db,'zones/'+deleteZoneTargetId));document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;showToast('🗑️ Zone deleted');});
 
 /* ── DELIVERY BOY ACCOUNTS ── */
 let editingDbKey=null;
@@ -393,21 +357,21 @@ onValue(ref(db,'deliveryAccounts'),snap=>{
       </div>`;
     card.querySelector('.rounded-full[data-key]').addEventListener('click',async function(){await set(ref(db,`deliveryAccounts/${this.dataset.key}/active`),this.dataset.active!=='true');});
     card.querySelector('.editDbBtn').addEventListener('click',()=>{editingDbKey=key;document.getElementById('editDbName').value=a.name||'';document.getElementById('editDbPhone').value=a.phone||'';document.getElementById('editDbPass').value='';document.getElementById('editDbModal').classList.remove('hidden');});
-    card.querySelector('.delDbBtn').addEventListener('click',()=>{if(confirm(`Delete account for ${a.name}?`)) remove(ref(db,`deliveryAccounts/${key}`));});
+    card.querySelector('.delDbBtn').addEventListener('click',()=>{if(confirm(`Delete account for ${a.name}?`))remove(ref(db,`deliveryAccounts/${key}`));});
     list.appendChild(card);
   });
 });
 document.getElementById('updateDbBtn').addEventListener('click',async()=>{
-  if(!editingDbKey) return;
+  if(!editingDbKey)return;
   const name=document.getElementById('editDbName').value.trim(),phone=document.getElementById('editDbPhone').value.trim(),pass=document.getElementById('editDbPass').value.trim();
   if(!name||!phone){alert('⚠️ Name and phone required!');return;}
-  const updates={name,phone};if(pass) updates.password=pass;
+  const updates={name,phone};if(pass)updates.password=pass;
   await update(ref(db,`deliveryAccounts/${editingDbKey}`),updates);
   document.getElementById('editDbModal').classList.add('hidden');editingDbKey=null;alert('✅ Account updated!');
 });
 
 /* ── HOTEL & MENU ── */
-let activeResId=null,activeResName='',editKey=null,menuCache={};
+let activeResId=null,editKey=null,menuCache={};
 onValue(ref(db,'restaurants'),snap=>{
   const list=document.getElementById('hotelList');list.innerHTML='';
   if(!snap.exists()){list.innerHTML='<p class="text-center text-gray-400 text-sm py-8">No hotels yet.</p>';return;}
@@ -422,25 +386,21 @@ onValue(ref(db,'restaurants'),snap=>{
     list.appendChild(div);
   });
   document.querySelectorAll('.openMenu').forEach(btn=>btn.addEventListener('click',()=>openMenuModal(btn.dataset.hid,btn.dataset.hname)));
-  document.querySelectorAll('.delHotel').forEach(btn=>btn.addEventListener('click',()=>deleteHotel(btn.dataset.hid)));
+  document.querySelectorAll('.delHotel').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Delete this hotel and ALL its menu items?'))remove(ref(db,`restaurants/${btn.dataset.hid}`));}));
 });
 window.addRestaurant=()=>{
-  const name=document.getElementById('resName').value.trim();
-  if(!name){alert('Please enter hotel name!');return;}
+  const name=document.getElementById('resName').value.trim();if(!name){alert('Please enter hotel name!');return;}
   const image=document.getElementById('resImg').value.trim()||'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
-  push(ref(db,'restaurants'),{name,image});
-  document.getElementById('resName').value='';document.getElementById('resImg').value='';
+  push(ref(db,'restaurants'),{name,image});document.getElementById('resName').value='';document.getElementById('resImg').value='';
 };
-function deleteHotel(id){if(confirm('Delete this hotel and ALL its menu items?')) remove(ref(db,`restaurants/${id}`));}
 function openMenuModal(resId,resName){
-  activeResId=resId;activeResName=resName;editKey=null;
+  activeResId=resId;editKey=null;
   document.getElementById('menuModalTitle').textContent='🍽️ '+resName;
-  document.getElementById('menuModal').classList.remove('hidden');
-  loadMenuList();
+  document.getElementById('menuModal').classList.remove('hidden');loadMenuList();
 }
 window.closeMenuModal=()=>{document.getElementById('menuModal').classList.add('hidden');activeResId=null;};
 
-/* ── LOAD MENU WITH OOS TOGGLE ── */
+/* ── MENU LIST WITH OOS TOGGLE ── */
 function loadMenuList(){
   const list=document.getElementById('menuList');
   list.innerHTML='<p class="text-center text-gray-300 text-xs py-6">Loading…</p>';
@@ -458,20 +418,16 @@ function loadMenuList(){
           <div class="flex-1 min-w-0">
             <p class="font-black text-sm text-gray-800">${m.dish}</p>
             <p class="text-red-600 font-bold text-sm">₹${m.price}</p>
-            <!-- OOS TOGGLE ROW -->
             <div class="flex items-center gap-2 mt-1.5">
-              <div class="oos-toggle ${isOos?'oos-on':'oos-off'}" data-key="${key}">
-                <div class="knob"></div>
-              </div>
+              <div class="oos-toggle ${isOos?'oos-on':'oos-off'}" data-key="${key}" title="Toggle stock status"><div class="knob"></div></div>
               <span class="oos-label text-[10px] font-black ${isOos?'text-red-600':'text-green-600'}">${isOos?'🚫 Out of Stock':'✅ Available'}</span>
             </div>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1.5 shrink-0">
             <button data-key="${key}" class="editBtn bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">✏️ Edit</button>
             <button data-key="${key}" class="delBtn bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">🗑️ Del</button>
           </div>
         </div>`;
-      /* OOS toggle */
       row.querySelector('.oos-toggle').addEventListener('click',async function(){
         const newOos=!this.classList.contains('oos-on');
         this.classList.toggle('oos-on',newOos);this.classList.toggle('oos-off',!newOos);
@@ -494,38 +450,25 @@ window.openItemForm=(key)=>{
   document.getElementById('previewWrap').classList.add('hidden');
   if(key&&menuCache[key]){
     const m=menuCache[key];
-    document.getElementById('itemModalTitle').textContent='✏️ Edit Dish';
-    document.getElementById('itemSaveBtn').textContent='✅ Update Dish';
+    document.getElementById('itemModalTitle').textContent='✏️ Edit Dish';document.getElementById('itemSaveBtn').textContent='✅ Update Dish';
     document.getElementById('fDish').value=m.dish||'';document.getElementById('fPrice').value=m.price||'';document.getElementById('fImg').value=m.dishImg||'';
     if(m.dishImg){document.getElementById('previewImg').src=m.dishImg;document.getElementById('previewWrap').classList.remove('hidden');}
-  } else {
-    document.getElementById('itemModalTitle').textContent='➕ Add New Dish';
-    document.getElementById('itemSaveBtn').textContent='💾 Save Dish';
-  }
+  } else {document.getElementById('itemModalTitle').textContent='➕ Add New Dish';document.getElementById('itemSaveBtn').textContent='💾 Save Dish';}
   document.getElementById('itemModal').classList.remove('hidden');
 };
 window.closeItemModal=()=>{document.getElementById('itemModal').classList.add('hidden');editKey=null;};
-window.previewImg=()=>{
-  const url=document.getElementById('fImg').value.trim();
-  if(!url){alert('Enter an image URL first!');return;}
-  document.getElementById('previewImg').src=url;document.getElementById('previewWrap').classList.remove('hidden');
-};
+window.previewImg=()=>{const url=document.getElementById('fImg').value.trim();if(!url){alert('Enter an image URL first!');return;}document.getElementById('previewImg').src=url;document.getElementById('previewWrap').classList.remove('hidden');};
 window.saveItem=async()=>{
   const dish=document.getElementById('fDish').value.trim(),price=parseFloat(document.getElementById('fPrice').value);
   const img=document.getElementById('fImg').value.trim()||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-  if(!dish){alert('⚠️ Dish name required!');return;}
-  if(!price||isNaN(price)){alert('⚠️ Enter valid price!');return;}
-  if(!activeResId){alert('Error: no restaurant selected.');return;}
+  if(!dish){alert('⚠️ Dish name required!');return;}if(!price||isNaN(price)){alert('⚠️ Enter valid price!');return;}if(!activeResId){alert('Error: no restaurant selected.');return;}
   const existOos=editKey&&menuCache[editKey]?(menuCache[editKey].outOfStock||false):false;
   const data={dish,price,dishImg:img,outOfStock:existOos};
-  if(editKey) await set(ref(db,`restaurants/${activeResId}/menu/${editKey}`),data);
+  if(editKey)await set(ref(db,`restaurants/${activeResId}/menu/${editKey}`),data);
   else await push(ref(db,`restaurants/${activeResId}/menu`),data);
   closeItemModal();loadMenuList();
 };
-async function deleteDish(key){
-  if(!confirm('Delete this dish?')) return;
-  await remove(ref(db,`restaurants/${activeResId}/menu/${key}`));loadMenuList();
-}
+async function deleteDish(key){if(!confirm('Delete this dish?'))return;await remove(ref(db,`restaurants/${activeResId}/menu/${key}`));loadMenuList();}
 </script>
 </body>
 </html>
