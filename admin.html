@@ -34,10 +34,10 @@
 
   <!-- ADD HOTEL -->
   <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-3">
-    <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest flex items-center gap-2">🏨 Add New Hotel</h2>
+    <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">🏨 Add New Hotel</h2>
     <input id="resName" type="text" placeholder="Hotel Name *" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-red-400"/>
     <input id="resImg"  type="text" placeholder="Hotel Image URL (optional)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-    <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 transition-transform">💾 Save Hotel</button>
+    <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Hotel</button>
   </div>
 
   <!-- SERVICE RADIUS -->
@@ -48,7 +48,7 @@
         <p class="text-[10px] text-gray-400 mt-0.5">Fixed for ALL customers</p></div>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">Current Radius</p>
+      <p class="text-[10px] font-black text-gray-500 uppercase mb-1">Current Radius</p>
       <p class="font-black text-4xl text-red-600" id="currentRadiusDisplay">—</p>
       <p class="text-xs text-gray-400 mt-1">metres from order location</p>
     </div>
@@ -60,7 +60,7 @@
       </div>
       <button id="radiusPlusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 border border-red-200">+</button>
     </div>
-    <div class="grid grid-cols-4 gap-2" id="presetBtns">
+    <div class="grid grid-cols-4 gap-2">
       <button data-r="100" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">100m</button>
       <button data-r="200" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">200m</button>
       <button data-r="500" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">500m</button>
@@ -116,7 +116,7 @@
       <input id="dbPhone"    type="tel"      placeholder="Phone Number *"         class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
       <input id="dbUsername" type="text"     placeholder="Username * (for login)" class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400"/>
       <div class="relative">
-        <input id="dbPassword" type="password" placeholder="Password *"           class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
+        <input id="dbPassword" type="password" placeholder="Password *" class="w-full p-3 border rounded-xl bg-white text-sm font-bold focus:outline-none focus:border-blue-400 pr-12"/>
         <button id="toggleDbPass" class="absolute right-3 top-3 text-gray-400 text-sm">👁️</button>
       </div>
       <button id="saveDbBtn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95">💾 Create Account</button>
@@ -153,7 +153,7 @@
       <p class="text-sm text-gray-500" id="deleteZoneNameText"></p>
       <div class="flex gap-3">
         <button id="cancelDeleteZone" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-black text-sm uppercase active:scale-95">Cancel</button>
-        <button id="confirmDeleteZone" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-black text-sm uppercase active:scale-95 shadow">Delete</button>
+        <button id="confirmDeleteZone" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-black text-sm uppercase active:scale-95">Delete</button>
       </div>
     </div>
   </div>
@@ -196,78 +196,76 @@
       <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
       <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
     </div>
-    <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImg" src="" class="w-full h-36 object-cover"/></div>
+    <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
     <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
   </div>
 </div>
 
 <!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-[100] shadow-lg">
-  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
-  <a href="admin.html" class="flex flex-col items-center gap-1 text-red-600"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
-  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
-  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
-  <a href="reports.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
+  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
+  <a href="admin.html"   class="flex flex-col items-center gap-1 text-red-600"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
+  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
+  <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
 
-<script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, push, remove, set, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain:"bhaskar-food-app.firebaseapp.com",
-  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId:"bhaskar-food-app",
-  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getDatabase(app);
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain: "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId: "bhaskar-food-app",
+  appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+});
+var db = firebase.database();
 
 function showToast(msg){
-  let t=document.getElementById('adminToast');
+  var t=document.getElementById('adminToast');
   if(!t){t=document.createElement('div');t.id='adminToast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;background:#1f2937;color:#fff;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.25)';document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3000);
+  t.textContent=msg; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(function(){t.style.opacity='0';},3000);
 }
 
-/* ── RADIUS ── */
-let adminRadius=200;const MIN_R=50,MAX_R=1000,STEP_R=50;
+/* RADIUS */
+var adminRadius=200; var MIN_R=50,MAX_R=1000,STEP_R=50;
 function updateRadiusUI(r){
   adminRadius=r;
   document.getElementById('currentRadiusDisplay').textContent=r+'m';
   document.getElementById('adminRadiusBar').style.width=((r-MIN_R)/(MAX_R-MIN_R)*100)+'%';
-  document.querySelectorAll('.preset-btn').forEach(b=>{
-    const a=parseInt(b.dataset.r)===r;
-    b.classList.toggle('bg-red-600',a);b.classList.toggle('text-white',a);
-    b.classList.toggle('border-red-600',a);b.classList.toggle('bg-gray-50',!a);b.classList.toggle('text-gray-600',!a);
+  document.querySelectorAll('.preset-btn').forEach(function(b){
+    var a=parseInt(b.dataset.r)===r;
+    b.classList.toggle('bg-red-600',a); b.classList.toggle('text-white',a);
+    b.classList.toggle('border-red-600',a); b.classList.toggle('bg-gray-50',!a); b.classList.toggle('text-gray-600',!a);
   });
 }
-onValue(ref(db,'settings/serviceRadius'),snap=>updateRadiusUI(parseInt(snap.val())||200));
-document.getElementById('radiusMinusBtn').addEventListener('click',()=>updateRadiusUI(Math.max(MIN_R,adminRadius-STEP_R)));
-document.getElementById('radiusPlusBtn').addEventListener('click',()=>updateRadiusUI(Math.min(MAX_R,adminRadius+STEP_R)));
-document.querySelectorAll('.preset-btn').forEach(btn=>btn.addEventListener('click',()=>updateRadiusUI(parseInt(btn.dataset.r))));
-document.getElementById('saveRadiusBtn').addEventListener('click',async()=>{
-  await set(ref(db,'settings/serviceRadius'),adminRadius);
-  const m=document.getElementById('radiusSavedMsg');m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3000);
+db.ref('settings/serviceRadius').on('value',function(snap){updateRadiusUI(parseInt(snap.val())||200);});
+document.getElementById('radiusMinusBtn').addEventListener('click',function(){updateRadiusUI(Math.max(MIN_R,adminRadius-STEP_R));});
+document.getElementById('radiusPlusBtn').addEventListener('click',function(){updateRadiusUI(Math.min(MAX_R,adminRadius+STEP_R));});
+document.querySelectorAll('.preset-btn').forEach(function(btn){btn.addEventListener('click',function(){updateRadiusUI(parseInt(btn.dataset.r));});});
+document.getElementById('saveRadiusBtn').addEventListener('click',function(){
+  db.ref('settings/serviceRadius').set(adminRadius);
+  var m=document.getElementById('radiusSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');},3000);
 });
 
-/* ── ZONE ── */
-let zoneLat=17.385,zoneLng=78.4867,zoneRadius=200,zoneMap,zoneCenterMarker,zoneCircleLayer;
-let editingZoneId=null,deleteZoneTargetId=null;
-setTimeout(()=>{
+/* ZONE */
+var zoneLat=17.385,zoneLng=78.4867,zoneRadius=200,zoneMap,zoneCenterMarker,zoneCircleLayer;
+var editingZoneId=null,deleteZoneTargetId=null;
+setTimeout(function(){
   zoneMap=L.map('zoneMap',{zoomControl:true,attributionControl:false}).setView([zoneLat,zoneLng],14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(zoneMap);
   drawZoneOnMap(zoneLat,zoneLng,zoneRadius);
-  zoneMap.on('click',e=>drawZoneOnMap(e.latlng.lat,e.latlng.lng,zoneRadius));
+  zoneMap.on('click',function(e){drawZoneOnMap(e.latlng.lat,e.latlng.lng,zoneRadius);});
 },200);
 function drawZoneOnMap(lat,lng,radius){
-  zoneLat=lat;zoneLng=lng;
-  document.getElementById('zoneCoordsText').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-  const icon=L.divIcon({html:`<div style="width:16px;height:16px;background:#7c3aed;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>`,iconSize:[16,16],className:''});
+  zoneLat=lat; zoneLng=lng;
+  document.getElementById('zoneCoordsText').textContent=lat.toFixed(5)+', '+lng.toFixed(5);
+  var icon=L.divIcon({html:'<div style="width:16px;height:16px;background:#7c3aed;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>',iconSize:[16,16],className:''});
   if(zoneCenterMarker)zoneCenterMarker.setLatLng([lat,lng]);
-  else{zoneCenterMarker=L.marker([lat,lng],{icon,draggable:true}).addTo(zoneMap).bindPopup('📍 Zone Center');zoneCenterMarker.on('dragend',e=>{const p=e.target.getLatLng();drawZoneOnMap(p.lat,p.lng,zoneRadius);});}
+  else{zoneCenterMarker=L.marker([lat,lng],{icon:icon,draggable:true}).addTo(zoneMap).bindPopup('📍 Zone Center');zoneCenterMarker.on('dragend',function(e){var p=e.target.getLatLng();drawZoneOnMap(p.lat,p.lng,zoneRadius);});}
   if(zoneCircleLayer){zoneCircleLayer.setLatLng([lat,lng]);zoneCircleLayer.setRadius(radius);}
-  else zoneCircleLayer=L.circle([lat,lng],{radius,color:'#7c3aed',fillColor:'#7c3aed',fillOpacity:0.12,weight:2.5,dashArray:'6,4'}).addTo(zoneMap);
+  else zoneCircleLayer=L.circle([lat,lng],{radius:radius,color:'#7c3aed',fillColor:'#7c3aed',fillOpacity:0.12,weight:2.5,dashArray:'6,4'}).addTo(zoneMap);
   zoneMap.setView([lat,lng],15);
 }
 function updateZoneRadius(val){
@@ -276,201 +274,228 @@ function updateZoneRadius(val){
   document.getElementById('zoneRadiusDisplay').textContent=zoneRadius>=1000?(zoneRadius/1000).toFixed(1)+' km':zoneRadius+' m';
   if(zoneCircleLayer)zoneCircleLayer.setRadius(zoneRadius);
 }
-document.getElementById('zoneRadiusSlider').addEventListener('input',e=>updateZoneRadius(parseInt(e.target.value)));
-document.getElementById('zoneRadiusUp').addEventListener('click',()=>updateZoneRadius(zoneRadius+50));
-document.getElementById('zoneRadiusDown').addEventListener('click',()=>updateZoneRadius(zoneRadius-50));
-document.getElementById('useMyLocZoneBtn').addEventListener('click',()=>{
+document.getElementById('zoneRadiusSlider').addEventListener('input',function(e){updateZoneRadius(parseInt(e.target.value));});
+document.getElementById('zoneRadiusUp').addEventListener('click',function(){updateZoneRadius(zoneRadius+50);});
+document.getElementById('zoneRadiusDown').addEventListener('click',function(){updateZoneRadius(zoneRadius-50);});
+document.getElementById('useMyLocZoneBtn').addEventListener('click',function(){
   if(!navigator.geolocation){alert('GPS not supported');return;}
-  const btn=document.getElementById('useMyLocZoneBtn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
-  navigator.geolocation.getCurrentPosition(pos=>{drawZoneOnMap(pos.coords.latitude,pos.coords.longitude,zoneRadius);btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';},()=>{btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';alert('Location denied');},{enableHighAccuracy:true});
+  var btn=document.getElementById('useMyLocZoneBtn'); btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+  navigator.geolocation.getCurrentPosition(function(pos){drawZoneOnMap(pos.coords.latitude,pos.coords.longitude,zoneRadius);btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';},function(){btn.innerHTML='<i class="fas fa-crosshairs"></i> My Location';alert('Location denied');},{enableHighAccuracy:true});
 });
-document.getElementById('saveZoneBtn').addEventListener('click',async()=>{
+document.getElementById('saveZoneBtn').addEventListener('click',function(){
   if(!zoneCenterMarker){alert('⚠️ Tap the map to set a center point first!');return;}
-  const name=document.getElementById('zoneNameInput').value.trim()||'Delivery Zone';
-  const btn=document.getElementById('saveZoneBtn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…';btn.disabled=true;
-  const data={name,lat:zoneLat,lng:zoneLng,radius:zoneRadius,updatedAt:Date.now()};
-  if(editingZoneId){await set(ref(db,'zones/'+editingZoneId),{...data,id:editingZoneId});editingZoneId=null;btn.innerHTML='<i class="fas fa-save"></i> Save Zone';}
-  else{const nr=push(ref(db,'zones'));await set(nr,{...data,id:nr.key});}
-  await set(ref(db,'settings/serviceRadius'),zoneRadius);
-  await set(ref(db,'settings/zoneCenter'),{lat:zoneLat,lng:zoneLng});
+  var name=document.getElementById('zoneNameInput').value.trim()||'Delivery Zone';
+  var btn=document.getElementById('saveZoneBtn'); btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; btn.disabled=true;
+  var data={name:name,lat:zoneLat,lng:zoneLng,radius:zoneRadius,updatedAt:Date.now()};
+  if(editingZoneId){
+    db.ref('zones/'+editingZoneId).set(Object.assign({},data,{id:editingZoneId}));
+    editingZoneId=null; btn.innerHTML='<i class="fas fa-save"></i> Save Zone';
+  } else {
+    var nr=db.ref('zones').push(); nr.set(Object.assign({},data,{id:nr.key}));
+  }
+  db.ref('settings/serviceRadius').set(zoneRadius);
+  db.ref('settings/zoneCenter').set({lat:zoneLat,lng:zoneLng});
   document.getElementById('zoneNameInput').value='';
-  btn.innerHTML='<i class="fas fa-save"></i> Save Zone';btn.disabled=false;
-  const m=document.getElementById('zoneSavedMsg');m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3000);
+  btn.innerHTML='<i class="fas fa-save"></i> Save Zone'; btn.disabled=false;
+  var m=document.getElementById('zoneSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');},3000);
 });
-onValue(ref(db,'zones'),snap=>{
-  const zones=snap.val()||{},list=document.getElementById('savedZonesList'),keys=Object.keys(zones);
+db.ref('zones').on('value',function(snap){
+  var zones=snap.val()||{}, list=document.getElementById('savedZonesList'), keys=Object.keys(zones);
   if(!keys.length){list.innerHTML='<p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p>';return;}
   list.innerHTML='';
-  keys.forEach(id=>{
-    const z=zones[id],rD=z.radius>=1000?(z.radius/1000).toFixed(1)+' km':z.radius+' m';
-    const card=document.createElement('div');card.className='bg-purple-50 border border-purple-200 rounded-2xl p-3 flex items-center gap-3';
-    card.innerHTML=`<div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-lg shrink-0">📍</div>
-      <div class="flex-1 min-w-0"><p class="font-black text-sm text-gray-800 truncate">${z.name}</p>
-        <p class="text-[10px] text-gray-500 font-bold mt-0.5">Radius: <span class="text-purple-600">${rD}</span></p></div>
-      <div class="flex gap-1.5 shrink-0">
-        <button class="editZoneBtn w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="${id}"><i class="fas fa-edit"></i></button>
-        <button class="delZoneBtn w-9 h-9 bg-red-100 text-red-500 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="${id}"><i class="fas fa-trash"></i></button>
-      </div>`;
-    card.querySelector('.editZoneBtn').addEventListener('click',()=>{editingZoneId=id;document.getElementById('zoneNameInput').value=z.name;updateZoneRadius(z.radius);drawZoneOnMap(z.lat,z.lng,z.radius);document.getElementById('saveZoneBtn').innerHTML='<i class="fas fa-edit"></i> Update Zone';document.getElementById('saveZoneBtn').scrollIntoView({behavior:'smooth',block:'center'});showToast('📝 Editing: '+z.name);});
-    card.querySelector('.delZoneBtn').addEventListener('click',()=>{deleteZoneTargetId=id;document.getElementById('deleteZoneNameText').textContent='"'+z.name+'"';document.getElementById('deleteZoneModal').classList.remove('hidden');});
+  keys.forEach(function(id){
+    var z=zones[id], rD=z.radius>=1000?(z.radius/1000).toFixed(1)+' km':z.radius+' m';
+    var card=document.createElement('div'); card.className='bg-purple-50 border border-purple-200 rounded-2xl p-3 flex items-center gap-3';
+    card.innerHTML='<div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-lg shrink-0">📍</div>'+
+      '<div class="flex-1 min-w-0"><p class="font-black text-sm text-gray-800 truncate">'+z.name+'</p>'+
+        '<p class="text-[10px] text-gray-500 font-bold mt-0.5">Radius: <span class="text-purple-600">'+rD+'</span></p></div>'+
+      '<div class="flex gap-1.5 shrink-0">'+
+        '<button class="editZoneBtn w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="'+id+'"><i class="fas fa-edit"></i></button>'+
+        '<button class="delZoneBtn w-9 h-9 bg-red-100 text-red-500 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="'+id+'"><i class="fas fa-trash"></i></button>'+
+      '</div>';
+    card.querySelector('.editZoneBtn').addEventListener('click',function(){
+      editingZoneId=id; document.getElementById('zoneNameInput').value=z.name;
+      updateZoneRadius(z.radius); drawZoneOnMap(z.lat,z.lng,z.radius);
+      document.getElementById('saveZoneBtn').innerHTML='<i class="fas fa-edit"></i> Update Zone';
+      document.getElementById('saveZoneBtn').scrollIntoView({behavior:'smooth',block:'center'}); showToast('📝 Editing: '+z.name);
+    });
+    card.querySelector('.delZoneBtn').addEventListener('click',function(){
+      deleteZoneTargetId=id; document.getElementById('deleteZoneNameText').textContent='"'+z.name+'"';
+      document.getElementById('deleteZoneModal').classList.remove('hidden');
+    });
     list.appendChild(card);
   });
 });
-document.getElementById('cancelDeleteZone').addEventListener('click',()=>{document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;});
-document.getElementById('confirmDeleteZone').addEventListener('click',async()=>{if(!deleteZoneTargetId)return;await remove(ref(db,'zones/'+deleteZoneTargetId));document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;showToast('🗑️ Zone deleted');});
+document.getElementById('cancelDeleteZone').addEventListener('click',function(){document.getElementById('deleteZoneModal').classList.add('hidden');deleteZoneTargetId=null;});
+document.getElementById('confirmDeleteZone').addEventListener('click',function(){
+  if(!deleteZoneTargetId)return;
+  db.ref('zones/'+deleteZoneTargetId).remove();
+  document.getElementById('deleteZoneModal').classList.add('hidden'); deleteZoneTargetId=null; showToast('🗑️ Zone deleted');
+});
 
-/* ── DELIVERY BOY ACCOUNTS ── */
-let editingDbKey=null;
-document.getElementById('toggleDbPass').addEventListener('click',()=>{const i=document.getElementById('dbPassword');i.type=i.type==='password'?'text':'password';});
-document.getElementById('toggleEditPass').addEventListener('click',()=>{const i=document.getElementById('editDbPass');i.type=i.type==='password'?'text':'password';});
-document.getElementById('closeEditDb').addEventListener('click',()=>{document.getElementById('editDbModal').classList.add('hidden');editingDbKey=null;});
-document.getElementById('saveDbBtn').addEventListener('click',async()=>{
-  const name=document.getElementById('dbFullName').value.trim(),phone=document.getElementById('dbPhone').value.trim();
-  const user=document.getElementById('dbUsername').value.trim().toLowerCase().replace(/\s/g,''),pass=document.getElementById('dbPassword').value.trim();
-  const msg=document.getElementById('dbSaveMsg');
+/* DELIVERY BOY ACCOUNTS */
+var editingDbKey=null;
+document.getElementById('toggleDbPass').addEventListener('click',function(){var i=document.getElementById('dbPassword');i.type=i.type==='password'?'text':'password';});
+document.getElementById('toggleEditPass').addEventListener('click',function(){var i=document.getElementById('editDbPass');i.type=i.type==='password'?'text':'password';});
+document.getElementById('closeEditDb').addEventListener('click',function(){document.getElementById('editDbModal').classList.add('hidden');editingDbKey=null;});
+document.getElementById('saveDbBtn').addEventListener('click',function(){
+  var name=document.getElementById('dbFullName').value.trim(), phone=document.getElementById('dbPhone').value.trim();
+  var user=document.getElementById('dbUsername').value.trim().toLowerCase().replace(/\s/g,''), pass=document.getElementById('dbPassword').value.trim();
+  var msg=document.getElementById('dbSaveMsg');
   if(!name||!phone||!user||!pass){alert('⚠️ All fields required!');return;}
   if(phone.replace(/\D/g,'').length<10){alert('⚠️ Enter valid 10-digit phone!');return;}
   if(user.length<3){alert('⚠️ Username min 3 chars!');return;}
   if(pass.length<4){alert('⚠️ Password min 4 chars!');return;}
-  const snap=await get(ref(db,`deliveryAccounts/${user}`));
-  if(snap.exists()){alert('⚠️ Username already taken!');return;}
-  await set(ref(db,`deliveryAccounts/${user}`),{name,phone,password:pass,username:user,active:true,createdAt:Date.now()});
-  ['dbFullName','dbPhone','dbUsername','dbPassword'].forEach(id=>document.getElementById(id).value='');
-  msg.textContent=`✅ Account created! Username: ${user}`;msg.classList.remove('hidden');setTimeout(()=>msg.classList.add('hidden'),4000);
+  db.ref('deliveryAccounts/'+user).once('value',function(snap){
+    if(snap.exists()){alert('⚠️ Username already taken!');return;}
+    db.ref('deliveryAccounts/'+user).set({name:name,phone:phone,password:pass,username:user,active:true,createdAt:Date.now()});
+    ['dbFullName','dbPhone','dbUsername','dbPassword'].forEach(function(id){document.getElementById(id).value='';});
+    msg.textContent='✅ Account created! Username: '+user; msg.classList.remove('hidden'); setTimeout(function(){msg.classList.add('hidden');},4000);
+  });
 });
-onValue(ref(db,'deliveryAccounts'),snap=>{
-  const list=document.getElementById('dbAccountsList');list.innerHTML='';
+db.ref('deliveryAccounts').on('value',function(snap){
+  var list=document.getElementById('dbAccountsList'); list.innerHTML='';
   if(!snap.exists()){list.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No accounts yet.</p>';return;}
-  snap.forEach(child=>{
-    const a=child.val(),key=child.key,card=document.createElement('div');
+  snap.forEach(function(child){
+    var a=child.val(), key=child.key, card=document.createElement('div');
     card.className='bg-gray-50 border rounded-2xl p-4 space-y-2';
-    card.innerHTML=`<div class="flex items-start justify-between gap-2"><div class="flex items-center gap-3">
-        <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">${(a.name||'?')[0].toUpperCase()}</div>
-        <div><p class="font-black text-sm text-gray-800">${a.name||'—'}</p><p class="text-blue-600 font-bold text-xs">📞 ${a.phone||'—'}</p>
-          <p class="text-gray-500 text-[10px] mt-0.5">👤 ${key}</p><p class="text-gray-500 text-[10px]">🔑 ${a.password||'—'}</p></div></div>
-      <div class="flex flex-col items-center gap-1 flex-shrink-0">
-        <div class="w-12 h-6 rounded-full cursor-pointer flex items-center px-1 transition-all ${a.active?'bg-green-500':'bg-gray-300'}" data-key="${key}" data-active="${a.active}">
-          <div class="w-4 h-4 bg-white rounded-full shadow transition-all ${a.active?'ml-auto':''}"></div></div>
-        <span class="text-[9px] font-black ${a.active?'text-green-600':'text-gray-400'}">${a.active?'Active':'Disabled'}</span>
-      </div></div>
-      <div class="flex gap-2">
-        <button class="editDbBtn flex-1 bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="${key}">✏️ Edit</button>
-        <button class="delDbBtn flex-1 bg-red-50 text-red-500 border border-red-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="${key}">🗑️ Delete</button>
-      </div>`;
-    card.querySelector('.rounded-full[data-key]').addEventListener('click',async function(){await set(ref(db,`deliveryAccounts/${this.dataset.key}/active`),this.dataset.active!=='true');});
-    card.querySelector('.editDbBtn').addEventListener('click',()=>{editingDbKey=key;document.getElementById('editDbName').value=a.name||'';document.getElementById('editDbPhone').value=a.phone||'';document.getElementById('editDbPass').value='';document.getElementById('editDbModal').classList.remove('hidden');});
-    card.querySelector('.delDbBtn').addEventListener('click',()=>{if(confirm(`Delete account for ${a.name}?`))remove(ref(db,`deliveryAccounts/${key}`));});
+    card.innerHTML='<div class="flex items-start justify-between gap-2"><div class="flex items-center gap-3">'+
+      '<div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+(a.name||'?')[0].toUpperCase()+'</div>'+
+      '<div><p class="font-black text-sm text-gray-800">'+(a.name||'—')+'</p><p class="text-blue-600 font-bold text-xs">📞 '+(a.phone||'—')+'</p>'+
+        '<p class="text-gray-500 text-[10px] mt-0.5">👤 '+key+'</p><p class="text-gray-500 text-[10px]">🔑 '+(a.password||'—')+'</p></div></div>'+
+      '<div class="flex flex-col items-center gap-1 flex-shrink-0">'+
+        '<div class="w-12 h-6 rounded-full cursor-pointer flex items-center px-1 transition-all '+(a.active?'bg-green-500':'bg-gray-300')+'" data-key="'+key+'" data-active="'+a.active+'">'+
+          '<div class="w-4 h-4 bg-white rounded-full shadow transition-all '+(a.active?'ml-auto':'')+'"></div></div>'+
+        '<span class="text-[9px] font-black '+(a.active?'text-green-600':'text-gray-400')+'">'+(a.active?'Active':'Disabled')+'</span>'+
+      '</div></div>'+
+      '<div class="flex gap-2">'+
+        '<button class="editDbBtn flex-1 bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="'+key+'">✏️ Edit</button>'+
+        '<button class="delDbBtn flex-1 bg-red-50 text-red-500 border border-red-200 py-2 rounded-xl font-black text-xs uppercase active:scale-95" data-key="'+key+'">🗑️ Delete</button>'+
+      '</div>';
+    card.querySelector('.rounded-full[data-key]').addEventListener('click',function(){db.ref('deliveryAccounts/'+this.dataset.key+'/active').set(this.dataset.active!=='true');});
+    card.querySelector('.editDbBtn').addEventListener('click',function(){
+      editingDbKey=key; document.getElementById('editDbName').value=a.name||'';
+      document.getElementById('editDbPhone').value=a.phone||''; document.getElementById('editDbPass').value='';
+      document.getElementById('editDbModal').classList.remove('hidden');
+    });
+    card.querySelector('.delDbBtn').addEventListener('click',function(){if(confirm('Delete account for '+a.name+'?'))db.ref('deliveryAccounts/'+key).remove();});
     list.appendChild(card);
   });
 });
-document.getElementById('updateDbBtn').addEventListener('click',async()=>{
+document.getElementById('updateDbBtn').addEventListener('click',function(){
   if(!editingDbKey)return;
-  const name=document.getElementById('editDbName').value.trim(),phone=document.getElementById('editDbPhone').value.trim(),pass=document.getElementById('editDbPass').value.trim();
+  var name=document.getElementById('editDbName').value.trim(), phone=document.getElementById('editDbPhone').value.trim(), pass=document.getElementById('editDbPass').value.trim();
   if(!name||!phone){alert('⚠️ Name and phone required!');return;}
-  const updates={name,phone};if(pass)updates.password=pass;
-  await update(ref(db,`deliveryAccounts/${editingDbKey}`),updates);
-  document.getElementById('editDbModal').classList.add('hidden');editingDbKey=null;alert('✅ Account updated!');
+  var updates={name:name,phone:phone}; if(pass)updates.password=pass;
+  db.ref('deliveryAccounts/'+editingDbKey).update(updates);
+  document.getElementById('editDbModal').classList.add('hidden'); editingDbKey=null; alert('✅ Account updated!');
 });
 
-/* ── HOTEL & MENU ── */
-let activeResId=null,editKey=null,menuCache={};
-onValue(ref(db,'restaurants'),snap=>{
-  const list=document.getElementById('hotelList');list.innerHTML='';
+/* HOTEL & MENU */
+var activeResId=null, editKey=null, menuCache={};
+db.ref('restaurants').on('value',function(snap){
+  var list=document.getElementById('hotelList'); list.innerHTML='';
   if(!snap.exists()){list.innerHTML='<p class="text-center text-gray-400 text-sm py-8">No hotels yet.</p>';return;}
-  snap.forEach(child=>{
-    const r=child.val(),hid=child.key,cnt=r.menu?Object.keys(r.menu).length:0;
-    const div=document.createElement('div');div.className='p-4 bg-white rounded-2xl shadow border';
-    div.innerHTML=`<div class="flex items-center gap-3 mb-3">
-        <img src="${r.image||''}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'" class="w-14 h-14 rounded-xl object-cover flex-shrink-0"/>
-        <div><p class="font-black text-sm text-red-600 uppercase">${r.name}</p><p class="text-xs text-gray-400">${cnt} dish${cnt!==1?'es':''}</p></div></div>
-      <button data-hid="${hid}" data-hname="${r.name}" class="openMenu w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 mb-2">🍽️ Manage Menu</button>
-      <button data-hid="${hid}" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>`;
+  snap.forEach(function(child){
+    var r=child.val(), hid=child.key, cnt=r.menu?Object.keys(r.menu).length:0;
+    var div=document.createElement('div'); div.className='p-4 bg-white rounded-2xl shadow border';
+    div.innerHTML='<div class="flex items-center gap-3 mb-3">'+
+      '<img src="'+(r.image||'')+'" onerror="this.src=\'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400\'" class="w-14 h-14 rounded-xl object-cover flex-shrink-0"/>'+
+      '<div><p class="font-black text-sm text-red-600 uppercase">'+r.name+'</p><p class="text-xs text-gray-400">'+cnt+' dish'+(cnt!==1?'es':'')+'</p></div></div>'+
+      '<button data-hid="'+hid+'" data-hname="'+r.name+'" class="openMenu w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 mb-2">🍽️ Manage Menu</button>'+
+      '<button data-hid="'+hid+'" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>';
     list.appendChild(div);
   });
-  document.querySelectorAll('.openMenu').forEach(btn=>btn.addEventListener('click',()=>openMenuModal(btn.dataset.hid,btn.dataset.hname)));
-  document.querySelectorAll('.delHotel').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Delete this hotel and ALL its menu items?'))remove(ref(db,`restaurants/${btn.dataset.hid}`));}));
+  document.querySelectorAll('.openMenu').forEach(function(btn){btn.addEventListener('click',function(){openMenuModal(btn.dataset.hid,btn.dataset.hname);});});
+  document.querySelectorAll('.delHotel').forEach(function(btn){btn.addEventListener('click',function(){if(confirm('Delete this hotel and ALL its menu items?'))db.ref('restaurants/'+btn.dataset.hid).remove();});});
 });
-window.addRestaurant=()=>{
-  const name=document.getElementById('resName').value.trim();if(!name){alert('Please enter hotel name!');return;}
-  const image=document.getElementById('resImg').value.trim()||'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
-  push(ref(db,'restaurants'),{name,image});document.getElementById('resName').value='';document.getElementById('resImg').value='';
+window.addRestaurant=function(){
+  var name=document.getElementById('resName').value.trim(); if(!name){alert('Please enter hotel name!');return;}
+  var image=document.getElementById('resImg').value.trim()||'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
+  db.ref('restaurants').push({name:name,image:image});
+  document.getElementById('resName').value=''; document.getElementById('resImg').value='';
 };
 function openMenuModal(resId,resName){
-  activeResId=resId;editKey=null;
+  activeResId=resId; editKey=null;
   document.getElementById('menuModalTitle').textContent='🍽️ '+resName;
-  document.getElementById('menuModal').classList.remove('hidden');loadMenuList();
+  document.getElementById('menuModal').classList.remove('hidden'); loadMenuList();
 }
-window.closeMenuModal=()=>{document.getElementById('menuModal').classList.add('hidden');activeResId=null;};
+window.closeMenuModal=function(){document.getElementById('menuModal').classList.add('hidden');activeResId=null;};
 
-/* ── MENU LIST WITH OOS TOGGLE ── */
 function loadMenuList(){
-  const list=document.getElementById('menuList');
+  var list=document.getElementById('menuList');
   list.innerHTML='<p class="text-center text-gray-300 text-xs py-6">Loading…</p>';
-  get(ref(db,`restaurants/${activeResId}/menu`)).then(snap=>{
-    menuCache={};list.innerHTML='';
+  db.ref('restaurants/'+activeResId+'/menu').once('value',function(snap){
+    menuCache={}; list.innerHTML='';
     if(!snap.exists()){list.innerHTML='<p class="text-center text-gray-400 text-sm py-8">No dishes yet.</p>';return;}
-    snap.forEach(child=>{
-      const m=child.val(),key=child.key;menuCache[key]=m;
-      const isOos=!!m.outOfStock;
-      const row=document.createElement('div');
-      row.className='bg-gray-50 rounded-2xl p-3 border space-y-2';
-      row.innerHTML=`
-        <div class="flex items-center gap-3">
-          <img src="${m.dishImg||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" style="${isOos?'filter:grayscale(70%)':''}"/>
-          <div class="flex-1 min-w-0">
-            <p class="font-black text-sm text-gray-800">${m.dish}</p>
-            <p class="text-red-600 font-bold text-sm">₹${m.price}</p>
-            <div class="flex items-center gap-2 mt-1.5">
-              <div class="oos-toggle ${isOos?'oos-on':'oos-off'}" data-key="${key}" title="Toggle stock status"><div class="knob"></div></div>
-              <span class="oos-label text-[10px] font-black ${isOos?'text-red-600':'text-green-600'}">${isOos?'🚫 Out of Stock':'✅ Available'}</span>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1.5 shrink-0">
-            <button data-key="${key}" class="editBtn bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">✏️ Edit</button>
-            <button data-key="${key}" class="delBtn bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">🗑️ Del</button>
-          </div>
-        </div>`;
-      row.querySelector('.oos-toggle').addEventListener('click',async function(){
-        const newOos=!this.classList.contains('oos-on');
-        this.classList.toggle('oos-on',newOos);this.classList.toggle('oos-off',!newOos);
-        const label=row.querySelector('.oos-label');
+    snap.forEach(function(child){
+      var m=child.val(), key=child.key; menuCache[key]=m;
+      var isOos=!!m.outOfStock;
+      var row=document.createElement('div'); row.className='bg-gray-50 rounded-2xl p-3 border space-y-2';
+      row.innerHTML='<div class="flex items-center gap-3">'+
+        '<img src="'+(m.dishImg||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200')+'" onerror="this.src=\'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200\'" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" style="'+(isOos?'filter:grayscale(70%)':'')+'"/>'+
+        '<div class="flex-1 min-w-0">'+
+          '<p class="font-black text-sm text-gray-800">'+m.dish+'</p>'+
+          '<p class="text-red-600 font-bold text-sm">₹'+m.price+'</p>'+
+          '<div class="flex items-center gap-2 mt-1.5">'+
+            '<div class="oos-toggle '+(isOos?'oos-on':'oos-off')+'" data-key="'+key+'" title="Toggle stock"><div class="knob"></div></div>'+
+            '<span class="oos-label text-[10px] font-black '+(isOos?'text-red-600':'text-green-600')+'">'+(isOos?'🚫 Out of Stock':'✅ Available')+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="flex flex-col gap-1.5 shrink-0">'+
+          '<button data-key="'+key+'" class="editBtn bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">✏️ Edit</button>'+
+          '<button data-key="'+key+'" class="delBtn bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">🗑️ Del</button>'+
+        '</div>'+
+      '</div>';
+      row.querySelector('.oos-toggle').addEventListener('click',function(){
+        var newOos=!this.classList.contains('oos-on');
+        this.classList.toggle('oos-on',newOos); this.classList.toggle('oos-off',!newOos);
+        var label=row.querySelector('.oos-label');
         label.textContent=newOos?'🚫 Out of Stock':'✅ Available';
-        label.className=`oos-label text-[10px] font-black ${newOos?'text-red-600':'text-green-600'}`;
+        label.className='oos-label text-[10px] font-black '+(newOos?'text-red-600':'text-green-600');
         row.querySelector('img').style.filter=newOos?'grayscale(70%)':'';
-        await set(ref(db,`restaurants/${activeResId}/menu/${this.dataset.key}/outOfStock`),newOos);
+        db.ref('restaurants/'+activeResId+'/menu/'+this.dataset.key+'/outOfStock').set(newOos);
         menuCache[this.dataset.key].outOfStock=newOos;
         showToast(newOos?'🚫 Marked Out of Stock':'✅ Marked Available');
       });
-      row.querySelector('.editBtn').addEventListener('click',()=>openItemForm(key));
-      row.querySelector('.delBtn').addEventListener('click',()=>deleteDish(key));
+      row.querySelector('.editBtn').addEventListener('click',function(){openItemForm(this.dataset.key);});
+      row.querySelector('.delBtn').addEventListener('click',function(){
+        if(!confirm('Delete this dish?'))return;
+        db.ref('restaurants/'+activeResId+'/menu/'+this.dataset.key).remove(); loadMenuList();
+      });
       list.appendChild(row);
     });
   });
 }
-window.openItemForm=(key)=>{
-  editKey=key;['fDish','fPrice','fImg'].forEach(id=>document.getElementById(id).value='');
+window.openItemForm=function(key){
+  editKey=key; ['fDish','fPrice','fImg'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('previewWrap').classList.add('hidden');
   if(key&&menuCache[key]){
-    const m=menuCache[key];
-    document.getElementById('itemModalTitle').textContent='✏️ Edit Dish';document.getElementById('itemSaveBtn').textContent='✅ Update Dish';
-    document.getElementById('fDish').value=m.dish||'';document.getElementById('fPrice').value=m.price||'';document.getElementById('fImg').value=m.dishImg||'';
-    if(m.dishImg){document.getElementById('previewImg').src=m.dishImg;document.getElementById('previewWrap').classList.remove('hidden');}
-  } else {document.getElementById('itemModalTitle').textContent='➕ Add New Dish';document.getElementById('itemSaveBtn').textContent='💾 Save Dish';}
+    var m=menuCache[key];
+    document.getElementById('itemModalTitle').textContent='✏️ Edit Dish'; document.getElementById('itemSaveBtn').textContent='✅ Update Dish';
+    document.getElementById('fDish').value=m.dish||''; document.getElementById('fPrice').value=m.price||''; document.getElementById('fImg').value=m.dishImg||'';
+    if(m.dishImg){document.getElementById('previewImgEl').src=m.dishImg;document.getElementById('previewWrap').classList.remove('hidden');}
+  } else {
+    document.getElementById('itemModalTitle').textContent='➕ Add New Dish'; document.getElementById('itemSaveBtn').textContent='💾 Save Dish';
+  }
   document.getElementById('itemModal').classList.remove('hidden');
 };
-window.closeItemModal=()=>{document.getElementById('itemModal').classList.add('hidden');editKey=null;};
-window.previewImg=()=>{const url=document.getElementById('fImg').value.trim();if(!url){alert('Enter an image URL first!');return;}document.getElementById('previewImg').src=url;document.getElementById('previewWrap').classList.remove('hidden');};
-window.saveItem=async()=>{
-  const dish=document.getElementById('fDish').value.trim(),price=parseFloat(document.getElementById('fPrice').value);
-  const img=document.getElementById('fImg').value.trim()||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-  if(!dish){alert('⚠️ Dish name required!');return;}if(!price||isNaN(price)){alert('⚠️ Enter valid price!');return;}if(!activeResId){alert('Error: no restaurant selected.');return;}
-  const existOos=editKey&&menuCache[editKey]?(menuCache[editKey].outOfStock||false):false;
-  const data={dish,price,dishImg:img,outOfStock:existOos};
-  if(editKey)await set(ref(db,`restaurants/${activeResId}/menu/${editKey}`),data);
-  else await push(ref(db,`restaurants/${activeResId}/menu`),data);
-  closeItemModal();loadMenuList();
+window.closeItemModal=function(){document.getElementById('itemModal').classList.add('hidden');editKey=null;};
+window.previewImg=function(){
+  var url=document.getElementById('fImg').value.trim(); if(!url){alert('Enter an image URL first!');return;}
+  document.getElementById('previewImgEl').src=url; document.getElementById('previewWrap').classList.remove('hidden');
 };
-async function deleteDish(key){if(!confirm('Delete this dish?'))return;await remove(ref(db,`restaurants/${activeResId}/menu/${key}`));loadMenuList();}
+window.saveItem=function(){
+  var dish=document.getElementById('fDish').value.trim(), price=parseFloat(document.getElementById('fPrice').value);
+  var img=document.getElementById('fImg').value.trim()||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+  if(!dish){alert('⚠️ Dish name required!');return;} if(!price||isNaN(price)){alert('⚠️ Enter valid price!');return;}
+  if(!activeResId){alert('Error: no restaurant selected.');return;}
+  var existOos=editKey&&menuCache[editKey]?(menuCache[editKey].outOfStock||false):false;
+  var data={dish:dish,price:price,dishImg:img,outOfStock:existOos};
+  if(editKey) db.ref('restaurants/'+activeResId+'/menu/'+editKey).set(data);
+  else db.ref('restaurants/'+activeResId+'/menu').push(data);
+  window.closeItemModal(); loadMenuList();
+};
 </script>
 </body>
 </html>
