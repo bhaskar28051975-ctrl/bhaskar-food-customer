@@ -1,240 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kitchen – Bhaskar Food</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-<style>
-@keyframes newping{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}50%{box-shadow:0 0 0 16px rgba(220,38,38,0)}}
-.new-order{animation:newping 1.5s infinite}
-</style>
 </head>
 <body class="bg-orange-50 pb-24 p-4">
-<div class="max-w-md mx-auto space-y-5">
+<div class="max-w-md mx-auto space-y-4">
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-black text-orange-600 italic uppercase">👨‍🍳 Kitchen Live</h1>
-      <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Real-time order dashboard</p>
-    </div>
-    <div class="flex flex-col items-end gap-1">
-      <span id="activeCount" class="bg-red-100 text-red-600 font-black text-xs px-3 py-1.5 rounded-full border border-red-200">0 Active</span>
-      <span id="lastUpdate" class="text-[9px] text-gray-400 font-bold">Connecting…</span>
-    </div>
-  </div>
+  <h1 class="text-2xl font-black text-orange-600 italic uppercase">👨‍🍳 Kitchen Live</h1>
 
-  <!-- PENDING / PREPARING / READY -->
   <div id="live-orders" class="space-y-4">
-    <div class="flex items-center justify-center py-12 gap-3">
+    <div class="flex items-center justify-center py-12">
       <div class="w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-sm font-black text-gray-400 uppercase">Loading orders…</p>
     </div>
   </div>
 
-  <!-- CANCELLED -->
-  <div id="cancelled-section" class="hidden space-y-3">
-    <div class="flex items-center gap-2 mt-2">
-      <div class="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center text-xs">❌</div>
-      <p class="text-[10px] font-black text-red-500 uppercase tracking-widest">Cancelled Orders</p>
-    </div>
-    <div id="cancelled-orders" class="space-y-2"></div>
-  </div>
-
-  <!-- HISTORY -->
-  <hr class="border-orange-200 mt-4"/>
-  <div class="flex items-center gap-2">
-    <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-xs">✅</div>
-    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completed Orders History</p>
-  </div>
-  <div id="order-history" class="space-y-2 opacity-70"></div>
-
+  <hr class="border-orange-200"/>
+  <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest">Last 10 Completed</h2>
+  <div id="order-history" class="space-y-2 opacity-60"></div>
 </div>
 
 <!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-[100] shadow-lg">
-  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
-  <a href="admin.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-50">
+  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
+  <a href="admin.html"   class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
   <a href="kitchen.html" class="flex flex-col items-center gap-1 text-orange-600"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
-  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
-  <a href="reports.html" class="flex flex-col items-center gap-1 text-gray-400 active:scale-90"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
+  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
+  <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
 
-<script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// Firebase compat SDK - simpler, more reliable
+firebase.initializeApp({
+  apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain: "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId: "bhaskar-food-app",
+  appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+});
 
-const firebaseConfig = {
-  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain:"bhaskar-food-app.firebaseapp.com",
-  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId:"bhaskar-food-app",
-  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getDatabase(app);
+const db = firebase.database();
 
-/* ── STATUS UPDATE ── */
-window.updateStatus=(id,s)=>update(ref(db,`orders/${id}`),{status:s});
-
-function timeAgo(ts){
-  if(!ts)return'';const m=Math.floor((Date.now()-ts)/60000);
-  if(m<1)return'just now';if(m<60)return m+'m ago';
-  const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';
+function updateStatus(id, newStatus) {
+  db.ref('orders/' + id).update({ status: newStatus });
 }
 
-function statusStyle(s){
-  return {
-    pending:    'border-red-500 bg-red-50',
-    preparing:  'border-orange-400 bg-orange-50',
-    ready_for_pickup: 'border-green-500 bg-green-50',
-    out_for_delivery: 'border-blue-400 bg-blue-50',
-  }[s]||'border-gray-300 bg-white';
-}
-function statusLabel(s){
-  return {
-    pending:    '🔴 Pending',
-    preparing:  '🟡 Preparing',
-    ready_for_pickup: '🟢 Ready for Pickup',
-    out_for_delivery: '🚚 Out for Delivery',
-  }[s]||s;
-}
+db.ref('orders').on('value', function(snap) {
+  var liveDiv = document.getElementById('live-orders');
+  var histDiv = document.getElementById('order-history');
+  liveDiv.innerHTML = '';
+  histDiv.innerHTML = '';
 
-/* ── VOICE ALERT FOR NEW ORDERS ── */
-let knownKeys=new Set(),voiceReady=false;
-document.addEventListener('click',()=>{
-  if(voiceReady)return;voiceReady=true;
-  if(!window.speechSynthesis)return;
-  speechSynthesis.getVoices();
-  const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);
-},{once:true});
-function speak(txt){
-  if(!window.speechSynthesis||!voiceReady)return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(txt);u.lang='en-IN';u.rate=0.9;u.pitch=1.1;u.volume=1;
-  const v=speechSynthesis.getVoices().find(x=>x.lang.startsWith('en'));if(v)u.voice=v;
-  speechSynthesis.speak(u);
-}
+  if (!snap.exists()) {
+    liveDiv.innerHTML = '<div class="text-center py-12 text-gray-400"><div class="text-5xl">🍽️</div><p class="font-black mt-3 uppercase">No orders yet</p></div>';
+    histDiv.innerHTML = '<p class="text-center text-xs text-gray-400 py-2">No history yet.</p>';
+    return;
+  }
 
-/* ── MAIN LISTENER ── */
-onValue(ref(db,'orders'),snap=>{
-  const liveEl=document.getElementById('live-orders');
-  const cancelEl=document.getElementById('cancelled-orders');
-  const cancelSec=document.getElementById('cancelled-section');
-  const histEl=document.getElementById('order-history');
-  liveEl.innerHTML='';cancelEl.innerHTML='';histEl.innerHTML='';
+  var all = [];
+  snap.forEach(function(child) {
+    var o = child.val();
+    o.id = child.key;
+    all.push(o);
+  });
+  all.reverse();
 
-  let all=[],activeCount=0,cancelCount=0,newFound=false;
-  if(snap.exists()) snap.forEach(c=>all.push({id:c.key,...c.val()}));
-  all.reverse(); // newest first
+  var liveCount = 0;
+  var histCount = 0;
 
-  all.forEach(order=>{
-    const {id,customerName,customerPhone,items,totalAmount,status,timestamp,
-           cancelledBy,cancelledAt,assignedTo,assignedName,address}=order;
-    const amt=totalAmount||0;
-    const timeStr=timeAgo(timestamp);
-    const itemList=(items||'').split(',').map(i=>`<p class="text-sm font-bold text-gray-700 py-0.5 border-b border-gray-100 last:border-0">• ${i.trim()}</p>`).join('');
+  all.forEach(function(o) {
+    var status = o.status || 'pending';
+    var name   = o.customerName || '—';
+    var phone  = o.customerPhone || '—';
+    var items  = o.items || '—';
+    var total  = o.totalAmount || 0;
+    var id     = o.id;
 
-    /* ── ACTIVE ORDERS (pending/preparing/ready/out_for_delivery) ── */
-    if(['pending','preparing','ready_for_pickup','out_for_delivery'].includes(status)){
-      activeCount++;
-      const isNew=!knownKeys.has(id);
-      if(isNew){knownKeys.add(id);newFound=true;}
+    if (status === 'pending' || status === 'preparing' || status === 'ready_for_pickup' || status === 'out_for_delivery' || status === 'cancelled') {
+      liveCount++;
 
-      const div=document.createElement('div');
-      div.className=`rounded-3xl border-2 ${statusStyle(status)} p-5 space-y-3 shadow-sm ${isNew&&status==='pending'?'new-order':''}`;
-      div.innerHTML=`
-        <div class="flex justify-between items-start gap-2">
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1">${statusLabel(status)}</p>
-            <p class="font-black text-gray-800 text-base">${customerName||'—'}</p>
-            <a href="tel:${customerPhone||''}" class="text-blue-600 font-bold text-xs">📞 ${customerPhone||'—'}</a>
-            ${address?`<p class="text-[10px] text-gray-500 mt-0.5 truncate max-w-[200px]">📍 ${address}</p>`:''}
-          </div>
-          <div class="text-right shrink-0">
-            <p class="font-black text-green-600 text-xl">₹${amt}</p>
-            <p class="text-[10px] text-orange-500 font-black">💵 COD</p>
-            <p class="text-[10px] text-gray-400 mt-1">${timeStr}</p>
-          </div>
-        </div>
-        <div class="bg-white rounded-2xl p-3 border">
-          <p class="text-[10px] font-black text-gray-400 uppercase mb-2">🍽️ Order Items</p>
-          ${itemList}
-        </div>
-        ${assignedTo?`<div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 flex items-center gap-2">
-          <span class="text-sm">🛵</span>
-          <p class="text-xs font-black text-blue-700">Assigned to: ${assignedName||assignedTo}</p>
-        </div>`:''}
-        <div class="grid grid-cols-3 gap-2">
-          <button onclick="updateStatus('${id}','preparing')"
-            class="bg-orange-500 text-white py-3 rounded-xl font-black uppercase text-[10px] active:scale-95 transition-transform ${status==='preparing'?'opacity-50 cursor-not-allowed':''}">
-            🍳 Preparing
-          </button>
-          <button onclick="updateStatus('${id}','ready_for_pickup')"
-            class="bg-green-600 text-white py-3 rounded-xl font-black uppercase text-[10px] active:scale-95 transition-transform ${status==='ready_for_pickup'||status==='out_for_delivery'?'opacity-50 cursor-not-allowed':''}">
-            ✅ Ready
-          </button>
-          <button onclick="if(confirm('Cancel this order?'))updateStatus('${id}','cancelled')"
-            class="bg-red-100 text-red-600 border border-red-200 py-3 rounded-xl font-black text-[10px] active:scale-95 transition-transform">
-            ❌ Cancel
-          </button>
-        </div>`;
-      liveEl.appendChild(div);
-    }
+      var borderCol = 'border-red-500';
+      var bgCol     = 'bg-red-50';
+      var label     = '🔴 New Order';
 
-    /* ── CANCELLED ── */
-    else if(status==='cancelled'){
-      cancelCount++;
-      cancelEl.innerHTML+=`
-        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-base shrink-0">❌</div>
-          <div class="flex-1 min-w-0">
-            <p class="font-black text-sm text-gray-700">${customerName||'—'}</p>
-            <p class="text-[10px] text-gray-500 truncate">${items||'—'}</p>
-            <p class="text-[10px] font-bold mt-0.5 ${cancelledBy==='customer'?'text-orange-500':'text-red-500'}">
-              Cancelled by ${cancelledBy==='customer'?'customer':'kitchen'} · ${timeAgo(cancelledAt||timestamp)}
-            </p>
-          </div>
-          <p class="font-black text-red-400 text-sm shrink-0">₹${amt}</p>
-        </div>`;
-    }
+      if (status === 'preparing')        { borderCol = 'border-orange-400'; bgCol = 'bg-orange-50'; label = '🟡 Preparing'; }
+      if (status === 'ready_for_pickup') { borderCol = 'border-green-500';  bgCol = 'bg-green-50';  label = '🟢 Ready for Pickup'; }
+      if (status === 'out_for_delivery') { borderCol = 'border-blue-400';   bgCol = 'bg-blue-50';   label = '🚚 Out for Delivery'; }
+      if (status === 'cancelled')        { borderCol = 'border-gray-400';   bgCol = 'bg-gray-50';   label = '❌ Cancelled'; }
 
-    /* ── HISTORY (completed / settled) ── */
-    else if(status==='completed'||status==='settled'){
-      histEl.innerHTML+=`
-        <div class="bg-white p-3 rounded-xl border flex justify-between items-start gap-2 text-[10px]">
-          <div class="min-w-0 flex-1">
-            <p class="font-black text-gray-700 truncate">${customerName||'—'}</p>
-            <p class="text-gray-400 truncate mt-0.5">${items||'—'}</p>
-            <p class="text-gray-400 mt-0.5">${timeStr}</p>
-          </div>
-          <div class="text-right shrink-0">
-            <p class="font-black text-green-600">₹${amt}</p>
-            <p class="text-green-500 font-bold">✅ Done</p>
-          </div>
-        </div>`;
+      var itemRows = items.split(',').map(function(i) {
+        return '<p class="text-sm font-bold text-gray-700 border-b border-gray-100 py-1 last:border-0">• ' + i.trim() + '</p>';
+      }).join('');
+
+      var buttons = '';
+      if (status !== 'cancelled' && status !== 'out_for_delivery') {
+        buttons = '<div class="grid grid-cols-3 gap-2 mt-3">' +
+          '<button onclick="updateStatus(\'' + id + '\',\'preparing\')" class="bg-orange-500 text-white py-3 rounded-xl font-black uppercase text-[11px] active:scale-95">🍳 Preparing</button>' +
+          '<button onclick="updateStatus(\'' + id + '\',\'ready_for_pickup\')" class="bg-green-600 text-white py-3 rounded-xl font-black uppercase text-[11px] active:scale-95">✅ Ready</button>' +
+          '<button onclick="if(confirm(\'Cancel?\'))updateStatus(\'' + id + '\',\'cancelled\')" class="bg-red-100 text-red-600 border-2 border-red-300 py-3 rounded-xl font-black text-[11px] active:scale-95">❌ Cancel</button>' +
+          '</div>';
+      }
+
+      var div = document.createElement('div');
+      div.className = 'bg-white rounded-3xl border-2 ' + borderCol + ' shadow-md p-5 space-y-3';
+      div.innerHTML =
+        '<div class="flex justify-between items-start">' +
+          '<div>' +
+            '<span class="text-[10px] font-black uppercase px-3 py-1.5 rounded-full ' + bgCol + ' border ' + borderCol + '">' + label + '</span>' +
+            '<p class="font-black text-gray-800 text-lg mt-2">' + name + '</p>' +
+            '<a href="tel:' + phone + '" class="text-blue-600 font-bold text-sm">📞 ' + phone + '</a>' +
+          '</div>' +
+          '<div class="text-right">' +
+            '<p class="font-black text-2xl text-green-600">₹' + total + '</p>' +
+            '<p class="text-[10px] font-bold text-orange-500 mt-1">💵 Cash on Delivery</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bg-gray-50 rounded-2xl p-3 border">' +
+          '<p class="text-[10px] font-black text-gray-400 uppercase mb-2">🍽️ Order Items</p>' +
+          itemRows +
+        '</div>' +
+        buttons;
+
+      liveDiv.appendChild(div);
+
+    } else if ((status === 'completed' || status === 'settled') && histCount < 10) {
+      histCount++;
+      histDiv.innerHTML +=
+        '<div class="bg-white p-3 rounded-xl border flex justify-between items-start text-xs font-bold">' +
+          '<div><p class="text-gray-700">' + name + '</p>' +
+          '<p class="text-gray-400 mt-0.5 max-w-[200px] truncate">' + items + '</p></div>' +
+          '<span class="text-green-600 font-black ml-2 shrink-0">✅ ₹' + total + '</span>' +
+        '</div>';
     }
   });
 
-  /* Update counts */
-  document.getElementById('activeCount').textContent=activeCount+' Active';
-  document.getElementById('lastUpdate').textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-
-  if(cancelCount>0) cancelSec.classList.remove('hidden');
-  else cancelSec.classList.add('hidden');
-
-  if(!liveEl.innerHTML)
-    liveEl.innerHTML=`<div class="text-center py-16 space-y-3"><div class="text-6xl">🍽️</div><p class="font-black text-gray-400 uppercase tracking-wider">No active orders</p><p class="text-xs text-gray-400">New orders will appear here instantly</p></div>`;
-  if(!histEl.innerHTML)
-    histEl.innerHTML=`<p class="text-center text-gray-400 text-xs py-4">No completed orders yet.</p>`;
-
-  /* Voice alert for new orders */
-  if(newFound){
-    setTimeout(()=>{
-      speak('New order received! Please start preparing.');
-    },600);
+  if (liveCount === 0) {
+    liveDiv.innerHTML = '<div class="text-center py-12"><div class="text-5xl">🍽️</div><p class="font-black text-gray-400 mt-3 uppercase">No active orders</p><p class="text-xs text-gray-400 mt-1">New orders appear here instantly</p></div>';
   }
+  if (histCount === 0) {
+    histDiv.innerHTML = '<p class="text-center text-gray-400 text-xs py-2">No completed orders yet.</p>';
+  }
+
+}, function(error) {
+  document.getElementById('live-orders').innerHTML =
+    '<div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-3">' +
+    '<p class="font-black text-red-600 text-lg">❌ Connection Error</p>' +
+    '<p class="text-xs text-red-500">' + error.message + '</p>' +
+    '<button onclick="location.reload()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase">🔄 Retry</button>' +
+    '</div>';
 });
 </script>
 </body>
