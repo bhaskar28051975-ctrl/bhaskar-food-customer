@@ -3,45 +3,34 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-<title>Street Food</title>
-<meta name="application-name" content="Street Food"/>
-<meta name="description" content="Order fresh food with live GPS delivery tracking. Bhaskar Food — Delivery Services At Where You Are."/>
+<title>Street Food – Bhaskar Food</title>
 <meta name="theme-color" content="#dc2626"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Street Food"/>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%20fill%3D%27%2523dc2626%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27300%27%20font-size%3D%27260%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%27%3E%F0%9F%8D%9C%3C%2Ftext%3E%3Crect%20x%3D%2760%27%20y%3D%27370%27%20width%3D%27392%27%20height%3D%2718%27%20rx%3D%279%27%20fill%3D%27%2523fff%27%20opacity%3D%270.3%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27460%27%20font-size%3D%2762%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%20Black%27%20font-weight%3D%27900%27%20fill%3D%27white%27%3ESTREET%20FOOD%3C%2Ftext%3E%3C%2Fsvg%3E"/>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%20fill%3D%27%2523dc2626%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27300%27%20font-size%3D%27260%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%27%3E%F0%9F%8D%9C%3C%2Ftext%3E%3Crect%20x%3D%2760%27%20y%3D%27370%27%20width%3D%27392%27%20height%3D%2718%27%20rx%3D%279%27%20fill%3D%27%2523fff%27%20opacity%3D%270.3%27%2F%3E%3Ctext%20x%3D%27256%27%20y%3D%27460%27%20font-size%3D%2762%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%20Black%27%20font-weight%3D%27900%27%20fill%3D%27white%27%3ESTREET%20FOOD%3C%2Ftext%3E%3C%2Fsvg%3E"/>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Bhaskar%20Food%22%2C%22short_name%22%3A%22Bhaskar%20Food%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f4f6%22%2C%22theme_color%22%3A%22%23dc2626%22%7D"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-html{scroll-behavior:smooth}
-.dish-card{transition:transform 0.15s;position:relative}.dish-card:active{transform:scale(0.95)}
+.dish-card{transition:transform 0.15s;position:relative}.dish-card:active{transform:scale(0.97)}
 #trackMap{height:200px;width:100%;border-radius:16px;z-index:1}
-.pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 0 rgba(220,38,38,.4);animation:pp 1.5s infinite}
+.pdot{width:14px;height:14px;background:#dc2626;border-radius:50%;border:3px solid #fff;animation:pp 1.5s infinite}
 @keyframes pp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}70%{box-shadow:0 0 0 12px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
 #stopLocBtn.gps-idle{opacity:0.45}
-/* OUT OF STOCK */
-.oos-overlay{position:absolute;inset:0;border-radius:1rem;background:rgba(0,0,0,0.52);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;z-index:10;pointer-events:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
-.oos-badge{background:#dc2626;color:#fff;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:99px;}
+.oos-overlay{position:absolute;inset:0;border-radius:1rem;background:rgba(0,0,0,0.52);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;z-index:10;pointer-events:none;backdrop-filter:blur(2px)}
+.oos-badge{background:#dc2626;color:#fff;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
 .oos-icon{font-size:22px}
 .dish-card.out-of-stock .qMinus,.dish-card.out-of-stock .qPlus{pointer-events:none;opacity:0.25!important}
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800" style="padding-bottom:100px">
 
+<!-- HEADER -->
 <header class="bg-white p-4 shadow-sm sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600 gap-2">
   <div class="flex flex-col min-w-0">
-    <h1 class="text-2xl font-black text-red-600 italic uppercase leading-none tracking-tight">Bhaskar Food</h1>
-    <p class="text-xs font-semibold text-slate-600 tracking-wide mt-1 leading-tight">Delivery Services At <span class="text-red-600 font-bold">Where You Are.</span></p>
-    <a href="tel:9154095125" class="flex items-center gap-1 mt-1">
-      <i class="fas fa-phone text-green-600 text-[10px]"></i>
-      <span class="text-[11px] font-black text-green-600 tracking-wide">9154095125</span>
-    </a>
+    <h1 class="text-2xl font-black text-red-600 italic uppercase leading-none">Bhaskar Food</h1>
+    <p class="text-xs font-semibold text-slate-600 mt-1">Delivery Services At <span class="text-red-600 font-bold">Where You Are.</span></p>
+    <a href="tel:9154095125" class="flex items-center gap-1 mt-1"><i class="fas fa-phone text-green-600 text-[10px]"></i><span class="text-[11px] font-black text-green-600">9154095125</span></a>
   </div>
   <div class="flex items-center gap-2 shrink-0">
     <button id="shareAppBtn" class="text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-full uppercase flex items-center gap-1"><i class="fas fa-share-alt"></i> Share</button>
@@ -49,16 +38,16 @@ html{scroll-behavior:smooth}
   </div>
 </header>
 
-<div id="gpsBar" class="hidden sticky top-[73px] z-40 bg-green-600 text-white px-4 py-2 flex items-center justify-between gap-2 shadow-sm">
+<!-- GPS BAR -->
+<div id="gpsBar" class="hidden sticky top-[73px] z-40 bg-green-600 text-white px-4 py-2 flex items-center justify-between gap-2">
   <div class="flex items-center gap-2 min-w-0">
-    <div class="pdot shrink-0" style="background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.4)"></div>
+    <div class="pdot shrink-0" style="background:#fff"></div>
     <p class="text-xs font-black truncate" id="gpsBarText">📍 Live location ON</p>
   </div>
-  <button id="gpsBarStopBtn" class="shrink-0 bg-white text-green-700 px-3 py-1 rounded-full font-black text-[10px] uppercase active:scale-95 transition-transform flex items-center gap-1">
-    <i class="fas fa-stop-circle"></i> Stop GPS
-  </button>
+  <button id="gpsBarStopBtn" class="shrink-0 bg-white text-green-700 px-3 py-1 rounded-full font-black text-[10px] uppercase active:scale-95"><i class="fas fa-stop-circle"></i> Stop GPS</button>
 </div>
 
+<!-- MENU -->
 <div id="customer-list" class="p-4 space-y-8">
   <div class="flex flex-col items-center justify-center py-16 gap-4">
     <div class="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
@@ -66,14 +55,15 @@ html{scroll-behavior:smooth}
   </div>
 </div>
 
+<!-- BOTTOM BILL BAR -->
 <div id="bottom-bill-bar" class="hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4 z-[90] flex justify-between items-center border-t border-gray-200">
   <div>
-    <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Bill</p>
+    <p class="text-[10px] font-black text-gray-400 uppercase">Total Bill</p>
     <p id="panel-total" class="text-2xl font-black text-green-600">₹0</p>
   </div>
   <div class="flex items-center gap-3">
-    <button id="cancelBtn" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-3 rounded-xl active:scale-95 transition-transform">Clear</button>
-    <button id="proceedBtn" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 transition-transform flex items-center gap-2">Proceed <i class="fas fa-arrow-right text-xs"></i></button>
+    <button id="cancelBtn" class="text-red-500 font-bold text-xs uppercase bg-red-50 px-4 py-3 rounded-xl active:scale-95">Clear</button>
+    <button id="proceedBtn" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 flex items-center gap-2">Proceed <i class="fas fa-arrow-right text-xs"></i></button>
   </div>
 </div>
 
@@ -85,11 +75,10 @@ html{scroll-behavior:smooth}
       <button id="closeShareBtn" class="text-gray-400 p-1"><i class="fas fa-times text-lg"></i></button>
     </div>
     <div class="space-y-4">
-      <p class="text-xs font-medium text-gray-500">Enter phone number to share the Bhaskar Food ordering link.</p>
       <input id="sharePhone" type="tel" maxlength="10" placeholder="Enter 10-digit Mobile Number *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400 tracking-widest text-center"/>
       <div class="grid grid-cols-2 gap-2">
-        <button id="sendWhatsAppBtn" class="bg-green-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-sm active:scale-95"><i class="fab fa-whatsapp text-sm"></i> WhatsApp</button>
-        <button id="sendSMSBtn" class="bg-blue-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 shadow-sm active:scale-95"><i class="fas fa-sms text-sm"></i> Direct SMS</button>
+        <button id="sendWhatsAppBtn" class="bg-green-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 active:scale-95"><i class="fab fa-whatsapp text-sm"></i> WhatsApp</button>
+        <button id="sendSMSBtn" class="bg-blue-600 text-white p-3 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-1 active:scale-95"><i class="fas fa-sms text-sm"></i> Direct SMS</button>
       </div>
     </div>
   </div>
@@ -103,23 +92,23 @@ html{scroll-behavior:smooth}
       <button id="closeModalBtn" class="text-gray-400 p-2"><i class="fas fa-times text-xl"></i></button>
     </div>
     <div class="space-y-4">
-      <input id="custName" type="text" placeholder="Your Full Name *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
-      <input id="custPhone" type="tel" placeholder="Your Phone Number *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+      <input id="custName"  type="text" placeholder="Your Full Name *"    class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
+      <input id="custPhone" type="tel"  placeholder="Your Phone Number *" class="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-red-400"/>
       <!-- GPS -->
       <div class="bg-red-50 rounded-2xl p-4 border border-red-100 space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
             <p class="font-black text-sm text-gray-800">📍 Live Location</p>
-            <p class="text-[11px] text-gray-500 mt-0.5" id="locStatusText">Share GPS coordinates for fast delivery</p>
+            <p class="text-[11px] text-gray-500 mt-0.5" id="locStatusText">Share GPS for fast delivery</p>
           </div>
           <div class="flex gap-2 shrink-0">
-            <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1"><i class="fas fa-location-arrow text-[10px]"></i> Share GPS</button>
-            <button id="stopLocBtn" class="gps-idle bg-gray-300 text-gray-500 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1"><i class="fas fa-stop-circle text-[10px]"></i> Stop GPS</button>
+            <button id="locBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1"><i class="fas fa-location-arrow text-[10px]"></i> Share GPS</button>
+            <button id="stopLocBtn" class="gps-idle bg-gray-300 text-gray-500 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1"><i class="fas fa-stop-circle text-[10px]"></i> Stop</button>
           </div>
         </div>
         <div class="bg-white rounded-xl p-3 border border-red-100 space-y-1">
           <div class="flex items-center justify-between">
-            <p class="text-[10px] font-black text-gray-500 uppercase">📡 Active Delivery Zone</p>
+            <p class="text-[10px] font-black text-gray-500 uppercase">📡 Delivery Zone</p>
             <span id="zoneNameDisplay" class="font-black text-red-600 text-[10px]">Loading…</span>
           </div>
           <div class="flex items-center justify-between mt-1">
@@ -127,7 +116,6 @@ html{scroll-behavior:smooth}
             <span id="radiusVal" class="font-black text-red-600 text-xs">…</span>
           </div>
           <div class="bg-gray-100 rounded-full h-1.5 mt-1"><div id="radiusBar" class="bg-red-500 h-1.5 rounded-full transition-all" style="width:20%"></div></div>
-          <p class="text-[10px] text-gray-400 text-center mt-1">⚙️ Set by restaurant</p>
         </div>
         <div id="mapWrap" class="hidden space-y-2">
           <div id="trackMap"></div>
@@ -142,7 +130,7 @@ html{scroll-behavior:smooth}
         <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-2xl shrink-0">💵</div>
         <div>
           <p class="font-black text-gray-800 text-sm">Cash on Delivery</p>
-          <p class="text-xs text-gray-500 mt-0.5">Pay in <span class="font-bold text-orange-600">cash</span> when your order arrives. No advance payment needed.</p>
+          <p class="text-xs text-gray-500 mt-0.5">Pay cash when your order arrives. No advance needed.</p>
         </div>
       </div>
       <div class="pt-1">
@@ -150,7 +138,7 @@ html{scroll-behavior:smooth}
           <span class="text-gray-500 font-bold text-sm">Grand Total:</span>
           <span id="modal-total" class="text-2xl font-black text-green-600">₹0</span>
         </div>
-        <button id="placeOrderBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-base tracking-wide">🛵 Confirm & Order Now</button>
+        <button id="placeOrderBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 text-base">🛵 Confirm & Order Now</button>
       </div>
     </div>
   </div>
@@ -168,421 +156,371 @@ html{scroll-behavior:smooth}
       <div class="flex justify-between"><span class="text-xs text-gray-500 font-bold uppercase">Status</span><span class="font-black text-orange-500 text-sm">🕐 Being Prepared</span></div>
     </div>
     <p class="text-[11px] text-gray-400">We'll call you on <span id="successPhone" class="font-bold text-gray-600"></span> to confirm.</p>
-    <button id="successDoneBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform text-sm">Done 👍</button>
-    <button id="cancelOrderBtn" class="hidden w-full bg-gray-100 text-red-500 border border-red-200 py-3 rounded-2xl font-black uppercase text-xs active:scale-95 transition-transform">❌ Cancel My Order</button>
-    <p id="cancelHint" class="hidden text-[10px] text-gray-400">You can cancel within 3 minutes of ordering.</p>
+    <button id="successDoneBtn" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 text-sm">Done 👍</button>
+    <button id="cancelOrderBtn" class="hidden w-full bg-gray-100 text-red-500 border border-red-200 py-3 rounded-2xl font-black uppercase text-xs active:scale-95">❌ Cancel My Order</button>
+    <p id="cancelHint" class="hidden text-[10px] text-gray-400">Cancel within 3 minutes.</p>
   </div>
 </div>
 
-<!-- INSTALL BANNER -->
-<div id="installBanner" class="hidden fixed bottom-0 left-0 right-0 z-[200] p-4">
-  <div class="bg-gray-900 text-white rounded-2xl p-4 flex items-center gap-3 shadow-2xl max-w-md mx-auto">
-    <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-2xl shrink-0">🍜</div>
-    <div class="flex-1 min-w-0">
-      <p class="font-black text-sm">Add Street Food to Home Screen</p>
-      <p class="text-[11px] text-gray-400 mt-0.5">Install for quick access — works like a real app!</p>
-    </div>
-    <div class="flex flex-col gap-1.5 shrink-0">
-      <button id="installBtn" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95">Install</button>
-      <button id="dismissInstall" class="text-gray-400 text-[10px] font-bold text-center">Not now</button>
-    </div>
-  </div>
-</div>
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain: "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId: "bhaskar-food-app",
+  appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+});
+var db = firebase.database();
 
-<!-- iOS BANNER -->
-<div id="iosBanner" class="hidden fixed bottom-0 left-0 right-0 z-[200] p-4">
-  <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl max-w-md mx-auto space-y-2">
-    <div class="flex justify-between items-center">
-      <p class="font-black text-sm flex items-center gap-2">🍜 Install Street Food</p>
-      <button id="dismissIos" class="text-gray-400 text-xs font-bold">✕</button>
-    </div>
-    <p class="text-[11px] text-gray-300">To install on your iPhone:</p>
-    <div class="space-y-1">
-      <p class="text-[11px] text-gray-200">1. Tap the <span class="font-black text-white">Share</span> button <span class="text-blue-400">⬆</span> at the bottom</p>
-      <p class="text-[11px] text-gray-200">2. Scroll down and tap <span class="font-black text-white">"Add to Home Screen"</span></p>
-      <p class="text-[11px] text-gray-200">3. Tap <span class="font-black text-white">"Add"</span> — done! 🎉</p>
-    </div>
-  </div>
-</div>
+var cart = {}, resData = {}, dishMap = {}, outOfStockMap = {};
+var myLat = null, myLng = null, myAddress = '';
+var watchId = null, trackMap = null, myMarker = null, myCircle = null;
+var radiusM = 200, orderLat = null, orderLng = null, wasOutside = false;
+var activeOid = null, zoneCenterLat = null, zoneCenterLng = null, zoneCircle = null;
+var speechReady = false;
 
-<script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain:"bhaskar-food-app.firebaseapp.com",
-  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId:"bhaskar-food-app",
-  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getDatabase(app);
-
-let cart={}, resData={}, myLat=null, myLng=null, myAddress='';
-let watchId=null, trackMap=null, myMarker=null, myCircle=null;
-let radiusM=200, orderLat=null, orderLng=null, wasOutside=false;
-let activeOid=null, speechReady=false;
-const outOfStockMap={};
-
-function speak(txt,urgent=false){
-  if(!window.speechSynthesis)return;
+/* VOICE */
+function speak(txt, urgent) {
+  if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang='en-IN';u.rate=urgent?.85:.95;u.pitch=urgent?1.2:1;u.volume=1;
-  const v=speechSynthesis.getVoices().find(x=>x.lang.startsWith('en'));if(v)u.voice=v;
+  var u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'en-IN'; u.rate = urgent ? 0.85 : 0.95; u.pitch = urgent ? 1.2 : 1; u.volume = 1;
+  var v = speechSynthesis.getVoices().find(function(x){ return x.lang.startsWith('en'); });
+  if (v) u.voice = v;
   window.speechSynthesis.speak(u);
 }
-function initSpeech(){if(speechReady)return;speechReady=true;speechSynthesis.getVoices();const w=new SpeechSynthesisUtterance(' ');w.volume=0;speechSynthesis.speak(w);}
-document.addEventListener('click',initSpeech,{once:true});
+function initSpeech() {
+  if (speechReady) return; speechReady = true;
+  speechSynthesis.getVoices();
+  var w = new SpeechSynthesisUtterance(' '); w.volume = 0; speechSynthesis.speak(w);
+}
+document.addEventListener('click', initSpeech, { once: true });
 
-function showBanner(msg,color){
-  let b=document.getElementById('cBanner');
-  if(!b){b=document.createElement('div');b.id='cBanner';b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.2)';document.body.appendChild(b);}
-  b.textContent=msg;b.style.background=color==='red'?'#dc2626':'#16a34a';b.style.color='#fff';b.style.opacity='1';
-  clearTimeout(b._t);b._t=setTimeout(()=>b.style.opacity='0',4500);
+/* BANNER */
+function showBanner(msg, color) {
+  var b = document.getElementById('cBanner');
+  if (!b) { b = document.createElement('div'); b.id = 'cBanner'; b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:14px;font-weight:800;font-size:13px;text-align:center;max-width:90vw;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.2)'; document.body.appendChild(b); }
+  b.textContent = msg; b.style.background = color === 'red' ? '#dc2626' : '#16a34a'; b.style.color = '#fff'; b.style.opacity = '1';
+  clearTimeout(b._t); b._t = setTimeout(function(){ b.style.opacity = '0'; }, 4500);
 }
 
 /* SHARE */
-const shareModal=document.getElementById('share-modal');
-document.getElementById('shareAppBtn').addEventListener('click',()=>{document.getElementById('sharePhone').value='';shareModal.classList.remove('hidden');});
-document.getElementById('closeShareBtn').addEventListener('click',()=>shareModal.classList.add('hidden'));
-shareModal.addEventListener('click',e=>{if(e.target===shareModal)shareModal.classList.add('hidden');});
-function shareText(){return encodeURIComponent('🍽️ *Bhaskar Food*\nOrder fresh meals with live GPS delivery tracking!\n🔗 '+window.location.href+'\n📞 9154095125\n_Tap the link to order now!_ 🛵');}
-document.getElementById('sendWhatsAppBtn').addEventListener('click',()=>{const p=document.getElementById('sharePhone').value.replace(/\D/g,'');if(p.length<10){showBanner('⚠️ Enter a valid 10-digit number','red');return;}window.open('https://wa.me/91'+p+'?text='+shareText(),'_blank');shareModal.classList.add('hidden');});
-document.getElementById('sendSMSBtn').addEventListener('click',()=>{const p=document.getElementById('sharePhone').value.replace(/\D/g,'');if(p.length<10){showBanner('⚠️ Enter a valid 10-digit number','red');return;}window.open('sms:+91'+p+'?body='+shareText(),'_blank');shareModal.classList.add('hidden');});
+var shareModal = document.getElementById('share-modal');
+document.getElementById('shareAppBtn').addEventListener('click', function(){ document.getElementById('sharePhone').value = ''; shareModal.classList.remove('hidden'); });
+document.getElementById('closeShareBtn').addEventListener('click', function(){ shareModal.classList.add('hidden'); });
+shareModal.addEventListener('click', function(e){ if (e.target === shareModal) shareModal.classList.add('hidden'); });
+function shareText() { return encodeURIComponent('🍽️ *Bhaskar Food*\nOrder fresh meals!\n🔗 ' + window.location.href + '\n📞 9154095125'); }
+document.getElementById('sendWhatsAppBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('https://wa.me/91'+p+'?text='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
+document.getElementById('sendSMSBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('sms:+91'+p+'?body='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
 
 /* ZONE */
-let zoneCenterLat=null,zoneCenterLng=null,zoneCircleCustomer=null;
-onValue(ref(db,'zones'),snap=>{
-  const zones=snap.val()||{},keys=Object.keys(zones);if(!keys.length)return;
-  const latest=keys.map(k=>zones[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
-  radiusM=latest.radius||200;zoneCenterLat=latest.lat;zoneCenterLng=latest.lng;
-  const nm=latest.name||'Delivery Zone';
-  const displayR=radiusM>=1000?(radiusM/1000).toFixed(1)+' km':radiusM+' m';
-  document.getElementById('radiusVal').textContent=displayR;
-  document.getElementById('radiusBar').style.width=((radiusM-50)/(2000-50)*100)+'%';
-  const znEl=document.getElementById('zoneNameDisplay');if(znEl)znEl.textContent=nm;
-  if(myCircle)myCircle.setRadius(radiusM);
-  if(trackMap&&zoneCenterLat){
-    if(zoneCircleCustomer)zoneCircleCustomer.setLatLng([zoneCenterLat,zoneCenterLng]).setRadius(radiusM);
-    else zoneCircleCustomer=L.circle([zoneCenterLat,zoneCenterLng],{radius:radiusM,color:'#7c3aed',fillColor:'#7c3aed',fillOpacity:0.08,weight:2,dashArray:'8,5'}).addTo(trackMap).bindPopup('🟣 '+nm+' ('+displayR+')');
-  }
+db.ref('zones').on('value', function(snap) {
+  var zones = snap.val() || {}, keys = Object.keys(zones);
+  if (!keys.length) return;
+  var latest = keys.map(function(k){ return zones[k]; }).sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); })[0];
+  radiusM = latest.radius || 200;
+  zoneCenterLat = latest.lat; zoneCenterLng = latest.lng;
+  var nm = latest.name || 'Delivery Zone';
+  var dR = radiusM >= 1000 ? (radiusM/1000).toFixed(1)+' km' : radiusM+' m';
+  document.getElementById('radiusVal').textContent = dR;
+  document.getElementById('radiusBar').style.width = ((radiusM-50)/(2000-50)*100)+'%';
+  var znEl = document.getElementById('zoneNameDisplay'); if (znEl) znEl.textContent = nm;
+  if (myCircle) myCircle.setRadius(radiusM);
 });
-onValue(ref(db,'settings/serviceRadius'),snap=>{
-  if(zoneCenterLat)return;const v=parseInt(snap.val())||200;radiusM=v;
-  document.getElementById('radiusVal').textContent=v+' m';
-  document.getElementById('radiusBar').style.width=((v-50)/(2000-50)*100)+'%';
-  if(myCircle)myCircle.setRadius(v);
+db.ref('settings/serviceRadius').on('value', function(snap) {
+  if (zoneCenterLat) return;
+  var v = parseInt(snap.val()) || 200; radiusM = v;
+  document.getElementById('radiusVal').textContent = v+' m';
+  document.getElementById('radiusBar').style.width = ((v-50)/(2000-50)*100)+'%';
+  if (myCircle) myCircle.setRadius(v);
 });
 
 /* GPS STATES */
-function setGpsActive(){
-  const l=document.getElementById('locBtn'),s=document.getElementById('stopLocBtn');
-  l.innerHTML='<i class="fas fa-check-circle text-[10px]"></i> Sharing';l.disabled=true;
-  l.className='bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase transition-transform flex items-center gap-1 opacity-75 cursor-not-allowed';
-  s.disabled=false;s.classList.remove('gps-idle');
-  s.className='bg-red-600 text-white px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1';
+function setGpsActive() {
+  var l = document.getElementById('locBtn'), s = document.getElementById('stopLocBtn');
+  l.innerHTML = '<i class="fas fa-check-circle text-[10px]"></i> Sharing'; l.disabled = true;
+  l.className = 'bg-green-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase flex items-center gap-1 opacity-75 cursor-not-allowed';
+  s.disabled = false; s.classList.remove('gps-idle');
+  s.className = 'bg-red-600 text-white px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1';
 }
-function setGpsInactive(){
-  const l=document.getElementById('locBtn'),s=document.getElementById('stopLocBtn');
-  l.innerHTML='<i class="fas fa-location-arrow text-[10px]"></i> Share GPS';l.disabled=false;
-  l.className='bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1';
-  s.disabled=false;s.className='gps-idle bg-gray-300 text-gray-500 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform flex items-center gap-1';
+function setGpsInactive() {
+  var l = document.getElementById('locBtn'), s = document.getElementById('stopLocBtn');
+  l.innerHTML = '<i class="fas fa-location-arrow text-[10px]"></i> Share GPS'; l.disabled = false;
+  l.className = 'bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1';
+  s.disabled = false; s.className = 'gps-idle bg-gray-300 text-gray-500 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1';
 }
 
 /* GPS */
-document.getElementById('locBtn').addEventListener('click',()=>{
-  const locBtn=document.getElementById('locBtn');
-  if(!navigator.geolocation){alert('GPS not supported');return;}
-  locBtn.innerHTML='<i class="fas fa-spinner fa-spin text-[10px]"></i> Getting…';locBtn.disabled=true;
-  navigator.geolocation.getCurrentPosition(pos=>{
-    myLat=pos.coords.latitude;myLng=pos.coords.longitude;
+document.getElementById('locBtn').addEventListener('click', function() {
+  var locBtn = document.getElementById('locBtn');
+  if (!navigator.geolocation) { alert('GPS not supported'); return; }
+  locBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-[10px]"></i> Getting…'; locBtn.disabled = true;
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    myLat = pos.coords.latitude; myLng = pos.coords.longitude;
     setGpsActive();
-    document.getElementById('locStatusText').textContent='✅ Live location sharing ON';
+    document.getElementById('locStatusText').textContent = '✅ Live location sharing ON';
     document.getElementById('gpsBar').classList.remove('hidden');
-    showMap();reverseGeocode(myLat,myLng);
-    if(watchId)navigator.geolocation.clearWatch(watchId);
-    watchId=navigator.geolocation.watchPosition(p=>{
-      myLat=p.coords.latitude;myLng=p.coords.longitude;
-      updatePin(myLat,myLng);reverseGeocode(myLat,myLng);checkBreach(myLat,myLng);
-      if(activeOid){set(ref(db,`orders/${activeOid}/lat`),myLat);set(ref(db,`orders/${activeOid}/lng`),myLng);}
-    },null,{enableHighAccuracy:true,maximumAge:8000});
-  },()=>{setGpsInactive();alert('Location denied. Please allow GPS.');},{enableHighAccuracy:true});
+    showMap(); reverseGeocode(myLat, myLng);
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(function(p) {
+      myLat = p.coords.latitude; myLng = p.coords.longitude;
+      updatePin(myLat, myLng); reverseGeocode(myLat, myLng); checkBreach(myLat, myLng);
+      if (activeOid) { db.ref('orders/'+activeOid+'/lat').set(myLat); db.ref('orders/'+activeOid+'/lng').set(myLng); }
+    }, null, { enableHighAccuracy: true, maximumAge: 8000 });
+  }, function() { setGpsInactive(); alert('Location denied. Please allow GPS.'); }, { enableHighAccuracy: true });
 });
-function stopGPS(){
-  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  myLat=null;myLng=null;setGpsInactive();
-  document.getElementById('mapWrap')?.classList.add('hidden');
-  document.getElementById('locStatusText').textContent='Share GPS coordinates for fast delivery';
+function stopGPS() {
+  if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  myLat = null; myLng = null; setGpsInactive();
+  var mw = document.getElementById('mapWrap'); if (mw) mw.classList.add('hidden');
+  document.getElementById('locStatusText').textContent = 'Share GPS for fast delivery';
   document.getElementById('gpsBar').classList.add('hidden');
-  showBanner('📍 Location sharing stopped','red');
+  showBanner('📍 Location sharing stopped', 'red');
 }
-document.getElementById('stopLocBtn').addEventListener('click',()=>{if(!myLat&&!watchId){showBanner('ℹ️ GPS is not active yet.','red');return;}stopGPS();});
-document.getElementById('gpsBarStopBtn').addEventListener('click',stopGPS);
+document.getElementById('stopLocBtn').addEventListener('click', function() { if (!myLat && !watchId) { showBanner('ℹ️ GPS not active yet','red'); return; } stopGPS(); });
+document.getElementById('gpsBarStopBtn').addEventListener('click', stopGPS);
 
-function showMap(){
+function showMap() {
   document.getElementById('mapWrap').classList.remove('hidden');
-  if(!trackMap){
-    trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([myLat,myLng],16);
+  if (!trackMap) {
+    trackMap = L.map('trackMap', { zoomControl: true, attributionControl: false }).setView([myLat, myLng], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
-    if(zoneCenterLat&&zoneCenterLng){
-      const displayR=radiusM>=1000?(radiusM/1000).toFixed(1)+' km':radiusM+' m';
-      const nm=document.getElementById('zoneNameDisplay')?.textContent||'Delivery Zone';
-      zoneCircleCustomer=L.circle([zoneCenterLat,zoneCenterLng],{radius:radiusM,color:'#7c3aed',fillColor:'#7c3aed',fillOpacity:0.08,weight:2,dashArray:'8,5'}).addTo(trackMap).bindPopup('🟣 '+nm+' ('+displayR+')');
+    if (zoneCenterLat && zoneCenterLng) {
+      var dR = radiusM >= 1000 ? (radiusM/1000).toFixed(1)+' km' : radiusM+' m';
+      zoneCircle = L.circle([zoneCenterLat, zoneCenterLng], { radius: radiusM, color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.08, weight: 2, dashArray: '8,5' }).addTo(trackMap);
     }
   }
-  updatePin(myLat,myLng);setTimeout(()=>trackMap.invalidateSize(),200);
+  updatePin(myLat, myLng);
+  setTimeout(function(){ trackMap.invalidateSize(); }, 200);
 }
-function updatePin(lat,lng){
-  if(!trackMap)return;
-  const icon=L.divIcon({html:'<div class="pdot"></div>',iconSize:[14,14],className:''});
-  if(myMarker)myMarker.setLatLng([lat,lng]);
-  else myMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('📍 You are here');
-  if(myCircle){myCircle.setLatLng([lat,lng]);myCircle.setRadius(radiusM);}
-  else myCircle=L.circle([lat,lng],{radius:radiusM,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.1,weight:2}).addTo(trackMap);
-  trackMap.setView([lat,lng],16);
+function updatePin(lat, lng) {
+  if (!trackMap) return;
+  var icon = L.divIcon({ html: '<div class="pdot"></div>', iconSize: [14,14], className: '' });
+  if (myMarker) myMarker.setLatLng([lat, lng]); else myMarker = L.marker([lat, lng], { icon: icon }).addTo(trackMap).bindPopup('📍 You are here');
+  if (myCircle) { myCircle.setLatLng([lat, lng]); myCircle.setRadius(radiusM); } else myCircle = L.circle([lat, lng], { radius: radiusM, color: '#dc2626', fillColor: '#dc2626', fillOpacity: .1, weight: 2 }).addTo(trackMap);
+  trackMap.setView([lat, lng], 16);
 }
-function reverseGeocode(lat,lng){
-  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`)
-    .then(r=>r.json()).then(d=>{
-      const a=d.address||{};
-      myAddress=[a.road||a.suburb||'',a.city||a.town||a.village||'',a.state||''].filter(Boolean).join(', ');
-      document.getElementById('locAddress').textContent='📍 '+(myAddress||`${lat.toFixed(5)},${lng.toFixed(5)}`);
-    }).catch(()=>{myAddress=`${lat.toFixed(5)},${lng.toFixed(5)}`;document.getElementById('locAddress').textContent='📍 '+myAddress;});
+function reverseGeocode(lat, lng) {
+  fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=en')
+    .then(function(r){ return r.json(); }).then(function(d) {
+      var a = d.address || {};
+      myAddress = [a.road||a.suburb||'', a.city||a.town||a.village||'', a.state||''].filter(Boolean).join(', ');
+      document.getElementById('locAddress').textContent = '📍 '+(myAddress||lat.toFixed(5)+','+lng.toFixed(5));
+    }).catch(function(){ myAddress = lat.toFixed(5)+','+lng.toFixed(5); document.getElementById('locAddress').textContent = '📍 '+myAddress; });
 }
-function getDist(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));}
-function checkBreach(lat,lng){
-  const cLat=zoneCenterLat||orderLat,cLng=zoneCenterLng||orderLng;if(!cLat||!cLng)return;
-  const dist=getDist(lat,lng,cLat,cLng),out=dist>radiusM;
-  const st=document.getElementById('locStatusText'),gt=document.getElementById('gpsBarText');
-  if(gt)gt.textContent=out?`⚠️ Outside zone! (${dist}m away)`:`📍 Live location ON · ${dist}m from zone`;
-  if(out&&!wasOutside){wasOutside=true;speak('Warning! You are crossing the service area.',true);showBanner('⚠️ You are crossing the service area!','red');if(st){st.textContent=`⚠️ Outside radius! (${dist}m away)`;st.classList.add('text-red-600');}}
-  else if(!out&&wasOutside){wasOutside=false;speak('You are back in the service area.');showBanner('✅ You are back in the service area!','green');if(st){st.textContent=`✅ Inside radius (${dist}m from start)`;st.classList.remove('text-red-600');}}
-  else if(out&&st)st.textContent=`⚠️ Outside radius! (${dist}m away)`;
-  else if(st)st.textContent=`✅ Live location sharing ON (${dist}m from start)`;
+function getDist(a,b,c,d) {
+  var R=6371000, dL=(c-a)*Math.PI/180, dG=(d-b)*Math.PI/180;
+  var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)*Math.sin(dG/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
+}
+function checkBreach(lat, lng) {
+  var cLat = zoneCenterLat || orderLat, cLng = zoneCenterLng || orderLng;
+  if (!cLat || !cLng) return;
+  var dist = getDist(lat, lng, cLat, cLng), out = dist > radiusM;
+  var st = document.getElementById('locStatusText'), gt = document.getElementById('gpsBarText');
+  if (gt) gt.textContent = out ? '⚠️ Outside zone! ('+dist+'m away)' : '📍 Live location ON · '+dist+'m from zone';
+  if (out && !wasOutside) { wasOutside = true; speak('Warning! You are crossing the service area.', true); showBanner('⚠️ You are crossing the service area!','red'); if(st){st.textContent='⚠️ Outside radius! ('+dist+'m away)';st.classList.add('text-red-600');} }
+  else if (!out && wasOutside) { wasOutside = false; speak('You are back in the service area.'); showBanner('✅ You are back in the service area!','green'); if(st){st.textContent='✅ Inside radius';st.classList.remove('text-red-600');} }
 }
 
 /* CART */
-const dishMap={};
-function updateQty(id,change){
+function updateQty(id, change) {
   initSpeech();
-  if(outOfStockMap[id]){showBanner('❌ This item is currently out of stock!','red');return;}
-  const info=dishMap[id];if(!info)return;
-  if(!cart[id])cart[id]={dish:info.dish,price:info.price,qty:0};
-  if(change>0&&cart[id].qty>=20){showBanner('⚠️ Maximum 20 per item!','red');return;}
-  cart[id].qty=Math.min(20,Math.max(0,cart[id].qty+change));
-  if(cart[id].qty<=0)delete cart[id];
-  updateUI();updateCardQty(id);
+  if (outOfStockMap[id]) { showBanner('❌ This item is currently out of stock!','red'); return; }
+  var info = dishMap[id]; if (!info) return;
+  if (!cart[id]) cart[id] = { dish: info.dish, price: info.price, qty: 0 };
+  if (change > 0 && cart[id].qty >= 20) { showBanner('⚠️ Maximum 20 per item!','red'); return; }
+  cart[id].qty = Math.min(20, Math.max(0, cart[id].qty + change));
+  if (cart[id].qty <= 0) delete cart[id];
+  updateUI(); updateCardQty(id);
 }
-function updateCardQty(id){
-  const row=document.querySelector(`[data-mid="${id}"]`);if(!row)return;
-  const qty=cart[id]?cart[id].qty:0;
-  const span=row.querySelector('.qNum');if(span)span.textContent=qty;
-  const minus=row.querySelector('.qMinus'),plus=row.querySelector('.qPlus');
-  if(minus)minus.style.opacity=qty===0?'0.35':'1';
-  if(plus)plus.style.opacity=qty>=20?'0.35':'1';
+function updateCardQty(id) {
+  var row = document.querySelector('[data-mid="'+id+'"]'); if (!row) return;
+  var qty = cart[id] ? cart[id].qty : 0;
+  var span = row.querySelector('.qNum'); if (span) span.textContent = qty;
+  var minus = row.querySelector('.qMinus'), plus = row.querySelector('.qPlus');
+  if (minus) minus.style.opacity = qty === 0 ? '0.35' : '1';
+  if (plus) plus.style.opacity = qty >= 20 ? '0.35' : '1';
 }
-function applyOosState(mId,isOos){
-  const card=document.querySelector(`.dish-card[data-card-id="${mId}"]`);if(!card)return;
-  const existing=card.querySelector('.oos-overlay');
-  if(isOos){
+function applyOosState(mId, isOos) {
+  var card = document.querySelector('.dish-card[data-card-id="'+mId+'"]'); if (!card) return;
+  var existing = card.querySelector('.oos-overlay');
+  if (isOos) {
     card.classList.add('out-of-stock');
-    if(!existing){const ov=document.createElement('div');ov.className='oos-overlay';ov.innerHTML='<span class="oos-icon">🚫</span><span class="oos-badge">Out of Stock</span>';card.appendChild(ov);}
-    const img=card.querySelector('img');if(img)img.style.filter='grayscale(60%)';
-    if(cart[mId]){delete cart[mId];updateUI();}
+    if (!existing) { var ov = document.createElement('div'); ov.className = 'oos-overlay'; ov.innerHTML = '<span class="oos-icon">🚫</span><span class="oos-badge">Out of Stock</span>'; card.appendChild(ov); }
+    var img = card.querySelector('img'); if (img) img.style.filter = 'grayscale(60%)';
+    if (cart[mId]) { delete cart[mId]; updateUI(); }
   } else {
-    card.classList.remove('out-of-stock');if(existing)existing.remove();
-    const img=card.querySelector('img');if(img)img.style.filter='';
+    card.classList.remove('out-of-stock'); if (existing) existing.remove();
+    var img2 = card.querySelector('img'); if (img2) img2.style.filter = '';
   }
 }
 
 /* MODALS */
-const modal=document.getElementById('checkout-modal');
-const successModal=document.getElementById('success-modal');
-document.getElementById('proceedBtn').addEventListener('click',()=>{modal.classList.remove('hidden');if(myLat)setTimeout(()=>{if(trackMap)trackMap.invalidateSize();},250);});
-document.getElementById('closeModalBtn').addEventListener('click',()=>modal.classList.add('hidden'));
-document.getElementById('cancelBtn').addEventListener('click',()=>{
-  cart={};if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  updateUI();modal.classList.add('hidden');
-  document.querySelectorAll('[data-mid]').forEach(row=>updateCardQty(row.dataset.mid));
-});
-document.getElementById('successDoneBtn').addEventListener('click',()=>{
-  successModal.classList.add('hidden');
-  document.getElementById('cancelOrderBtn').classList.add('hidden');
-  document.getElementById('cancelHint').classList.add('hidden');
-});
+var modal = document.getElementById('checkout-modal');
+var successModal = document.getElementById('success-modal');
+document.getElementById('proceedBtn').addEventListener('click', function() { modal.classList.remove('hidden'); if (myLat) setTimeout(function(){ if(trackMap) trackMap.invalidateSize(); }, 250); });
+document.getElementById('closeModalBtn').addEventListener('click', function(){ modal.classList.add('hidden'); });
+document.getElementById('cancelBtn').addEventListener('click', function() { cart = {}; if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; } updateUI(); modal.classList.add('hidden'); document.querySelectorAll('[data-mid]').forEach(function(r){ updateCardQty(r.dataset.mid); }); });
+document.getElementById('successDoneBtn').addEventListener('click', function() { successModal.classList.add('hidden'); document.getElementById('cancelOrderBtn').classList.add('hidden'); document.getElementById('cancelHint').classList.add('hidden'); });
 
-function updateUI(){
-  const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
-  document.getElementById('bottom-bill-bar').style.display=total>0?'flex':'none';
-  document.getElementById('panel-total').innerText='₹'+total;
-  document.getElementById('modal-total').innerText='₹'+total;
+function updateUI() {
+  var total = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  document.getElementById('bottom-bill-bar').style.display = total > 0 ? 'flex' : 'none';
+  document.getElementById('panel-total').innerText = '₹'+total;
+  document.getElementById('modal-total').innerText = '₹'+total;
 }
 
 /* EVENT DELEGATION */
-document.getElementById('customer-list').addEventListener('click',e=>{
-  const btn=e.target.closest('button');if(!btn)return;
-  const row=btn.closest('[data-mid]');if(!row)return;
-  const mid=row.dataset.mid;
-  if(btn.classList.contains('qPlus'))updateQty(mid,+1);
-  if(btn.classList.contains('qMinus'))updateQty(mid,-1);
+document.getElementById('customer-list').addEventListener('click', function(e) {
+  var btn = e.target.closest('button'); if (!btn) return;
+  var row = btn.closest('[data-mid]'); if (!row) return;
+  var mid = row.dataset.mid;
+  if (btn.classList.contains('qPlus')) updateQty(mid, +1);
+  if (btn.classList.contains('qMinus')) updateQty(mid, -1);
 });
 
 /* RENDER MENU */
-function renderMenu(){
-  const container=document.getElementById('customer-list');container.innerHTML='';
-  if(!resData||!Object.keys(resData).length){
-    container.innerHTML=`<div class="flex flex-col items-center justify-center py-16 gap-4 text-center px-6"><div class="text-5xl">🍽️</div><p class="font-black text-gray-700 text-lg">Menu Coming Soon</p><p class="text-sm text-gray-400">No items available right now.</p><a href="tel:9154095125" class="bg-red-600 text-white px-6 py-3 rounded-2xl font-black text-sm">📞 Call 9154095125</a></div>`;return;
+function renderMenu() {
+  var container = document.getElementById('customer-list');
+  container.innerHTML = '';
+  if (!resData || !Object.keys(resData).length) {
+    container.innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 text-center px-6"><div class="text-5xl">🍽️</div><p class="font-black text-gray-700 text-lg">Menu Coming Soon</p><p class="text-sm text-gray-400">No items available right now.</p><a href="tel:9154095125" class="bg-red-600 text-white px-6 py-3 rounded-2xl font-black text-sm">📞 Call 9154095125</a></div>'; return;
   }
-  Object.keys(resData).forEach(resId=>{
-    const res=resData[resId];let html='';
-    if(res.menu){
-      Object.keys(res.menu).forEach(mId=>{
-        const m=res.menu[mId],price=parseInt(m.price)||0;
-        dishMap[mId]={dish:m.dish,price};
-        const qty=cart[mId]?cart[mId].qty:0;
-        const isOos=!!m.outOfStock;outOfStockMap[mId]=isOos;
-        if(isOos&&cart[mId])delete cart[mId];
-        html+=`<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm${isOos?' out-of-stock':''}" data-card-id="${mId}">
-          <img src="${m.dishImg||''}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-full aspect-square rounded-xl object-cover mb-2" style="${isOos?'filter:grayscale(60%)':''}"/>
-          <p class="font-bold text-[11px] h-8 text-center line-clamp-2">${m.dish}</p>
-          <p class="${isOos?'text-gray-400':'text-red-600'} font-black text-xs mb-2">₹${m.price}</p>
-          <div class="w-full flex items-center justify-between gap-1" data-mid="${mId}">
-            <button class="qMinus w-9 h-9 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-90" style="opacity:${qty===0||isOos?'0.35':'1'}">−</button>
-            <span class="qNum font-black text-base text-gray-800 w-6 text-center">${qty}</span>
-            <button class="qPlus w-9 h-9 bg-red-500 text-white rounded-xl font-black text-xl flex items-center justify-center active:scale-90" style="opacity:${qty>=20||isOos?'0.35':'1'}">+</button>
-          </div>
-          ${isOos?'<div class="oos-overlay"><span class="oos-icon">🚫</span><span class="oos-badge">Out of Stock</span></div>':''}
-        </div>`;
+  Object.keys(resData).forEach(function(resId) {
+    var res = resData[resId]; var html = '';
+    if (res.menu) {
+      Object.keys(res.menu).forEach(function(mId) {
+        var m = res.menu[mId], price = parseInt(m.price) || 0;
+        dishMap[mId] = { dish: m.dish, price: price };
+        var qty = cart[mId] ? cart[mId].qty : 0;
+        var isOos = !!m.outOfStock; outOfStockMap[mId] = isOos;
+        if (isOos && cart[mId]) delete cart[mId];
+        html += '<div class="dish-card bg-white rounded-2xl p-2 border flex flex-col items-center shadow-sm'+(isOos?' out-of-stock':'')+'" data-card-id="'+mId+'">' +
+          '<img src="'+(m.dishImg||'')+'" onerror="this.src=\'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200\'" class="w-full aspect-square rounded-xl object-cover mb-2" style="'+(isOos?'filter:grayscale(60%)':'')+'"/>' +
+          '<p class="font-bold text-[11px] h-8 text-center line-clamp-2">'+m.dish+'</p>' +
+          '<p class="'+(isOos?'text-gray-400':'text-red-600')+' font-black text-xs mb-2">₹'+m.price+'</p>' +
+          '<div class="w-full flex items-center justify-between gap-1" data-mid="'+mId+'">' +
+            '<button class="qMinus w-9 h-9 bg-red-100 text-red-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-90" style="opacity:'+(qty===0||isOos?'0.35':'1')+'">−</button>' +
+            '<span class="qNum font-black text-base text-gray-800 w-6 text-center">'+qty+'</span>' +
+            '<button class="qPlus w-9 h-9 bg-red-500 text-white rounded-xl font-black text-xl flex items-center justify-center active:scale-90" style="opacity:'+(qty>=20||isOos?'0.35':'1')+'">+</button>' +
+          '</div>' +
+          (isOos ? '<div class="oos-overlay"><span class="oos-icon">🚫</span><span class="oos-badge">Out of Stock</span></div>' : '') +
+        '</div>';
       });
     }
-    const wrap=document.createElement('div');
-    wrap.className='bg-white rounded-[3rem] shadow-sm border overflow-hidden';
-    wrap.innerHTML=`<img src="${res.image||''}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'" class="w-full h-44 object-cover"/>
-      <div class="p-6"><h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">${res.name}</h2>
-      <div class="grid grid-cols-2 gap-4">${html}</div></div>`;
+    var wrap = document.createElement('div');
+    wrap.className = 'bg-white rounded-[3rem] shadow-sm border overflow-hidden';
+    wrap.innerHTML = '<img src="'+(res.image||'')+'" onerror="this.src=\'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400\'" class="w-full h-44 object-cover"/>' +
+      '<div class="p-6"><h2 class="text-xl font-black text-gray-800 uppercase italic mb-6 border-l-4 border-red-500 pl-3">'+res.name+'</h2>' +
+      '<div class="grid grid-cols-2 gap-4">'+html+'</div></div>';
     container.appendChild(wrap);
   });
   updateUI();
 }
 
 /* REAL-TIME OOS LISTENER */
-function listenOosUpdates(resId,menuObj){
-  Object.keys(menuObj).forEach(mId=>{
-    onValue(ref(db,`restaurants/${resId}/menu/${mId}/outOfStock`),snap=>{
-      const isOos=!!snap.val();
-      if(outOfStockMap[mId]!==isOos){outOfStockMap[mId]=isOos;applyOosState(mId,isOos);if(isOos)updateUI();}
+function listenOos(resId, menuObj) {
+  Object.keys(menuObj).forEach(function(mId) {
+    db.ref('restaurants/'+resId+'/menu/'+mId+'/outOfStock').on('value', function(snap) {
+      var isOos = !!snap.val();
+      if (outOfStockMap[mId] !== isOos) { outOfStockMap[mId] = isOos; applyOosState(mId, isOos); if (isOos) updateUI(); }
     });
   });
 }
 
-/* FIREBASE MENU LOADER */
-let menuLoaded=false;
-const menuTimeout=setTimeout(()=>{
-  if(!menuLoaded)document.getElementById('customer-list').innerHTML=`<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">😕</div><p class="font-black text-gray-700 text-lg">Menu Not Loading</p><p class="text-sm text-gray-400">Check internet and try again.</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>`;
-},8000);
-onValue(ref(db,'restaurants'),snap=>{
-  menuLoaded=true;clearTimeout(menuTimeout);
-  resData=snap.val()||{};renderMenu();
-  Object.keys(resData).forEach(resId=>{if(resData[resId].menu)listenOosUpdates(resId,resData[resId].menu);});
-},err=>{
-  menuLoaded=true;clearTimeout(menuTimeout);
-  document.getElementById('customer-list').innerHTML=`<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">⚠️</div><p class="font-black text-gray-700">Connection Error</p><p class="text-sm text-gray-400">${err.message||'Unable to load menu.'}</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>`;
+/* LOAD MENU */
+var menuLoaded = false;
+var menuTimeout = setTimeout(function() {
+  if (!menuLoaded) document.getElementById('customer-list').innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">😕</div><p class="font-black text-gray-700">Menu Not Loading</p><p class="text-sm text-gray-400">Check internet and try again.</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>';
+}, 8000);
+
+db.ref('restaurants').on('value', function(snap) {
+  menuLoaded = true; clearTimeout(menuTimeout);
+  resData = snap.val() || {}; renderMenu();
+  Object.keys(resData).forEach(function(resId) { if (resData[resId].menu) listenOos(resId, resData[resId].menu); });
+}, function(err) {
+  menuLoaded = true; clearTimeout(menuTimeout);
+  document.getElementById('customer-list').innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">⚠️</div><p class="font-black text-gray-700">Connection Error</p><p class="text-sm text-gray-400">'+err.message+'</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>';
 });
 
 /* PLACE ORDER */
-document.getElementById('placeOrderBtn').addEventListener('click',async()=>{
-  const name=document.getElementById('custName').value.trim();
-  const phone=document.getElementById('custPhone').value.trim();
-  if(!name){alert('⚠️ Please enter your name!');return;}
-  if(!phone){alert('⚠️ Please enter your phone number!');return;}
-  if(phone.replace(/\D/g,'').length<10){alert('⚠️ Please enter a valid 10-digit phone number!');return;}
-  if(!myLat){alert('⚠️ Please share your live location first!');return;}
-  Object.keys(cart).forEach(id=>{if(outOfStockMap[id])delete cart[id];});
-  if(!Object.keys(cart).length){alert('⚠️ Your cart is empty!');return;}
+document.getElementById('placeOrderBtn').addEventListener('click', function() {
+  var name = document.getElementById('custName').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  if (!name)  { alert('⚠️ Please enter your name!'); return; }
+  if (!phone) { alert('⚠️ Please enter your phone number!'); return; }
+  if (phone.replace(/\D/g,'').length < 10) { alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
+  if (!myLat) { alert('⚠️ Please share your live location first!'); return; }
+  Object.keys(cart).forEach(function(id){ if (outOfStockMap[id]) delete cart[id]; });
+  if (!Object.keys(cart).length) { alert('⚠️ Your cart is empty!'); return; }
 
-  orderLat=myLat;orderLng=myLng;wasOutside=false;
-  const items=Object.values(cart).map(i=>`${i.dish} x${i.qty}`).join(', ');
-  const total=Object.values(cart).reduce((s,i)=>s+(i.price*i.qty),0);
+  orderLat = myLat; orderLng = myLng; wasOutside = false;
+  var items = Object.values(cart).map(function(i){ return i.dish+' x'+i.qty; }).join(', ');
+  var total = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  var oid = db.ref('orders').push().key;
+  activeOid = oid;
 
-  /* ── WRITE ORDER TO FIREBASE ── */
-  const oid=push(ref(db,'orders')).key;
-  activeOid=oid;
-  await set(ref(db,'orders/'+oid),{
-    id:oid,
-    customerName:name,
-    customerPhone:phone,
-    items,
-    totalAmount:total,
-    status:'pending',           /* ← Kitchen sees this */
-    paymentMethod:'Cash on Delivery',
-    lat:myLat,lng:myLng,
-    address:myAddress,
-    radiusMeters:radiusM,
-    timestamp:Date.now(),
-    cancelledBy:null,
-    assignedTo:null,
-    rejectedBy:[]
-  });
-
-  if(watchId){
-    navigator.geolocation.clearWatch(watchId);
-    watchId=navigator.geolocation.watchPosition(p=>{
-      myLat=p.coords.latitude;myLng=p.coords.longitude;
-      set(ref(db,`orders/${oid}/lat`),myLat);set(ref(db,`orders/${oid}/lng`),myLng);
-      checkBreach(myLat,myLng);
-    },null,{enableHighAccuracy:true,maximumAge:8000});
-  }
-
-  document.getElementById('successMsg').textContent=`Thank you, ${name}! Your order is confirmed.`;
-  document.getElementById('successTotal').textContent='₹'+total;
-  document.getElementById('successPhone').textContent=phone;
-  successModal.classList.remove('hidden');modal.classList.add('hidden');
-  speak('Order placed successfully! Your delivery is on the way.');
-  cart={};updateUI();
-  document.querySelectorAll('[data-mid]').forEach(row=>updateCardQty(row.dataset.mid));
-
-  /* CANCEL BUTTON — visible for 3 minutes */
-  const cancelBtn=document.getElementById('cancelOrderBtn');
-  const cancelHint=document.getElementById('cancelHint');
-  cancelBtn.classList.remove('hidden');cancelHint.classList.remove('hidden');
-  let cancelTimer=setTimeout(()=>{cancelBtn.classList.add('hidden');cancelHint.classList.add('hidden');},180000);
-
-  cancelBtn.onclick=async()=>{
-    if(!confirm('Are you sure you want to cancel your order?'))return;
-    const snap=await get(ref(db,'orders/'+oid));
-    if(!snap.exists()){showBanner('⚠️ Order not found!','red');return;}
-    const o=snap.val();
-    if(o.status==='preparing'||o.status==='ready_for_pickup'||o.status==='out_for_delivery'||o.status==='completed'){
-      showBanner('❌ Cannot cancel — order is already being prepared!','red');
-      cancelBtn.classList.add('hidden');cancelHint.classList.add('hidden');clearTimeout(cancelTimer);return;
+  db.ref('orders/'+oid).set({
+    id: oid,
+    customerName: name,
+    customerPhone: phone,
+    items: items,
+    totalAmount: total,
+    status: 'pending',
+    paymentMethod: 'Cash on Delivery',
+    lat: myLat, lng: myLng,
+    address: myAddress,
+    radiusMeters: radiusM,
+    timestamp: Date.now(),
+    cancelledBy: null,
+    assignedTo: null,
+    rejectedBy: []
+  }).then(function() {
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = navigator.geolocation.watchPosition(function(p) {
+        myLat = p.coords.latitude; myLng = p.coords.longitude;
+        db.ref('orders/'+oid+'/lat').set(myLat);
+        db.ref('orders/'+oid+'/lng').set(myLng);
+        checkBreach(myLat, myLng);
+      }, null, { enableHighAccuracy: true, maximumAge: 8000 });
     }
-    await set(ref(db,'orders/'+oid+'/status'),'cancelled');
-    await set(ref(db,'orders/'+oid+'/cancelledAt'),Date.now());
-    await set(ref(db,'orders/'+oid+'/cancelledBy'),'customer');
-    showBanner('✅ Order cancelled successfully!','green');
-    speak('Your order has been cancelled.');
-    cancelBtn.classList.add('hidden');cancelHint.classList.add('hidden');clearTimeout(cancelTimer);
-    successModal.classList.add('hidden');
-  };
-});
-</script>
+    document.getElementById('successMsg').textContent = 'Thank you, '+name+'! Your order is confirmed.';
+    document.getElementById('successTotal').textContent = '₹'+total;
+    document.getElementById('successPhone').textContent = phone;
+    successModal.classList.remove('hidden'); modal.classList.add('hidden');
+    speak('Order placed successfully! Your delivery is on the way.');
+    cart = {}; updateUI();
+    document.querySelectorAll('[data-mid]').forEach(function(row){ updateCardQty(row.dataset.mid); });
 
-<script>
-if('serviceWorker' in navigator){
-  const swCode=`const CACHE='street-food-v1';const URLS=[self.location.href];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
-  const blob=new Blob([swCode],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-}
-let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>{if(!localStorage.getItem('installDismissed'))document.getElementById('installBanner').classList.remove('hidden');},3000);});
-document.getElementById('installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('installBanner').classList.add('hidden');if(outcome==='accepted')localStorage.setItem('installDismissed','1');});
-document.getElementById('dismissInstall').addEventListener('click',()=>{document.getElementById('installBanner').classList.add('hidden');localStorage.setItem('installDismissed','1');});
-const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent),isInStandalone=('standalone' in navigator)&&navigator.standalone,isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-if(isIos&&!isInStandalone&&isSafari&&!localStorage.getItem('iosDismissed'))setTimeout(()=>document.getElementById('iosBanner').classList.remove('hidden'),3000);
-document.getElementById('dismissIos').addEventListener('click',()=>{document.getElementById('iosBanner').classList.add('hidden');localStorage.setItem('iosDismissed','1');});
-window.addEventListener('appinstalled',()=>{document.getElementById('installBanner').classList.add('hidden');localStorage.setItem('installDismissed','1');});
+    /* CANCEL BUTTON */
+    var cancelBtn = document.getElementById('cancelOrderBtn');
+    var cancelHint = document.getElementById('cancelHint');
+    cancelBtn.classList.remove('hidden'); cancelHint.classList.remove('hidden');
+    var cancelTimer = setTimeout(function(){ cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); }, 180000);
+    cancelBtn.onclick = function() {
+      if (!confirm('Are you sure you want to cancel your order?')) return;
+      db.ref('orders/'+oid).once('value', function(snap) {
+        if (!snap.exists()) { showBanner('⚠️ Order not found!','red'); return; }
+        var o = snap.val();
+        if (o.status === 'preparing' || o.status === 'ready_for_pickup' || o.status === 'out_for_delivery' || o.status === 'completed') {
+          showBanner('❌ Cannot cancel — order already being prepared!','red');
+          cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); clearTimeout(cancelTimer); return;
+        }
+        db.ref('orders/'+oid).update({ status: 'cancelled', cancelledAt: Date.now(), cancelledBy: 'customer' });
+        showBanner('✅ Order cancelled!','green'); speak('Your order has been cancelled.');
+        cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); clearTimeout(cancelTimer);
+        successModal.classList.add('hidden');
+      });
+    };
+  }).catch(function(err) {
+    alert('❌ Order failed: ' + err.message);
+  });
+});
 </script>
 </body>
 </html>
