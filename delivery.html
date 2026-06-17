@@ -18,9 +18,8 @@
 @keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .ov{background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
 #mainApp{display:none}
-/* NEW ORDER PULSE */
-@keyframes newOrderPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}50%{box-shadow:0 0 0 16px rgba(37,99,235,0)}}
-.new-order-card{animation:newOrderPulse 1.5s infinite}
+@keyframes newping{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}50%{box-shadow:0 0 0 16px rgba(37,99,235,0)}}
+.new-order-pulse{animation:newping 1.5s infinite}
 </style>
 </head>
 <body class="bg-blue-50 pb-28">
@@ -51,8 +50,8 @@
       <input id="loginPass" type="password" placeholder="Password *" class="w-full p-4 border-2 rounded-2xl bg-gray-50 font-bold text-sm focus:outline-none focus:border-blue-500 pr-14"/>
       <button id="togglePass" class="absolute right-4 top-4 text-gray-400 text-lg">👁️</button>
     </div>
-    <button id="loginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase active:scale-95 transition-transform text-base">🚀 Login & Start Delivering</button>
-    <p class="text-center text-[10px] text-gray-400 font-bold">Contact your admin if you don't have credentials</p>
+    <button id="loginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase active:scale-95 text-base">🚀 Login & Start Delivering</button>
+    <p class="text-center text-[10px] text-gray-400 font-bold">Contact admin if you don't have credentials</p>
   </div>
 </div>
 
@@ -83,7 +82,7 @@
       <span class="flex items-center gap-2"><div class="cpulse flex-shrink-0"></div>Customer</span>
     </div>
     <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center">
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider">Distance to Customer</p>
+      <p class="text-[10px] font-black text-gray-500 uppercase">Distance to Customer</p>
       <p class="font-black text-3xl text-green-600 mt-1" id="tDistance">Calculating…</p>
       <p class="text-xs text-gray-500 mt-1 font-bold" id="tDistNote">—</p>
     </div>
@@ -95,12 +94,12 @@
         <p class="font-black text-2xl text-red-600" id="tTotal">₹0</p>
       </div>
       <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2.5">
-        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect exact cash from customer on delivery</p>
+        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect exact cash from customer</p>
       </div>
     </div>
     <div class="space-y-2">
       <a id="callBtn" href="#" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-sm uppercase text-center block active:scale-95">📞 Call Customer</a>
-      <button id="deliverBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase active:scale-95 transition-transform">✅ Mark as Delivered & Cash Collected</button>
+      <button id="deliverBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase active:scale-95">✅ Mark as Delivered & Cash Collected</button>
     </div>
   </div>
 </div>
@@ -109,7 +108,7 @@
 <div id="mainApp" class="p-4">
 <div class="max-w-md mx-auto space-y-5">
 
-  <!-- EARNINGS HEADER -->
+  <!-- EARNINGS -->
   <div class="bg-blue-600 p-7 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
     <div class="relative z-10">
       <div class="flex justify-between items-start">
@@ -118,7 +117,7 @@
           <h1 id="myEarnings" class="text-4xl font-black italic mt-1">₹0.00</h1>
           <p class="text-[10px] opacity-60 mt-1" id="ordersCount">0 deliveries completed</p>
         </div>
-        <button id="settleBtn" title="Settle Earnings" class="bg-white/20 hover:bg-white/30 p-3 rounded-2xl transition-all active:scale-90">
+        <button id="settleBtn" class="bg-white/20 p-3 rounded-2xl active:scale-90" title="Settle Earnings">
           <i class="fa-solid fa-rotate text-xl"></i>
         </button>
       </div>
@@ -132,15 +131,15 @@
 
   <!-- SEARCH -->
   <div class="bg-white rounded-3xl shadow border p-5 space-y-3">
-    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🔍 Find Order by Customer Phone</p>
+    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🔍 Find Order by Phone</p>
     <div class="flex gap-2">
       <input id="searchPhone" type="tel" placeholder="Enter customer phone number" class="flex-1 p-3 border-2 rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
-      <button id="searchBtn" class="bg-blue-600 text-white px-5 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">Search</button>
+      <button id="searchBtn" class="bg-blue-600 text-white px-5 rounded-xl font-black text-xs uppercase active:scale-95">Search</button>
     </div>
     <div id="searchResult"></div>
   </div>
 
-  <!-- ── NEW: AVAILABLE ORDERS (unassigned — first come first serve) ── -->
+  <!-- AVAILABLE ORDERS (ready for pickup, unassigned) -->
   <div id="availableSection" class="hidden space-y-3">
     <div class="flex items-center gap-2">
       <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white text-sm animate-pulse">🔔</div>
@@ -149,20 +148,20 @@
     <div id="availableList" class="space-y-4"></div>
   </div>
 
-  <!-- MY ASSIGNED ORDERS -->
+  <!-- MY ASSIGNED -->
   <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📦 My Assigned Orders</p>
   <div id="deliveryList" class="space-y-4">
     <p class="text-center text-gray-400 text-sm py-6">No assigned orders yet.</p>
   </div>
 
-  <!-- CANCELLED ORDERS -->
+  <!-- CANCELLED -->
   <div id="cancelledSection" class="hidden space-y-3">
     <p class="text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">❌ Cancelled Orders</p>
     <div id="cancelledList" class="space-y-2"></div>
   </div>
 
-  <hr class="border-blue-100 my-2"/>
-  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✅ Today's Completed Deliveries</p>
+  <hr class="border-blue-100"/>
+  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✅ Completed Deliveries</p>
   <div id="deliveryHistory" class="space-y-3 pb-6">
     <p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>
   </div>
@@ -175,72 +174,79 @@
 
 <!-- BOTTOM NAV -->
 <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
-  <a href="admin.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
-  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
+  <a href="control.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
+  <a href="admin.html"    class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
+  <a href="kitchen.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
   <a href="delivery.html" class="flex flex-col items-center gap-1 text-blue-600"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
-  <a href="reports.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
+  <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
 
-<script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, get, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
+  authDomain: "bhaskar-food-app.firebaseapp.com",
+  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
+  projectId: "bhaskar-food-app",
+  appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
+});
+var db = firebase.database();
 
-const firebaseConfig = {
-  apiKey:"AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain:"bhaskar-food-app.firebaseapp.com",
-  databaseURL:"https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId:"bhaskar-food-app",
-  appId:"1:712053690568:web:b4d8b789e0359ebc0e95fd"
-};
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getDatabase(app);
+/* STATE */
+var myPhone='', myName='', myUsername='';
+var completedKeys=[], currentRate=10;
+var activeOrderId=null, trackMap=null;
+var myMarker=null, custMarker=null, custCircle=null;
+var myWatchId=null, custListener=null;
+var myLat=null, myLng=null, allOrders={};
+var knownAvailableKeys={}, wasNearby=false;
+var voicesLoaded=false;
 
-/* ── STATE ── */
-let myPhone='',myName='',myUsername='';
-let completedKeys=[],currentRate=10;
-let activeOrderId=null,trackMap=null;
-let myMarker=null,custMarker=null,custCircle=null;
-let myWatchId=null,custListenerOff=null;
-let myLat=null,myLng=null,allOrders={};
-let knownAvailableKeys=new Set(),wasNearby=false;
-let voicesLoaded=false;
-
-/* ── VOICE ── */
-function loadVoices(){if(voicesLoaded)return;const l=speechSynthesis.getVoices();if(l.length>0){voicesLoaded=true;return;}speechSynthesis.onvoiceschanged=()=>{voicesLoaded=true;};}
-function speak(text,urgent=false){
-  if(!window.speechSynthesis)return;loadVoices();speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang='en-IN';u.volume=1;u.rate=urgent?.85:.95;u.pitch=urgent?1.2:1;
-  const v=speechSynthesis.getVoices();const p=v.find(x=>x.lang.startsWith('en-IN'))||v.find(x=>x.lang.startsWith('en'))||v[0];
-  if(p)u.voice=p;speechSynthesis.speak(u);
+/* VOICE */
+function loadVoices(){ if(voicesLoaded)return; speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=function(){voicesLoaded=true;}; voicesLoaded=true; }
+function speak(text, urgent){
+  if(!window.speechSynthesis)return; loadVoices(); speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text); u.lang='en-IN'; u.volume=1;
+  u.rate=urgent?0.85:0.95; u.pitch=urgent?1.2:1.0;
+  var v=speechSynthesis.getVoices(); var p=v.find(function(x){return x.lang.startsWith('en-IN');})||v.find(function(x){return x.lang.startsWith('en');})||v[0];
+  if(p)u.voice=p; speechSynthesis.speak(u);
 }
-document.addEventListener('click',loadVoices,{once:false});
-document.addEventListener('touchend',loadVoices,{once:false});
+document.addEventListener('click', loadVoices, {once:false});
 
-/* ── BANNER ── */
-function showBanner(msg,color='blue'){
-  const b=document.getElementById('dBanner');
+/* BANNER */
+function showBanner(msg, color){
+  var b=document.getElementById('dBanner');
   b.textContent=msg;
   b.style.background=color==='red'?'#dc2626':color==='green'?'#16a34a':'#2563eb';
-  b.style.opacity='1';clearTimeout(b._t);b._t=setTimeout(()=>{b.style.opacity='0';},5000);
+  b.style.opacity='1'; clearTimeout(b._t); b._t=setTimeout(function(){b.style.opacity='0';},5000);
 }
 
 function timeAgo(ts){
-  if(!ts)return'';const m=Math.floor((Date.now()-ts)/60000);
-  if(m<1)return'just now';if(m<60)return m+'m ago';return Math.floor(m/60)+'h ago';
+  if(!ts)return''; var m=Math.floor((Date.now()-ts)/60000);
+  if(m<1)return'just now'; if(m<60)return m+'m ago'; return Math.floor(m/60)+'h ago';
 }
 
-/* ── LOGIN ── */
-document.getElementById('togglePass').addEventListener('click',()=>{const f=document.getElementById('loginPass');f.type=f.type==='password'?'text':'password';});
-async function tryAutoLogin(){
-  const u=localStorage.getItem('db_username'),p=localStorage.getItem('db_password');
+/* LOGIN */
+document.getElementById('togglePass').addEventListener('click',function(){
+  var f=document.getElementById('loginPass'); f.type=f.type==='password'?'text':'password';
+});
+
+function tryAutoLogin(){
+  var u=localStorage.getItem('db_username'), p=localStorage.getItem('db_password');
   if(!u||!p){showLogin();return;}
-  try{
-    const snap=await get(ref(db,`deliveryAccounts/${u}`));
-    if(snap.exists()){const a=snap.val();if(a.active&&a.password===p){myUsername=u;myName=a.name||'';myPhone=a.phone||'';showMainApp();return;}}
-    localStorage.removeItem('db_username');localStorage.removeItem('db_password');showLogin();
-  }catch(e){showLogin();}
+  db.ref('deliveryAccounts/'+u).once('value',function(snap){
+    if(snap.exists()){
+      var a=snap.val();
+      if(a.active&&a.password===p){ myUsername=u; myName=a.name||''; myPhone=a.phone||''; showMainApp(); return; }
+    }
+    localStorage.removeItem('db_username'); localStorage.removeItem('db_password'); showLogin();
+  },function(){ showLogin(); });
 }
-function showLogin(){document.getElementById('loadingScreen').style.display='none';document.getElementById('loginScreen').classList.remove('hidden');}
+function showLogin(){
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
 function showMainApp(){
   document.getElementById('loadingScreen').style.display='none';
   document.getElementById('loginScreen').classList.add('hidden');
@@ -248,89 +254,74 @@ function showMainApp(){
   document.getElementById('dispName').textContent='🛵 '+myName+' ('+myUsername+')';
   initApp();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{
-  const user=document.getElementById('loginUser').value.trim().toLowerCase();
-  const pass=document.getElementById('loginPass').value.trim();
-  const errEl=document.getElementById('loginError');errEl.classList.add('hidden');
+
+document.getElementById('loginBtn').addEventListener('click',function(){
+  var user=document.getElementById('loginUser').value.trim().toLowerCase();
+  var pass=document.getElementById('loginPass').value.trim();
+  var errEl=document.getElementById('loginError'); errEl.classList.add('hidden');
   if(!user||!pass){errEl.textContent='⚠️ Please enter username and password';errEl.classList.remove('hidden');return;}
-  const btn=document.getElementById('loginBtn');btn.textContent='⏳ Verifying…';btn.disabled=true;
-  try{
-    const snap=await get(ref(db,`deliveryAccounts/${user}`));
+  var btn=document.getElementById('loginBtn'); btn.textContent='⏳ Verifying…'; btn.disabled=true;
+  db.ref('deliveryAccounts/'+user).once('value',function(snap){
     if(!snap.exists()){errEl.textContent='❌ Username not found.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
-    const acc=snap.val();
+    var acc=snap.val();
     if(acc.password!==pass){errEl.textContent='❌ Wrong password.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
     if(!acc.active){errEl.textContent='❌ Account disabled. Contact admin.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
-    localStorage.setItem('db_username',user);localStorage.setItem('db_password',pass);
-    myUsername=user;myName=acc.name||'';myPhone=acc.phone||'';showMainApp();
-  }catch(e){errEl.textContent='❌ Connection error.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;}
+    localStorage.setItem('db_username',user); localStorage.setItem('db_password',pass);
+    myUsername=user; myName=acc.name||''; myPhone=acc.phone||''; showMainApp();
+  },function(e){errEl.textContent='❌ Connection error: '+e.message;errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;});
 });
-document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Logout from this device?')){localStorage.removeItem('db_username');localStorage.removeItem('db_password');location.reload();}});
 
-/* ── INIT ── */
+document.getElementById('logoutBtn').addEventListener('click',function(){
+  if(confirm('Logout from this device?')){ localStorage.removeItem('db_username'); localStorage.removeItem('db_password'); location.reload(); }
+});
+
+/* INIT */
 function initApp(){
-  onValue(ref(db,'settings/commission'),s=>{currentRate=parseFloat(s.val())||10;});
-  listenOrders();setupSearch();setupSettle();setupTrackModal();
+  db.ref('settings/commission').on('value',function(s){currentRate=parseFloat(s.val())||10;});
+  listenOrders();
+  setupSearch();
+  setupSettle();
+  setupTrackModal();
 }
 
-/* ════════════════════════════════
-   ORDER ASSIGNMENT SYSTEM
-   
-   Flow:
-   1. Kitchen marks "ready_for_pickup" → order becomes available
-   2. All delivery boys see it with Accept/Reject buttons
-   3. First to tap Accept → order assigned to them (assignedTo = myUsername)
-   4. If Reject → order goes back to pool (rejectedBy array updated)
-   5. Rejected boys don't see that order again
-════════════════════════════════ */
-
-/* ── ACCEPT ORDER ── */
-async function acceptOrder(key){
-  const snap=await get(ref(db,`orders/${key}`));
-  if(!snap.exists())return;
-  const o=snap.val();
-  // Check if already taken by someone else
-  if(o.assignedTo&&o.assignedTo!==myUsername){
-    showBanner('⚠️ Order already taken by another delivery boy!','red');return;
-  }
-  await update(ref(db,`orders/${key}`),{
-    assignedTo:myUsername,
-    assignedName:myName,
-    assignedPhone:myPhone,
-    assignedAt:Date.now(),
-    status:'out_for_delivery'
+/* ACCEPT ORDER */
+function acceptOrder(key){
+  db.ref('orders/'+key).once('value',function(snap){
+    if(!snap.exists())return;
+    var o=snap.val();
+    if(o.assignedTo&&o.assignedTo!==myUsername){showBanner('⚠️ Order already taken by another delivery boy!','red');return;}
+    db.ref('orders/'+key).update({
+      assignedTo:myUsername, assignedName:myName, assignedPhone:myPhone,
+      assignedAt:Date.now(), status:'out_for_delivery'
+    });
+    speak('Order accepted! Please pick up and deliver.');
+    showBanner('✅ Order accepted! Go pick it up.','green');
   });
-  speak('Order accepted! Please pick up and deliver.');
-  showBanner('✅ Order accepted! Go pick it up.','green');
 }
 
-/* ── REJECT ORDER ── */
-async function rejectOrder(key){
-  if(!confirm('Reject this order? It will be offered to other delivery boys.'))return;
-  const snap=await get(ref(db,`orders/${key}`));
-  if(!snap.exists())return;
-  const o=snap.val();
-  const rejected=o.rejectedBy||[];
-  if(!rejected.includes(myUsername)) rejected.push(myUsername);
-  await update(ref(db,`orders/${key}`),{
-    rejectedBy:rejected,
-    assignedTo:null,
-    assignedName:null,
-    assignedPhone:null,
-    status:'ready_for_pickup' // back to pool
+/* REJECT ORDER */
+function rejectOrder(key){
+  if(!confirm('Reject this order? It will go to other delivery boys.'))return;
+  db.ref('orders/'+key).once('value',function(snap){
+    if(!snap.exists())return;
+    var o=snap.val();
+    var rejected=o.rejectedBy||[];
+    if(rejected.indexOf(myUsername)===-1) rejected.push(myUsername);
+    db.ref('orders/'+key).update({ rejectedBy:rejected, assignedTo:null, assignedName:null, assignedPhone:null, status:'ready_for_pickup' });
+    showBanner('↩️ Order returned to pool.','blue');
   });
-  showBanner('↩️ Order returned to pool.','blue');
 }
 
-/* ── LISTEN ORDERS ── */
+/* LISTEN ORDERS */
 function listenOrders(){
-  onValue(ref(db,'orders'),snap=>{
+  db.ref('orders').on('value',function(snap){
     allOrders={};
-    const availList=document.getElementById('availableList');
-    const myList=document.getElementById('deliveryList');
-    const hist=document.getElementById('deliveryHistory');
-    const cancelledList=document.getElementById('cancelledList');
-    availList.innerHTML='';myList.innerHTML='';hist.innerHTML='';cancelledList.innerHTML='';
-    completedKeys=[];let totalComm=0,delivCount=0,newFound=false,cancelCount=0;
+    var availList=document.getElementById('availableList');
+    var myList=document.getElementById('deliveryList');
+    var hist=document.getElementById('deliveryHistory');
+    var cancelledList=document.getElementById('cancelledList');
+    availList.innerHTML=''; myList.innerHTML=''; hist.innerHTML=''; cancelledList.innerHTML='';
+    completedKeys=[]; var totalComm=0, delivCount=0, newFound=false, cancelCount=0;
 
     if(!snap.exists()){
       myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No orders yet.</p>';
@@ -341,66 +332,60 @@ function listenOrders(){
       return;
     }
 
-    snap.forEach(child=>{
-      const o=child.val(),key=child.key;
-      allOrders[key]={...o,key};
-      const comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
-      const rejectedByMe=(o.rejectedBy||[]).includes(myUsername);
+    snap.forEach(function(child){
+      var o=child.val(), key=child.key;
+      o.key=key; allOrders[key]=o;
+      var comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
+      var rejectedByMe=(o.rejectedBy||[]).indexOf(myUsername)!==-1;
 
-      /* ── AVAILABLE (unassigned ready orders not rejected by me) ── */
+      /* AVAILABLE — ready_for_pickup, unassigned, not rejected by me */
       if(o.status==='ready_for_pickup'&&!o.assignedTo&&!rejectedByMe){
-        if(!knownAvailableKeys.has(key)){newFound=true;knownAvailableKeys.add(key);}
+        if(!knownAvailableKeys[key]){newFound=true; knownAvailableKeys[key]=true;}
         availList.appendChild(buildAvailableCard(o,key,comm));
       }
-
-      /* ── MY ASSIGNED ORDERS ── */
+      /* MY ASSIGNED */
       else if((o.status==='out_for_delivery'||o.status==='ready_for_pickup')&&o.assignedTo===myUsername){
         myList.appendChild(buildMyOrderCard(o,key,comm));
       }
-
-      /* ── CANCELLED ── */
+      /* CANCELLED */
       else if(o.status==='cancelled'){
         cancelCount++;
-        cancelledList.innerHTML+=`<div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-lg shrink-0">❌</div>
-          <div class="flex-1 min-w-0">
-            <p class="font-black text-sm text-gray-700">${o.customerName||'—'}</p>
-            <p class="text-[10px] text-gray-500 truncate">${o.items||'—'}</p>
-            <p class="text-[10px] text-red-500 font-bold mt-0.5">
-              Cancelled ${o.cancelledBy==='customer'?'by customer':'by kitchen'} · ${timeAgo(o.cancelledAt||o.timestamp)}
-            </p>
-          </div>
-          <p class="font-black text-red-500 text-sm shrink-0">₹${o.totalAmount||0}</p>
-        </div>`;
+        cancelledList.innerHTML+='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">'+
+          '<div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-lg shrink-0">❌</div>'+
+          '<div class="flex-1 min-w-0">'+
+            '<p class="font-black text-sm text-gray-700">'+(o.customerName||'—')+'</p>'+
+            '<p class="text-[10px] text-gray-500 truncate">'+(o.items||'—')+'</p>'+
+            '<p class="text-[10px] font-bold mt-0.5 '+(o.cancelledBy==='customer'?'text-orange-500':'text-red-500')+'">'+
+              'Cancelled by '+(o.cancelledBy==='customer'?'customer':'kitchen')+' · '+timeAgo(o.cancelledAt||o.timestamp)+
+            '</p>'+
+          '</div>'+
+          '<p class="font-black text-red-500 text-sm shrink-0">₹'+(o.totalAmount||0)+'</p>'+
+        '</div>';
       }
-
-      /* ── COMPLETED/SETTLED BY ME ── */
+      /* COMPLETED */
       else if((o.status==='completed'||o.status==='settled')&&o.driverPhone===myPhone){
-        const paid=parseFloat(o.commissionPaid||0);
-        totalComm+=paid;delivCount++;completedKeys.push(key);
+        var paid=parseFloat(o.commissionPaid||0);
+        totalComm+=paid; delivCount++; completedKeys.push(key);
         hist.appendChild(buildHistoryCard(o,paid));
       }
     });
 
     updateEarnings(totalComm,delivCount);
 
-    /* New available order alert */
     if(newFound){
-      setTimeout(()=>{
+      setTimeout(function(){
         speak('Attention! A new order is available. Please accept quickly.',true);
         showBanner('🔔 New order available! Tap to accept.','blue');
       },500);
     }
 
-    const availSection=document.getElementById('availableSection');
-    if(availList.innerHTML) availSection.classList.remove('hidden');
-    else availSection.classList.add('hidden');
+    if(availList.innerHTML) document.getElementById('availableSection').classList.remove('hidden');
+    else document.getElementById('availableSection').classList.add('hidden');
 
     if(!myList.innerHTML) myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No assigned orders yet.</p>';
-    if(!hist.innerHTML) hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
-
-    const cancelSection=document.getElementById('cancelledSection');
-    if(cancelCount>0) cancelSection.classList.remove('hidden'); else cancelSection.classList.add('hidden');
+    if(!hist.innerHTML)   hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
+    if(cancelCount>0) document.getElementById('cancelledSection').classList.remove('hidden');
+    else document.getElementById('cancelledSection').classList.add('hidden');
   });
 }
 
@@ -409,175 +394,166 @@ function updateEarnings(total,count){
   document.getElementById('ordersCount').textContent=count+' deliver'+(count===1?'y':'ies')+' completed';
 }
 
-/* ── BUILD AVAILABLE CARD (Accept / Reject) ── */
+/* BUILD AVAILABLE CARD */
 function buildAvailableCard(o,key,comm){
-  const items=(o.items||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const div=document.createElement('div');
-  div.className='new-order-card bg-white rounded-[2rem] border-2 border-blue-500 shadow-md p-5 space-y-3';
-  div.innerHTML=`
-    <div class="flex items-center gap-2 mb-1">
-      <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-      <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">New Order — Accept Fast!</span>
-    </div>
-    <div class="flex items-start justify-between gap-2">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">${(o.customerName||'?')[0].toUpperCase()}</div>
-        <div>
-          <p class="font-black text-gray-800 text-sm">${o.customerName||'—'}</p>
-          <p class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</p>
-        </div>
-      </div>
-      <span class="bg-green-100 text-green-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹${comm}</span>
-    </div>
-    ${o.address?`<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">${o.address}</p></div>`:''}
-    <div class="bg-orange-50 rounded-xl p-3 border border-orange-200">
-      <p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>
-      ${items.map(i=>`<p class="text-xs font-bold text-gray-700 py-0.5">• ${i}</p>`).join('')}
-    </div>
-    <div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">
-      <div>
-        <p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>
-        <p class="font-black text-2xl text-red-600">₹${o.totalAmount||0}</p>
-      </div>
-      <div class="text-right">
-        <p class="text-[10px] text-gray-400">Cash on Delivery</p>
-        <p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg mt-1 border border-green-200">Your cut: ₹${comm}</p>
-      </div>
-    </div>
-    <!-- ACCEPT / REJECT BUTTONS -->
-    <div class="grid grid-cols-2 gap-3">
-      <button class="acceptBtn bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-md">
-        ✅ Accept Order
-      </button>
-      <button class="rejectBtn bg-gray-100 text-gray-600 border-2 border-gray-300 py-4 rounded-2xl font-black text-sm uppercase active:scale-95 transition-transform flex items-center justify-center gap-2">
-        ↩️ Reject
-      </button>
-    </div>
-    <p class="text-[10px] text-gray-400 text-center">Rejecting will pass this order to another delivery boy</p>`;
-  div.querySelector('.acceptBtn').addEventListener('click',()=>acceptOrder(key));
-  div.querySelector('.rejectBtn').addEventListener('click',()=>rejectOrder(key));
+  var items=(o.items||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var div=document.createElement('div');
+  div.className='new-order-pulse bg-white rounded-[2rem] border-2 border-blue-500 shadow-md p-5 space-y-3';
+  div.innerHTML=
+    '<div class="flex items-center gap-2 mb-1">'+
+      '<div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>'+
+      '<span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">New Order — Accept Fast!</span>'+
+    '</div>'+
+    '<div class="flex items-start justify-between gap-2">'+
+      '<div class="flex items-center gap-3">'+
+        '<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+
+          (o.customerName||'?')[0].toUpperCase()+
+        '</div>'+
+        '<div>'+
+          '<p class="font-black text-gray-800 text-sm">'+(o.customerName||'—')+'</p>'+
+          '<p class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</p>'+
+        '</div>'+
+      '</div>'+
+      '<span class="bg-green-100 text-green-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹'+comm+'</span>'+
+    '</div>'+
+    (o.address?'<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">'+o.address+'</p></div>':'')+
+    '<div class="bg-orange-50 rounded-xl p-3 border border-orange-200">'+
+      '<p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>'+
+      items.map(function(i){return '<p class="text-xs font-bold text-gray-700 py-0.5">• '+i+'</p>';}).join('')+
+    '</div>'+
+    '<div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">'+
+      '<div><p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>'+
+      '<p class="font-black text-2xl text-red-600">₹'+(o.totalAmount||0)+'</p></div>'+
+      '<div class="text-right"><p class="text-[10px] text-gray-400">Cash on Delivery</p>'+
+      '<p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg mt-1 border border-green-200">Your cut: ₹'+comm+'</p></div>'+
+    '</div>'+
+    '<div class="grid grid-cols-2 gap-3">'+
+      '<button class="acceptBtn bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase active:scale-95 shadow-md">✅ Accept</button>'+
+      '<button class="rejectBtn bg-gray-100 text-gray-600 border-2 border-gray-300 py-4 rounded-2xl font-black text-sm uppercase active:scale-95">↩️ Reject</button>'+
+    '</div>'+
+    '<p class="text-[10px] text-gray-400 text-center">Rejecting passes this to another delivery boy</p>';
+  div.querySelector('.acceptBtn').addEventListener('click',function(){acceptOrder(key);});
+  div.querySelector('.rejectBtn').addEventListener('click',function(){rejectOrder(key);});
   return div;
 }
 
-/* ── BUILD MY ORDER CARD ── */
+/* BUILD MY ORDER CARD */
 function buildMyOrderCard(o,key,comm){
-  const items=(o.items||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const div=document.createElement('div');
+  var items=(o.items||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var div=document.createElement('div');
   div.className='bg-white rounded-[2rem] border-l-[8px] border-green-500 shadow-md p-5 space-y-3';
-  div.innerHTML=`
-    <div class="flex items-center gap-2 mb-1">
-      <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-      <span class="text-[10px] font-black text-green-600 uppercase tracking-wider">Assigned to You</span>
-    </div>
-    <div class="flex items-start justify-between gap-2">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">${(o.customerName||'?')[0].toUpperCase()}</div>
-        <div>
-          <p class="font-black text-gray-800 text-sm">${o.customerName||'—'}</p>
-          <a href="tel:${o.customerPhone||''}" class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</a>
-        </div>
-      </div>
-      <span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹${comm}</span>
-    </div>
-    ${o.address?`<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">${o.address}</p></div>`:''}
-    <div class="bg-orange-50 rounded-xl p-3 border border-orange-200">
-      <p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>
-      ${items.map(i=>`<p class="text-xs font-bold text-gray-700 py-0.5">• ${i}</p>`).join('')}
-    </div>
-    <div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">
-      <div>
-        <p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>
-        <p class="font-black text-2xl text-red-600">₹${o.totalAmount||0}</p>
-      </div>
-      <div class="text-right">
-        <p class="text-[10px] text-gray-400">Cash on Delivery</p>
-        <p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg mt-1 border border-green-200">Your cut: ₹${comm}</p>
-      </div>
-    </div>
-    <div class="grid grid-cols-2 gap-2">
-      <button class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">🗺️ Track Customer</button>
-      <button class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 transition-transform">✅ Mark Delivered</button>
-    </div>`;
-  div.querySelector('.trackBtn').addEventListener('click',()=>openTrack(key));
-  div.querySelector('.pickBtn').addEventListener('click',()=>markDelivered(key));
+  div.innerHTML=
+    '<div class="flex items-center gap-2 mb-1">'+
+      '<div class="w-3 h-3 bg-green-500 rounded-full"></div>'+
+      '<span class="text-[10px] font-black text-green-600 uppercase tracking-wider">Assigned to You</span>'+
+    '</div>'+
+    '<div class="flex items-start justify-between gap-2">'+
+      '<div class="flex items-center gap-3">'+
+        '<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+
+          (o.customerName||'?')[0].toUpperCase()+
+        '</div>'+
+        '<div>'+
+          '<p class="font-black text-gray-800 text-sm">'+(o.customerName||'—')+'</p>'+
+          '<a href="tel:'+(o.customerPhone||'')+'" class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</a>'+
+        '</div>'+
+      '</div>'+
+      '<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹'+comm+'</span>'+
+    '</div>'+
+    (o.address?'<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">'+o.address+'</p></div>':'')+
+    '<div class="bg-orange-50 rounded-xl p-3 border border-orange-200">'+
+      '<p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>'+
+      items.map(function(i){return '<p class="text-xs font-bold text-gray-700 py-0.5">• '+i+'</p>';}).join('')+
+    '</div>'+
+    '<div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">'+
+      '<div><p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>'+
+      '<p class="font-black text-2xl text-red-600">₹'+(o.totalAmount||0)+'</p></div>'+
+      '<p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg border border-green-200">Your cut: ₹'+comm+'</p>'+
+    '</div>'+
+    '<div class="grid grid-cols-2 gap-2">'+
+      '<button class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track Customer</button>'+
+      '<button class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">✅ Mark Delivered</button>'+
+    '</div>';
+  div.querySelector('.trackBtn').addEventListener('click',function(){openTrack(key);});
+  div.querySelector('.pickBtn').addEventListener('click',function(){markDelivered(key);});
   return div;
 }
 
+/* HISTORY CARD */
 function buildHistoryCard(o,paid){
-  const div=document.createElement('div');
+  var div=document.createElement('div');
   div.className='bg-white rounded-2xl p-4 border shadow-sm space-y-2';
-  div.innerHTML=`
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
-        <p class="text-blue-600 text-xs font-bold">📞 ${o.customerPhone||'—'}</p>
-      </div>
-      <span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl border border-green-200">+₹${paid.toFixed(2)}</span>
-    </div>
-    <div class="bg-gray-50 rounded-xl px-3 py-2">
-      ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-600 py-0.5">• ${i.trim()}</p>`).join('')}
-    </div>
-    <div class="flex justify-between text-xs font-bold text-gray-500 pt-1">
-      <span>💰 Cash: ₹${o.totalAmount||0}</span>
-      <span class="text-green-600 font-black">✅ Delivered</span>
-    </div>`;
+  div.innerHTML=
+    '<div class="flex justify-between items-start">'+
+      '<div><p class="font-black text-sm text-gray-800">'+(o.customerName||'—')+'</p>'+
+      '<p class="text-blue-600 text-xs font-bold">📞 '+(o.customerPhone||'—')+'</p></div>'+
+      '<span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl border border-green-200">+₹'+paid.toFixed(2)+'</span>'+
+    '</div>'+
+    '<div class="bg-gray-50 rounded-xl px-3 py-2">'+
+      (o.items||'').split(',').map(function(i){return '<p class="text-xs text-gray-600 py-0.5">• '+i.trim()+'</p>';}).join('')+
+    '</div>'+
+    '<div class="flex justify-between text-xs font-bold text-gray-500 pt-1">'+
+      '<span>💰 Cash: ₹'+(o.totalAmount||0)+'</span>'+
+      '<span class="text-green-600 font-black">✅ Delivered</span>'+
+    '</div>';
   return div;
 }
 
-/* ── SEARCH ── */
+/* SEARCH */
 function setupSearch(){
-  document.getElementById('searchBtn').addEventListener('click',()=>{
-    const ph=document.getElementById('searchPhone').value.trim().replace(/\D/g,'');
-    const res=document.getElementById('searchResult');
-    if(ph.length<10){res.innerHTML='<p class="text-xs text-red-500 font-bold py-1">⚠️ Enter a valid 10-digit number</p>';return;}
-    const found=Object.values(allOrders).filter(o=>(o.customerPhone||'').replace(/\D/g,'')===ph&&o.status!=='settled');
+  document.getElementById('searchBtn').addEventListener('click',function(){
+    var ph=document.getElementById('searchPhone').value.trim().replace(/\D/g,'');
+    var res=document.getElementById('searchResult');
+    if(ph.length<10){res.innerHTML='<p class="text-xs text-red-500 font-bold py-1">⚠️ Enter valid 10-digit number</p>';return;}
+    var found=Object.values(allOrders).filter(function(o){return (o.customerPhone||'').replace(/\D/g,'')===ph&&o.status!=='settled';});
     if(!found.length){res.innerHTML='<p class="text-xs text-red-500 font-bold py-2">❌ No active order found.</p>';return;}
     res.innerHTML='';
-    found.forEach(o=>{
-      const comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
-      const div=document.createElement('div');
+    found.forEach(function(o){
+      var comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
+      var div=document.createElement('div');
       div.className='bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-2 space-y-2';
-      div.innerHTML=`<div class="flex justify-between items-start">
-          <div><p class="font-black text-sm text-gray-800">${o.customerName||'—'}</p>
-            <p class="text-blue-600 font-bold text-xs">📞 ${o.customerPhone||'—'}</p>
-            ${o.address?`<p class="text-xs text-gray-500 font-bold mt-0.5">📍 ${o.address}</p>`:''}
-          </div>
-          <span class="text-[10px] font-black px-2 py-1 rounded-full ${o.status==='cancelled'?'bg-red-100 text-red-600':o.status==='completed'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'} uppercase">${o.status}</span>
-        </div>
-        <div class="bg-white rounded-xl p-3 border">
-          ${(o.items||'').split(',').map(i=>`<p class="text-xs text-gray-700 font-bold">• ${i.trim()}</p>`).join('')}
-          <p class="font-black text-red-600 text-lg mt-2">💰 ₹${o.totalAmount||0} Cash</p>
-        </div>
-        ${(o.status==='ready_for_pickup'||o.status==='out_for_delivery')&&o.assignedTo===myUsername?`
-        <div class="grid grid-cols-2 gap-2">
-          <button class="sTrk bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>
-          <button class="sPik bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>
-        </div>`:``}`;
-      div.querySelector('.sTrk')?.addEventListener('click',()=>openTrack(o.key));
-      div.querySelector('.sPik')?.addEventListener('click',()=>markDelivered(o.key));
+      div.innerHTML=
+        '<div class="flex justify-between items-start">'+
+          '<div><p class="font-black text-sm text-gray-800">'+(o.customerName||'—')+'</p>'+
+          '<p class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</p>'+
+          (o.address?'<p class="text-xs text-gray-500 font-bold mt-0.5">📍 '+o.address+'</p>':'')+
+          '</div>'+
+          '<span class="text-[10px] font-black px-2 py-1 rounded-full '+(o.status==='cancelled'?'bg-red-100 text-red-600':o.status==='completed'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700')+' uppercase">'+o.status+'</span>'+
+        '</div>'+
+        '<div class="bg-white rounded-xl p-3 border">'+
+          (o.items||'').split(',').map(function(i){return '<p class="text-xs text-gray-700 font-bold">• '+i.trim()+'</p>';}).join('')+
+          '<p class="font-black text-red-600 text-lg mt-2">💰 ₹'+(o.totalAmount||0)+' Cash</p>'+
+        '</div>'+
+        ((o.status==='ready_for_pickup'||o.status==='out_for_delivery')&&o.assignedTo===myUsername?
+          '<div class="grid grid-cols-2 gap-2">'+
+            '<button class="sTrk bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>'+
+            '<button class="sPik bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>'+
+          '</div>':'');
+      if(div.querySelector('.sTrk')) div.querySelector('.sTrk').addEventListener('click',function(){openTrack(o.key);});
+      if(div.querySelector('.sPik')) div.querySelector('.sPik').addEventListener('click',function(){markDelivered(o.key);});
       res.appendChild(div);
     });
   });
 }
 
-/* ── SETTLE ── */
+/* SETTLE */
 function setupSettle(){
-  document.getElementById('settleBtn').addEventListener('click',()=>{
+  document.getElementById('settleBtn').addEventListener('click',function(){
     if(!completedKeys.length){alert('No earnings to settle!');return;}
     if(!confirm('Confirm settlement?'))return;
-    const upd={};completedKeys.forEach(k=>{upd[`orders/${k}/status`]='settled';});
-    update(ref(db),upd).then(()=>showBanner('✅ Earnings settled!','green'));
+    var upd={};
+    completedKeys.forEach(function(k){upd['orders/'+k+'/status']='settled';});
+    db.ref().update(upd).then(function(){showBanner('✅ Earnings settled!','green');});
   });
 }
 
-/* ── TRACK MODAL ── */
+/* TRACK MODAL */
 function setupTrackModal(){
   document.getElementById('closeTrackBtn').addEventListener('click',closeTrack);
-  document.getElementById('deliverBtn').addEventListener('click',()=>{if(activeOrderId)markDelivered(activeOrderId);});
+  document.getElementById('deliverBtn').addEventListener('click',function(){if(activeOrderId)markDelivered(activeOrderId);});
 }
 function openTrack(key){
-  const o=allOrders[key];if(!o){alert('Order not found!');return;}
-  activeOrderId=key;wasNearby=false;
+  var o=allOrders[key]; if(!o){alert('Order not found!');return;}
+  activeOrderId=key; wasNearby=false;
   document.getElementById('tAvatar').textContent=(o.customerName||'?')[0].toUpperCase();
   document.getElementById('tName').textContent=o.customerName||'—';
   document.getElementById('tPhone').textContent='📞 '+(o.customerPhone||'—');
@@ -585,66 +561,99 @@ function openTrack(key){
   document.getElementById('tRadius').textContent=(o.radiusMeters||200)+'m';
   document.getElementById('tTotal').textContent='₹'+(o.totalAmount||0);
   document.getElementById('callBtn').href='tel:'+(o.customerPhone||'');
-  document.getElementById('tItems').innerHTML=(o.items||'').split(',').map(i=>`<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0"><span>🍽️</span><p class="text-sm font-bold text-gray-700">${i.trim()}</p></div>`).join('');
+  document.getElementById('tItems').innerHTML=(o.items||'').split(',').map(function(i){
+    return '<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0"><span>🍽️</span><p class="text-sm font-bold text-gray-700">'+i.trim()+'</p></div>';
+  }).join('');
   document.getElementById('trackModal').classList.remove('hidden');
   document.getElementById('tDistance').textContent='Getting your location…';
-  setTimeout(()=>{
+  setTimeout(function(){
     if(!trackMap){
       trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([20.59,78.96],5);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
     }
     trackMap.invalidateSize();
-    if(o.lat&&o.lng)plotCust(o.lat,o.lng,o.radiusMeters||200);
-    navigator.geolocation.getCurrentPosition(pos=>{
-      myLat=pos.coords.latitude;myLng=pos.coords.longitude;plotMe(myLat,myLng);
-      const cur=allOrders[activeOrderId];if(cur&&cur.lat&&cur.lng)calcDist(myLat,myLng,cur.lat,cur.lng);
+    if(o.lat&&o.lng) plotCust(o.lat,o.lng,o.radiusMeters||200);
+    navigator.geolocation.getCurrentPosition(function(pos){
+      myLat=pos.coords.latitude; myLng=pos.coords.longitude;
+      plotMe(myLat,myLng);
+      var cur=allOrders[activeOrderId]; if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
       fitMap();
-    },()=>{document.getElementById('tDistance').textContent='GPS denied';},{enableHighAccuracy:true,timeout:10000});
-    if(myWatchId)navigator.geolocation.clearWatch(myWatchId);
-    myWatchId=navigator.geolocation.watchPosition(pos=>{
-      myLat=pos.coords.latitude;myLng=pos.coords.longitude;plotMe(myLat,myLng);
-      const cur=allOrders[activeOrderId];if(cur&&cur.lat&&cur.lng)calcDist(myLat,myLng,cur.lat,cur.lng);
+    },function(){document.getElementById('tDistance').textContent='GPS denied';},{enableHighAccuracy:true,timeout:10000});
+    if(myWatchId) navigator.geolocation.clearWatch(myWatchId);
+    myWatchId=navigator.geolocation.watchPosition(function(pos){
+      myLat=pos.coords.latitude; myLng=pos.coords.longitude; plotMe(myLat,myLng);
+      var cur=allOrders[activeOrderId]; if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
     },null,{enableHighAccuracy:true,maximumAge:6000});
-    if(custListenerOff)custListenerOff();
-    custListenerOff=onValue(ref(db,`orders/${key}`),snap=>{
-      const d=snap.val();if(!d)return;
-      allOrders[key]={...d,key};
-      if(d.lat&&d.lng){plotCust(d.lat,d.lng,d.radiusMeters||200);document.getElementById('tAddress').textContent=d.address||'Tracking…';if(myLat&&myLng)calcDist(myLat,myLng,d.lat,d.lng);}
+    if(custListener) custListener(); // detach previous
+    custListener=db.ref('orders/'+key).on('value',function(snap){
+      var d=snap.val(); if(!d)return;
+      allOrders[key]=d; allOrders[key].key=key;
+      if(d.lat&&d.lng){ plotCust(d.lat,d.lng,d.radiusMeters||200); document.getElementById('tAddress').textContent=d.address||'Tracking…'; if(myLat&&myLng) calcDist(myLat,myLng,d.lat,d.lng); }
     });
   },400);
 }
 function closeTrack(){
   document.getElementById('trackModal').classList.add('hidden');
   if(myWatchId){navigator.geolocation.clearWatch(myWatchId);myWatchId=null;}
-  if(custListenerOff){custListenerOff();custListenerOff=null;}
+  if(custListener){db.ref('orders/'+activeOrderId).off('value',custListener);custListener=null;}
   activeOrderId=null;
 }
-function plotMe(lat,lng){if(!trackMap)return;const icon=L.divIcon({html:'<div class="dpulse"></div>',iconSize:[14,14],className:''});if(myMarker)myMarker.setLatLng([lat,lng]);else myMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🛵 You');}
-function plotCust(lat,lng,r){if(!trackMap)return;const icon=L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});if(custMarker)custMarker.setLatLng([lat,lng]);else custMarker=L.marker([lat,lng],{icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();if(custCircle){custCircle.setLatLng([lat,lng]);custCircle.setRadius(r);}else custCircle=L.circle([lat,lng],{radius:r,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.08,weight:2}).addTo(trackMap);}
-function fitMap(){if(!trackMap)return;const pts=[];if(myMarker)pts.push(myMarker.getLatLng());if(custMarker)pts.push(custMarker.getLatLng());if(pts.length===2)trackMap.fitBounds(L.latLngBounds(pts).pad(.35));else if(pts.length===1)trackMap.setView(pts[0],16);}
-function haversine(a,b,c,d){const R=6371000,dl=(c-a)*Math.PI/180,dg=(d-b)*Math.PI/180;const x=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dg/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));}
+function plotMe(lat,lng){
+  if(!trackMap)return;
+  var icon=L.divIcon({html:'<div class="dpulse"></div>',iconSize:[14,14],className:''});
+  if(myMarker)myMarker.setLatLng([lat,lng]); else myMarker=L.marker([lat,lng],{icon:icon}).addTo(trackMap).bindPopup('🛵 You');
+}
+function plotCust(lat,lng,r){
+  if(!trackMap)return;
+  var icon=L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});
+  if(custMarker)custMarker.setLatLng([lat,lng]); else custMarker=L.marker([lat,lng],{icon:icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();
+  if(custCircle){custCircle.setLatLng([lat,lng]);custCircle.setRadius(r);} else custCircle=L.circle([lat,lng],{radius:r,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.08,weight:2}).addTo(trackMap);
+}
+function fitMap(){
+  if(!trackMap)return;
+  var pts=[];
+  if(myMarker)pts.push(myMarker.getLatLng());
+  if(custMarker)pts.push(custMarker.getLatLng());
+  if(pts.length===2)trackMap.fitBounds(L.latLngBounds(pts).pad(.35));
+  else if(pts.length===1)trackMap.setView(pts[0],16);
+}
+function haversine(a,b,c,d){
+  var R=6371000,dl=(c-a)*Math.PI/180,dg=(d-b)*Math.PI/180;
+  var x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dg/2)*Math.sin(dg/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
+}
 function calcDist(a,b,c,d){
-  const dist=haversine(a,b,c,d);const o=allOrders[activeOrderId],r=o?(o.radiusMeters||200):200;
+  var dist=haversine(a,b,c,d);
+  var o=allOrders[activeOrderId], r=o?(o.radiusMeters||200):200;
   document.getElementById('tDistance').textContent=dist>=1000?(dist/1000).toFixed(2)+' km':dist+' m';
-  if(dist<=r){document.getElementById('tDistNote').textContent='✅ You are within customer delivery radius!';
+  if(dist<=r){
+    document.getElementById('tDistNote').textContent='✅ You are within customer delivery radius!';
     if(!wasNearby){wasNearby=true;speak('You have reached the customer. Please hand over the order and collect the cash.',true);showBanner('✅ You have reached the customer!','green');}
-  } else {document.getElementById('tDistNote').textContent=`⚠️ ${dist-r}m outside radius – keep moving`;wasNearby=false;}
+  } else {
+    document.getElementById('tDistNote').textContent='⚠️ '+(dist-r)+'m outside radius – keep moving';
+    wasNearby=false;
+  }
 }
 
-/* ── MARK DELIVERED ── */
+/* MARK DELIVERED */
 function markDelivered(key){
   if(!confirm('Confirm: Order delivered and cash collected?'))return;
-  get(ref(db,`orders/${key}`)).then(snap=>{
+  db.ref('orders/'+key).once('value',function(snap){
     if(!snap.exists())return;
-    const o=snap.val();const comm=(parseFloat(o.totalAmount||0)*currentRate/100);
-    update(ref(db,`orders/${key}`),{status:'completed',deliveredBy:myName,driverPhone:myPhone,commissionPaid:comm,deliveredAt:Date.now()}).then(()=>{
-      speak(`Order delivered! You earned rupees ${Math.round(comm)} as commission.`);
-      showBanner(`🎉 Delivered! Cash: ₹${o.totalAmount} | Commission: ₹${comm.toFixed(2)}`,'green');
+    var o=snap.val();
+    var comm=(parseFloat(o.totalAmount||0)*currentRate/100);
+    db.ref('orders/'+key).update({
+      status:'completed', deliveredBy:myName, driverPhone:myPhone,
+      commissionPaid:comm, deliveredAt:Date.now()
+    }).then(function(){
+      speak('Order delivered! You earned rupees '+Math.round(comm)+' as commission.');
+      showBanner('🎉 Delivered! Cash: ₹'+o.totalAmount+' | Commission: ₹'+comm.toFixed(2),'green');
       closeTrack();
     });
   });
 }
 
+/* START */
 tryAutoLogin();
 </script>
 </body>
