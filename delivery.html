@@ -18,12 +18,9 @@
 @keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .ov{background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
 #mainApp{display:none}
-@keyframes newping{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}50%{box-shadow:0 0 0 16px rgba(37,99,235,0)}}
-.new-order-pulse{animation:newping 1.5s infinite}
 </style>
 </head>
 <body class="bg-blue-50 pb-28">
-
 <!-- LOADING -->
 <div id="loadingScreen" class="fixed inset-0 bg-blue-600 z-[300] flex flex-col items-center justify-center">
   <div class="text-6xl mb-4">🛵</div>
@@ -35,7 +32,6 @@
     <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.3s"></div>
   </div>
 </div>
-
 <!-- LOGIN -->
 <div id="loginScreen" class="hidden fixed inset-0 bg-gradient-to-br from-blue-700 to-blue-500 z-[200] flex items-center justify-center p-6">
   <div class="bg-white p-8 rounded-[3rem] w-full max-w-md shadow-2xl space-y-4">
@@ -54,7 +50,6 @@
     <p class="text-center text-[10px] text-gray-400 font-bold">Contact admin if you don't have credentials</p>
   </div>
 </div>
-
 <!-- TRACK MAP MODAL -->
 <div id="trackModal" class="ov fixed inset-0 z-[150] hidden flex items-end justify-center">
   <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-5" style="max-height:92vh;overflow-y:auto">
@@ -71,10 +66,6 @@
           <p class="text-gray-500 text-xs mt-0.5" id="tAddress">—</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border">
-        <span>📡</span>
-        <p class="text-xs font-bold text-gray-600">Delivery Radius: <span id="tRadius" class="text-blue-600 font-black">—</span></p>
-      </div>
     </div>
     <div id="trackMap" class="mbox mb-3"></div>
     <div class="flex gap-6 mb-3 text-xs font-bold px-1">
@@ -84,7 +75,6 @@
     <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center">
       <p class="text-[10px] font-black text-gray-500 uppercase">Distance to Customer</p>
       <p class="font-black text-3xl text-green-600 mt-1" id="tDistance">Calculating…</p>
-      <p class="text-xs text-gray-500 mt-1 font-bold" id="tDistNote">—</p>
     </div>
     <div class="bg-white rounded-2xl border p-4 mb-4 space-y-2">
       <p class="font-black text-xs text-gray-500 uppercase mb-3">🧾 Order Details</p>
@@ -93,9 +83,6 @@
         <p class="font-black text-sm text-gray-700">💰 Cash on Delivery</p>
         <p class="font-black text-2xl text-red-600" id="tTotal">₹0</p>
       </div>
-      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2.5">
-        <p class="text-[10px] font-black text-yellow-700 uppercase">⚠️ Collect exact cash from customer</p>
-      </div>
     </div>
     <div class="space-y-2">
       <a id="callBtn" href="#" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-sm uppercase text-center block active:scale-95">📞 Call Customer</a>
@@ -103,12 +90,9 @@
     </div>
   </div>
 </div>
-
 <!-- MAIN APP -->
 <div id="mainApp" class="p-4">
 <div class="max-w-md mx-auto space-y-5">
-
-  <!-- EARNINGS -->
   <div class="bg-blue-600 p-7 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
     <div class="relative z-10">
       <div class="flex justify-between items-start">
@@ -117,7 +101,7 @@
           <h1 id="myEarnings" class="text-4xl font-black italic mt-1">₹0.00</h1>
           <p class="text-[10px] opacity-60 mt-1" id="ordersCount">0 deliveries completed</p>
         </div>
-        <button id="settleBtn" class="bg-white/20 p-3 rounded-2xl active:scale-90" title="Settle Earnings">
+        <button id="refreshBtn" class="bg-white/20 p-3 rounded-2xl active:scale-90" title="Refresh">
           <i class="fa-solid fa-rotate text-xl"></i>
         </button>
       </div>
@@ -126,52 +110,27 @@
         <button id="logoutBtn" class="text-[10px] text-white/60 font-bold uppercase underline">Logout</button>
       </div>
     </div>
-    <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
-
-  <!-- SEARCH -->
-  <div class="bg-white rounded-3xl shadow border p-5 space-y-3">
-    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🔍 Find Order by Phone</p>
-    <div class="flex gap-2">
-      <input id="searchPhone" type="tel" placeholder="Enter customer phone number" class="flex-1 p-3 border-2 rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-blue-400"/>
-      <button id="searchBtn" class="bg-blue-600 text-white px-5 rounded-xl font-black text-xs uppercase active:scale-95">Search</button>
-    </div>
-    <div id="searchResult"></div>
-  </div>
-
-  <!-- AVAILABLE ORDERS (ready for pickup, unassigned) -->
-  <div id="availableSection" class="hidden space-y-3">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white text-sm animate-pulse">🔔</div>
-      <p class="font-black text-blue-600 text-sm uppercase tracking-wide">New Orders Available!</p>
-    </div>
-    <div id="availableList" class="space-y-4"></div>
-  </div>
-
-  <!-- MY ASSIGNED -->
-  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📦 My Assigned Orders</p>
+  
+  <!-- MY ASSIGNED ORDERS ONLY -->
+  <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📦 Assigned to Me by Admin</p>
   <div id="deliveryList" class="space-y-4">
     <p class="text-center text-gray-400 text-sm py-6">No assigned orders yet.</p>
   </div>
 
-  <!-- CANCELLED -->
   <div id="cancelledSection" class="hidden space-y-3">
     <p class="text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">❌ Cancelled Orders</p>
     <div id="cancelledList" class="space-y-2"></div>
   </div>
-
   <hr class="border-blue-100"/>
   <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✅ Completed Deliveries</p>
   <div id="deliveryHistory" class="space-y-3 pb-6">
     <p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>
   </div>
-
 </div>
 </div>
-
 <!-- BANNER -->
 <div id="dBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl font-black text-sm text-white text-center max-w-xs w-[90vw] shadow-xl opacity-0 pointer-events-none transition-opacity duration-300"></div>
-
 <!-- BOTTOM NAV -->
 <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
   <a href="control.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
@@ -180,7 +139,6 @@
   <a href="delivery.html" class="flex flex-col items-center gap-1 text-blue-600"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
   <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -192,29 +150,12 @@ firebase.initializeApp({
   appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
 });
 var db = firebase.database();
-
-/* STATE */
 var myPhone='', myName='', myUsername='';
 var completedKeys=[], currentRate=10;
 var activeOrderId=null, trackMap=null;
-var myMarker=null, custMarker=null, custCircle=null;
-var myWatchId=null, custListener=null;
-var myLat=null, myLng=null, allOrders={};
-var knownAvailableKeys={}, wasNearby=false;
-var voicesLoaded=false;
+var myMarker=null, custMarker=null;
+var allOrders={};
 
-/* VOICE */
-function loadVoices(){ if(voicesLoaded)return; speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=function(){voicesLoaded=true;}; voicesLoaded=true; }
-function speak(text, urgent){
-  if(!window.speechSynthesis)return; loadVoices(); speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text); u.lang='en-IN'; u.volume=1;
-  u.rate=urgent?0.85:0.95; u.pitch=urgent?1.2:1.0;
-  var v=speechSynthesis.getVoices(); var p=v.find(function(x){return x.lang.startsWith('en-IN');})||v.find(function(x){return x.lang.startsWith('en');})||v[0];
-  if(p)u.voice=p; speechSynthesis.speak(u);
-}
-document.addEventListener('click', loadVoices, {once:false});
-
-/* BANNER */
 function showBanner(msg, color){
   var b=document.getElementById('dBanner');
   b.textContent=msg;
@@ -222,12 +163,6 @@ function showBanner(msg, color){
   b.style.opacity='1'; clearTimeout(b._t); b._t=setTimeout(function(){b.style.opacity='0';},5000);
 }
 
-function timeAgo(ts){
-  if(!ts)return''; var m=Math.floor((Date.now()-ts)/60000);
-  if(m<1)return'just now'; if(m<60)return m+'m ago'; return Math.floor(m/60)+'h ago';
-}
-
-/* LOGIN */
 document.getElementById('togglePass').addEventListener('click',function(){
   var f=document.getElementById('loginPass'); f.type=f.type==='password'?'text':'password';
 });
@@ -243,6 +178,8 @@ function tryAutoLogin(){
     localStorage.removeItem('db_username'); localStorage.removeItem('db_password'); showLogin();
   },function(){ showLogin(); });
 }
+tryAutoLogin();
+
 function showLogin(){
   document.getElementById('loadingScreen').style.display='none';
   document.getElementById('loginScreen').classList.remove('hidden');
@@ -265,89 +202,51 @@ document.getElementById('loginBtn').addEventListener('click',function(){
     if(!snap.exists()){errEl.textContent='❌ Username not found.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
     var acc=snap.val();
     if(acc.password!==pass){errEl.textContent='❌ Wrong password.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
-    if(!acc.active){errEl.textContent='❌ Account disabled. Contact admin.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
+    if(!acc.active){errEl.textContent='❌ Account disabled.';errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;return;}
     localStorage.setItem('db_username',user); localStorage.setItem('db_password',pass);
     myUsername=user; myName=acc.name||''; myPhone=acc.phone||''; showMainApp();
-  },function(e){errEl.textContent='❌ Connection error: '+e.message;errEl.classList.remove('hidden');btn.textContent='🚀 Login & Start Delivering';btn.disabled=false;});
+  });
 });
 
 document.getElementById('logoutBtn').addEventListener('click',function(){
   if(confirm('Logout from this device?')){ localStorage.removeItem('db_username'); localStorage.removeItem('db_password'); location.reload(); }
 });
 
-/* INIT */
+document.getElementById('refreshBtn').addEventListener('click', function(){
+  showBanner('🔄 Refreshed successfully', 'blue');
+  listenOrders();
+});
+
 function initApp(){
   db.ref('settings/commission').on('value',function(s){currentRate=parseFloat(s.val())||10;});
   listenOrders();
-  setupSearch();
-  setupSettle();
   setupTrackModal();
 }
 
-/* ACCEPT ORDER */
-function acceptOrder(key){
-  db.ref('orders/'+key).once('value',function(snap){
-    if(!snap.exists())return;
-    var o=snap.val();
-    if(o.assignedTo&&o.assignedTo!==myUsername){showBanner('⚠️ Order already taken by another delivery boy!','red');return;}
-    db.ref('orders/'+key).update({
-      assignedTo:myUsername, assignedName:myName, assignedPhone:myPhone,
-      assignedAt:Date.now(), status:'out_for_delivery'
-    });
-    speak('Order accepted! Please pick up and deliver.');
-    showBanner('✅ Order accepted! Go pick it up.','green');
-  });
-}
-
-/* REJECT ORDER */
-function rejectOrder(key){
-  if(!confirm('Reject this order? It will go to other delivery boys.'))return;
-  db.ref('orders/'+key).once('value',function(snap){
-    if(!snap.exists())return;
-    var o=snap.val();
-    var rejected=o.rejectedBy||[];
-    if(rejected.indexOf(myUsername)===-1) rejected.push(myUsername);
-    db.ref('orders/'+key).update({ rejectedBy:rejected, assignedTo:null, assignedName:null, assignedPhone:null, status:'ready_for_pickup' });
-    showBanner('↩️ Order returned to pool.','blue');
-  });
-}
-
-/* LISTEN ORDERS */
 function listenOrders(){
   db.ref('orders').on('value',function(snap){
     allOrders={};
-    var availList=document.getElementById('availableList');
     var myList=document.getElementById('deliveryList');
     var hist=document.getElementById('deliveryHistory');
     var cancelledList=document.getElementById('cancelledList');
-    availList.innerHTML=''; myList.innerHTML=''; hist.innerHTML=''; cancelledList.innerHTML='';
-    completedKeys=[]; var totalComm=0, delivCount=0, newFound=false, cancelCount=0;
-
+    myList.innerHTML=''; hist.innerHTML=''; cancelledList.innerHTML='';
+    completedKeys=[]; var totalComm=0, delivCount=0, cancelCount=0;
+    
     if(!snap.exists()){
-      myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No orders yet.</p>';
+      myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No assigned orders yet.</p>';
       hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No history yet.</p>';
-      updateEarnings(0,0);
-      document.getElementById('availableSection').classList.add('hidden');
-      document.getElementById('cancelledSection').classList.add('hidden');
       return;
     }
-
+    
     snap.forEach(function(child){
       var o=child.val(), key=child.key;
       o.key=key; allOrders[key]=o;
       var comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
-      var rejectedByMe=(o.rejectedBy||[]).indexOf(myUsername)!==-1;
-
-      /* AVAILABLE — ready_for_pickup, unassigned, not rejected by me */
-      if(o.status==='ready_for_pickup'&&!o.assignedTo&&!rejectedByMe){
-        if(!knownAvailableKeys[key]){newFound=true; knownAvailableKeys[key]=true;}
-        availList.appendChild(buildAvailableCard(o,key,comm));
-      }
-      /* MY ASSIGNED */
-      else if((o.status==='out_for_delivery'||o.status==='ready_for_pickup')&&o.assignedTo===myUsername){
+      
+      // STRICT REQUIREMENT: Only show orders explicitly assigned to this delivery boy by admin
+      if(o.assignedTo === myUsername && o.status !== 'completed' && o.status !== 'settled' && o.status !== 'cancelled'){
         myList.appendChild(buildMyOrderCard(o,key,comm));
       }
-      /* CANCELLED */
       else if(o.status==='cancelled'){
         cancelCount++;
         cancelledList.innerHTML+='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">'+
@@ -355,306 +254,118 @@ function listenOrders(){
           '<div class="flex-1 min-w-0">'+
             '<p class="font-black text-sm text-gray-700">'+(o.customerName||'—')+'</p>'+
             '<p class="text-[10px] text-gray-500 truncate">'+(o.items||'—')+'</p>'+
-            '<p class="text-[10px] font-bold mt-0.5 '+(o.cancelledBy==='customer'?'text-orange-500':'text-red-500')+'">'+
-              'Cancelled by '+(o.cancelledBy==='customer'?'customer':'kitchen')+' · '+timeAgo(o.cancelledAt||o.timestamp)+
-            '</p>'+
           '</div>'+
           '<p class="font-black text-red-500 text-sm shrink-0">₹'+(o.totalAmount||0)+'</p>'+
         '</div>';
       }
-      /* COMPLETED */
-      else if((o.status==='completed'||o.status==='settled')&&o.driverPhone===myPhone){
-        var paid=parseFloat(o.commissionPaid||0);
+      else if((o.status==='completed'||o.status==='settled') && o.assignedTo === myUsername){
+        var paid=parseFloat(o.commissionPaid||comm);
         totalComm+=paid; delivCount++; completedKeys.push(key);
         hist.appendChild(buildHistoryCard(o,paid));
       }
     });
-
-    updateEarnings(totalComm,delivCount);
-
-    if(newFound){
-      setTimeout(function(){
-        speak('Attention! A new order is available. Please accept quickly.',true);
-        showBanner('🔔 New order available! Tap to accept.','blue');
-      },500);
-    }
-
-    if(availList.innerHTML) document.getElementById('availableSection').classList.remove('hidden');
-    else document.getElementById('availableSection').classList.add('hidden');
-
-    if(!myList.innerHTML) myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No assigned orders yet.</p>';
+    
+    if(!myList.innerHTML) myList.innerHTML='<p class="text-center text-gray-400 text-sm py-6">No assigned orders from admin yet.</p>';
     if(!hist.innerHTML)   hist.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No completed deliveries yet.</p>';
     if(cancelCount>0) document.getElementById('cancelledSection').classList.remove('hidden');
     else document.getElementById('cancelledSection').classList.add('hidden');
   });
 }
 
-function updateEarnings(total,count){
-  document.getElementById('myEarnings').textContent='₹'+total.toFixed(2);
-  document.getElementById('ordersCount').textContent=count+' deliver'+(count===1?'y':'ies')+' completed';
-}
-
-/* BUILD AVAILABLE CARD */
-function buildAvailableCard(o,key,comm){
-  var items=(o.items||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
-  var div=document.createElement('div');
-  div.className='new-order-pulse bg-white rounded-[2rem] border-2 border-blue-500 shadow-md p-5 space-y-3';
-  div.innerHTML=
-    '<div class="flex items-center gap-2 mb-1">'+
-      '<div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>'+
-      '<span class="text-[10px] font-black text-blue-600 uppercase tracking-wider">New Order — Accept Fast!</span>'+
-    '</div>'+
-    '<div class="flex items-start justify-between gap-2">'+
-      '<div class="flex items-center gap-3">'+
-        '<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+
-          (o.customerName||'?')[0].toUpperCase()+
-        '</div>'+
-        '<div>'+
-          '<p class="font-black text-gray-800 text-sm">'+(o.customerName||'—')+'</p>'+
-          '<p class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</p>'+
-        '</div>'+
-      '</div>'+
-      '<span class="bg-green-100 text-green-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹'+comm+'</span>'+
-    '</div>'+
-    (o.address?'<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">'+o.address+'</p></div>':'')+
-    '<div class="bg-orange-50 rounded-xl p-3 border border-orange-200">'+
-      '<p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>'+
-      items.map(function(i){return '<p class="text-xs font-bold text-gray-700 py-0.5">• '+i+'</p>';}).join('')+
-    '</div>'+
-    '<div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">'+
-      '<div><p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>'+
-      '<p class="font-black text-2xl text-red-600">₹'+(o.totalAmount||0)+'</p></div>'+
-      '<div class="text-right"><p class="text-[10px] text-gray-400">Cash on Delivery</p>'+
-      '<p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg mt-1 border border-green-200">Your cut: ₹'+comm+'</p></div>'+
-    '</div>'+
-    '<div class="grid grid-cols-2 gap-3">'+
-      '<button class="acceptBtn bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase active:scale-95 shadow-md">✅ Accept</button>'+
-      '<button class="rejectBtn bg-gray-100 text-gray-600 border-2 border-gray-300 py-4 rounded-2xl font-black text-sm uppercase active:scale-95">↩️ Reject</button>'+
-    '</div>'+
-    '<p class="text-[10px] text-gray-400 text-center">Rejecting passes this to another delivery boy</p>';
-  div.querySelector('.acceptBtn').addEventListener('click',function(){acceptOrder(key);});
-  div.querySelector('.rejectBtn').addEventListener('click',function(){rejectOrder(key);});
-  return div;
-}
-
-/* BUILD MY ORDER CARD */
 function buildMyOrderCard(o,key,comm){
-  var items=(o.items||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
   var div=document.createElement('div');
   div.className='bg-white rounded-[2rem] border-l-[8px] border-green-500 shadow-md p-5 space-y-3';
   div.innerHTML=
     '<div class="flex items-center gap-2 mb-1">'+
       '<div class="w-3 h-3 bg-green-500 rounded-full"></div>'+
-      '<span class="text-[10px] font-black text-green-600 uppercase tracking-wider">Assigned to You</span>'+
+      '<span class="text-[10px] font-black text-green-600 uppercase tracking-wider">Assigned to You by Admin</span>'+
     '</div>'+
     '<div class="flex items-start justify-between gap-2">'+
       '<div class="flex items-center gap-3">'+
-        '<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+
-          (o.customerName||'?')[0].toUpperCase()+
-        '</div>'+
+        '<div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0">'+(o.customerName||'?')[0].toUpperCase()+'</div>'+
         '<div>'+
           '<p class="font-black text-gray-800 text-sm">'+(o.customerName||'—')+'</p>'+
           '<a href="tel:'+(o.customerPhone||'')+'" class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</a>'+
         '</div>'+
       '</div>'+
-      '<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1.5 rounded-full font-black uppercase flex-shrink-0">Earn ₹'+comm+'</span>'+
+      '<div class="text-right">'+
+        '<p class="font-black text-xl text-gray-800">₹'+(o.totalAmount||0)+'</p>'+
+        '<span class="text-[10px] bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full">COD</span>'+
+      '</div>'+
     '</div>'+
-    (o.address?'<div class="flex gap-2 bg-gray-50 rounded-xl px-3 py-2"><span>📍</span><p class="text-xs text-gray-600 font-bold">'+o.address+'</p></div>':'')+
-    '<div class="bg-orange-50 rounded-xl p-3 border border-orange-200">'+
-      '<p class="text-[10px] font-black text-gray-500 uppercase mb-1.5">🍽️ Items</p>'+
-      items.map(function(i){return '<p class="text-xs font-bold text-gray-700 py-0.5">• '+i+'</p>';}).join('')+
-    '</div>'+
-    '<div class="flex justify-between items-center bg-red-50 rounded-xl px-4 py-3 border border-red-100">'+
-      '<div><p class="text-[10px] font-black text-gray-500 uppercase">💰 Collect Cash</p>'+
-      '<p class="font-black text-2xl text-red-600">₹'+(o.totalAmount||0)+'</p></div>'+
-      '<p class="text-[10px] font-black text-green-700 bg-green-50 px-2 py-1 rounded-lg border border-green-200">Your cut: ₹'+comm+'</p>'+
-    '</div>'+
-    '<div class="grid grid-cols-2 gap-2">'+
-      '<button class="trackBtn bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track Customer</button>'+
-      '<button class="pickBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">✅ Mark Delivered</button>'+
+    (o.address?'<div class="bg-gray-50 rounded-xl p-3"><p class="text-[10px] font-black text-gray-400 uppercase">📍 Delivery Address</p><p class="text-xs text-gray-700 font-bold mt-0.5">'+o.address+'</p></div>':'')+
+    '<div class="grid grid-cols-2 gap-2 pt-1">'+
+      '<button class="trackBtn bg-blue-50 text-blue-600 border border-blue-200 py-3 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track & Navigate</button>'+
+      '<button class="deliverBtn bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95 shadow">✅ Complete Order</button>'+
     '</div>';
-  div.querySelector('.trackBtn').addEventListener('click',function(){openTrack(key);});
-  div.querySelector('.pickBtn').addEventListener('click',function(){markDelivered(key);});
-  return div;
-}
-
-/* HISTORY CARD */
-function buildHistoryCard(o,paid){
-  var div=document.createElement('div');
-  div.className='bg-white rounded-2xl p-4 border shadow-sm space-y-2';
-  div.innerHTML=
-    '<div class="flex justify-between items-start">'+
-      '<div><p class="font-black text-sm text-gray-800">'+(o.customerName||'—')+'</p>'+
-      '<p class="text-blue-600 text-xs font-bold">📞 '+(o.customerPhone||'—')+'</p></div>'+
-      '<span class="text-green-600 bg-green-50 font-black text-sm px-3 py-1 rounded-xl border border-green-200">+₹'+paid.toFixed(2)+'</span>'+
-    '</div>'+
-    '<div class="bg-gray-50 rounded-xl px-3 py-2">'+
-      (o.items||'').split(',').map(function(i){return '<p class="text-xs text-gray-600 py-0.5">• '+i.trim()+'</p>';}).join('')+
-    '</div>'+
-    '<div class="flex justify-between text-xs font-bold text-gray-500 pt-1">'+
-      '<span>💰 Cash: ₹'+(o.totalAmount||0)+'</span>'+
-      '<span class="text-green-600 font-black">✅ Delivered</span>'+
-    '</div>';
-  return div;
-}
-
-/* SEARCH */
-function setupSearch(){
-  document.getElementById('searchBtn').addEventListener('click',function(){
-    var ph=document.getElementById('searchPhone').value.trim().replace(/\D/g,'');
-    var res=document.getElementById('searchResult');
-    if(ph.length<10){res.innerHTML='<p class="text-xs text-red-500 font-bold py-1">⚠️ Enter valid 10-digit number</p>';return;}
-    var found=Object.values(allOrders).filter(function(o){return (o.customerPhone||'').replace(/\D/g,'')===ph&&o.status!=='settled';});
-    if(!found.length){res.innerHTML='<p class="text-xs text-red-500 font-bold py-2">❌ No active order found.</p>';return;}
-    res.innerHTML='';
-    found.forEach(function(o){
-      var comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
-      var div=document.createElement('div');
-      div.className='bg-blue-50 border border-blue-200 rounded-2xl p-4 mt-2 space-y-2';
-      div.innerHTML=
-        '<div class="flex justify-between items-start">'+
-          '<div><p class="font-black text-sm text-gray-800">'+(o.customerName||'—')+'</p>'+
-          '<p class="text-blue-600 font-bold text-xs">📞 '+(o.customerPhone||'—')+'</p>'+
-          (o.address?'<p class="text-xs text-gray-500 font-bold mt-0.5">📍 '+o.address+'</p>':'')+
-          '</div>'+
-          '<span class="text-[10px] font-black px-2 py-1 rounded-full '+(o.status==='cancelled'?'bg-red-100 text-red-600':o.status==='completed'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700')+' uppercase">'+o.status+'</span>'+
-        '</div>'+
-        '<div class="bg-white rounded-xl p-3 border">'+
-          (o.items||'').split(',').map(function(i){return '<p class="text-xs text-gray-700 font-bold">• '+i.trim()+'</p>';}).join('')+
-          '<p class="font-black text-red-600 text-lg mt-2">💰 ₹'+(o.totalAmount||0)+' Cash</p>'+
-        '</div>'+
-        ((o.status==='ready_for_pickup'||o.status==='out_for_delivery')&&o.assignedTo===myUsername?
-          '<div class="grid grid-cols-2 gap-2">'+
-            '<button class="sTrk bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🗺️ Track</button>'+
-            '<button class="sPik bg-green-600 text-white py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">✅ Delivered</button>'+
-          '</div>':'');
-      if(div.querySelector('.sTrk')) div.querySelector('.sTrk').addEventListener('click',function(){openTrack(o.key);});
-      if(div.querySelector('.sPik')) div.querySelector('.sPik').addEventListener('click',function(){markDelivered(o.key);});
-      res.appendChild(div);
+  div.querySelector('.trackBtn').addEventListener('click',function(){openTrackModal(key);});
+  div.querySelector('.deliverBtn').addEventListener('click',function(){
+    if(!confirm('Mark order as delivered and cash collected?'))return;
+    db.ref('orders/'+key).update({
+      status:'completed',
+      completedAt:Date.now(),
+      commissionPaid: comm
     });
+    showBanner('✅ Order completed successfully!','green');
   });
+  return div;
 }
 
-/* SETTLE */
-function setupSettle(){
-  document.getElementById('settleBtn').addEventListener('click',function(){
-    if(!completedKeys.length){alert('No earnings to settle!');return;}
-    if(!confirm('Confirm settlement?'))return;
-    var upd={};
-    completedKeys.forEach(function(k){upd['orders/'+k+'/status']='settled';});
-    db.ref().update(upd).then(function(){showBanner('✅ Earnings settled!','green');});
-  });
+function buildHistoryCard(o,comm){
+  var div=document.createElement('div');
+  div.className='bg-white rounded-2xl border p-4 flex justify-between items-center text-xs font-bold';
+  div.innerHTML=
+    '<div>'+
+      '<p class="text-gray-800 font-black">'+(o.customerName||'—')+'</p>'+
+      '<p class="text-gray-400 mt-0.5">'+(o.items||'—')+'</p>'+
+    '</div>'+
+    '<div class="text-right shrink-0 ml-2">'+
+      '<p class="text-green-600 font-black text-sm">₹'+(o.totalAmount||0)+'</p>'+
+      '<p class="text-[10px] text-blue-600">Cut: ₹'+comm+'</p>'+
+    '</div>';
+  return div;
 }
 
-/* TRACK MODAL */
-function setupTrackModal(){
-  document.getElementById('closeTrackBtn').addEventListener('click',closeTrack);
-  document.getElementById('deliverBtn').addEventListener('click',function(){if(activeOrderId)markDelivered(activeOrderId);});
-}
-function openTrack(key){
-  var o=allOrders[key]; if(!o){alert('Order not found!');return;}
-  activeOrderId=key; wasNearby=false;
-  document.getElementById('tAvatar').textContent=(o.customerName||'?')[0].toUpperCase();
+function openTrackModal(key){
+  activeOrderId=key; var o=allOrders[key]; if(!o)return;
   document.getElementById('tName').textContent=o.customerName||'—';
-  document.getElementById('tPhone').textContent='📞 '+(o.customerPhone||'—');
-  document.getElementById('tAddress').textContent=o.address||'—';
-  document.getElementById('tRadius').textContent=(o.radiusMeters||200)+'m';
+  document.getElementById('tPhone').textContent=o.customerPhone||'—';
+  document.getElementById('tAddress').textContent=o.address||'No address shared';
   document.getElementById('tTotal').textContent='₹'+(o.totalAmount||0);
+  document.getElementById('tAvatar').textContent=(o.customerName||'?')[0].toUpperCase();
   document.getElementById('callBtn').href='tel:'+(o.customerPhone||'');
-  document.getElementById('tItems').innerHTML=(o.items||'').split(',').map(function(i){
-    return '<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0"><span>🍽️</span><p class="text-sm font-bold text-gray-700">'+i.trim()+'</p></div>';
-  }).join('');
   document.getElementById('trackModal').classList.remove('hidden');
-  document.getElementById('tDistance').textContent='Getting your location…';
   setTimeout(function(){
     if(!trackMap){
-      trackMap=L.map('trackMap',{zoomControl:true,attributionControl:false}).setView([20.59,78.96],5);
+      trackMap=L.map('trackMap',{zoomControl:false,attributionControl:false}).setView([o.lat||17.3850,o.lng||78.4867],15);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
+    } else {
+      trackMap.invalidateSize();
     }
-    trackMap.invalidateSize();
-    if(o.lat&&o.lng) plotCust(o.lat,o.lng,o.radiusMeters||200);
-    navigator.geolocation.getCurrentPosition(function(pos){
-      myLat=pos.coords.latitude; myLng=pos.coords.longitude;
-      plotMe(myLat,myLng);
-      var cur=allOrders[activeOrderId]; if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
-      fitMap();
-    },function(){document.getElementById('tDistance').textContent='GPS denied';},{enableHighAccuracy:true,timeout:10000});
-    if(myWatchId) navigator.geolocation.clearWatch(myWatchId);
-    myWatchId=navigator.geolocation.watchPosition(function(pos){
-      myLat=pos.coords.latitude; myLng=pos.coords.longitude; plotMe(myLat,myLng);
-      var cur=allOrders[activeOrderId]; if(cur&&cur.lat&&cur.lng) calcDist(myLat,myLng,cur.lat,cur.lng);
-    },null,{enableHighAccuracy:true,maximumAge:6000});
-    if(custListener) custListener(); // detach previous
-    custListener=db.ref('orders/'+key).on('value',function(snap){
-      var d=snap.val(); if(!d)return;
-      allOrders[key]=d; allOrders[key].key=key;
-      if(d.lat&&d.lng){ plotCust(d.lat,d.lng,d.radiusMeters||200); document.getElementById('tAddress').textContent=d.address||'Tracking…'; if(myLat&&myLng) calcDist(myLat,myLng,d.lat,d.lng); }
-    });
-  },400);
+    if(o.lat&&o.lng){
+      if(custMarker) custMarker.setLatLng([o.lat,o.lng]);
+      else custMarker=L.marker([o.lat,o.lng]).addTo(trackMap);
+      trackMap.setView([o.lat,o.lng],15);
+    }
+  },200);
 }
-function closeTrack(){
+
+document.getElementById('closeTrackBtn').addEventListener('click',function(){
   document.getElementById('trackModal').classList.add('hidden');
-  if(myWatchId){navigator.geolocation.clearWatch(myWatchId);myWatchId=null;}
-  if(custListener){db.ref('orders/'+activeOrderId).off('value',custListener);custListener=null;}
-  activeOrderId=null;
-}
-function plotMe(lat,lng){
-  if(!trackMap)return;
-  var icon=L.divIcon({html:'<div class="dpulse"></div>',iconSize:[14,14],className:''});
-  if(myMarker)myMarker.setLatLng([lat,lng]); else myMarker=L.marker([lat,lng],{icon:icon}).addTo(trackMap).bindPopup('🛵 You');
-}
-function plotCust(lat,lng,r){
-  if(!trackMap)return;
-  var icon=L.divIcon({html:'<div class="cpulse"></div>',iconSize:[14,14],className:''});
-  if(custMarker)custMarker.setLatLng([lat,lng]); else custMarker=L.marker([lat,lng],{icon:icon}).addTo(trackMap).bindPopup('🧑 Customer').openPopup();
-  if(custCircle){custCircle.setLatLng([lat,lng]);custCircle.setRadius(r);} else custCircle=L.circle([lat,lng],{radius:r,color:'#dc2626',fillColor:'#dc2626',fillOpacity:.08,weight:2}).addTo(trackMap);
-}
-function fitMap(){
-  if(!trackMap)return;
-  var pts=[];
-  if(myMarker)pts.push(myMarker.getLatLng());
-  if(custMarker)pts.push(custMarker.getLatLng());
-  if(pts.length===2)trackMap.fitBounds(L.latLngBounds(pts).pad(.35));
-  else if(pts.length===1)trackMap.setView(pts[0],16);
-}
-function haversine(a,b,c,d){
-  var R=6371000,dl=(c-a)*Math.PI/180,dg=(d-b)*Math.PI/180;
-  var x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dg/2)*Math.sin(dg/2);
-  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
-}
-function calcDist(a,b,c,d){
-  var dist=haversine(a,b,c,d);
-  var o=allOrders[activeOrderId], r=o?(o.radiusMeters||200):200;
-  document.getElementById('tDistance').textContent=dist>=1000?(dist/1000).toFixed(2)+' km':dist+' m';
-  if(dist<=r){
-    document.getElementById('tDistNote').textContent='✅ You are within customer delivery radius!';
-    if(!wasNearby){wasNearby=true;speak('You have reached the customer. Please hand over the order and collect the cash.',true);showBanner('✅ You have reached the customer!','green');}
-  } else {
-    document.getElementById('tDistNote').textContent='⚠️ '+(dist-r)+'m outside radius – keep moving';
-    wasNearby=false;
-  }
-}
+});
 
-/* MARK DELIVERED */
-function markDelivered(key){
-  if(!confirm('Confirm: Order delivered and cash collected?'))return;
-  db.ref('orders/'+key).once('value',function(snap){
-    if(!snap.exists())return;
-    var o=snap.val();
-    var comm=(parseFloat(o.totalAmount||0)*currentRate/100);
-    db.ref('orders/'+key).update({
-      status:'completed', deliveredBy:myName, driverPhone:myPhone,
-      commissionPaid:comm, deliveredAt:Date.now()
-    }).then(function(){
-      speak('Order delivered! You earned rupees '+Math.round(comm)+' as commission.');
-      showBanner('🎉 Delivered! Cash: ₹'+o.totalAmount+' | Commission: ₹'+comm.toFixed(2),'green');
-      closeTrack();
-    });
+document.getElementById('deliverBtn').addEventListener('click',function(){
+  if(!activeOrderId)return;
+  var o=allOrders[activeOrderId];
+  var comm=((parseFloat(o.totalAmount||0)*currentRate)/100).toFixed(2);
+  db.ref('orders/'+activeOrderId).update({
+    status:'completed',
+    completedAt:Date.now(),
+    commissionPaid:comm
   });
-}
-
-/* START */
-tryAutoLogin();
+  document.getElementById('trackModal').classList.add('hidden');
+  showBanner('✅ Order marked as delivered!','green');
+});
 </script>
 </body>
 </html>
