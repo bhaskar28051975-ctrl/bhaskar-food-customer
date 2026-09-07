@@ -169,11 +169,11 @@
   </div>
 </div>
 <!-- ADD/EDIT ITEM MODAL -->
-<div id="itemModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" style="max-height:88vh;overflow-y:auto">
+<div id="itemModal" class="overlay fixed inset-0 z-[200] hidden flex items-end justify-center">
+  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 pb-28 space-y-4 shadow-2xl overflow-y-auto" style="max-height:85vh;">
     <div class="flex justify-between items-center">
       <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
-      <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none">✕</button>
+      <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none p-2">✕</button>
     </div>
     <div>
       <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
@@ -189,10 +189,9 @@
       <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
     </div>
     <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
-    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
+    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow-lg active:scale-95 mt-4">💾 Save Dish</button>
   </div>
 </div>
-<!-- ADD/EDIT DELIVERY BOY MODAL -->
 <div id="boyModal" class="overlay fixed inset-0 z-[150] hidden flex items-center justify-center p-4">
   <div class="sheet bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4">
     <div class="flex justify-between items-center">
