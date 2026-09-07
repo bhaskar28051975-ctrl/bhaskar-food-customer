@@ -21,7 +21,6 @@
 </style>
 </head>
 <body class="bg-gray-50 pb-28">
-
 <!-- LOADING / AUTH -->
 <div id="loadingScreen" class="fixed inset-0 bg-blue-600 z-[300] flex flex-col items-center justify-center">
   <div class="text-6xl mb-4">⚙️</div>
@@ -33,7 +32,6 @@
     <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.3s"></div>
   </div>
 </div>
-
 <!-- TOP HEADER -->
 <div class="bg-blue-600 text-white p-6 shadow-xl rounded-b-[2.5rem]">
   <div class="max-w-md mx-auto flex justify-between items-center">
@@ -46,10 +44,8 @@
     </button>
   </div>
 </div>
-
 <!-- MAIN CONTENT CONTAINER -->
 <div class="max-w-md mx-auto p-4 space-y-6">
-
   <!-- STATS OVERVIEW -->
   <div class="grid grid-cols-2 gap-3">
     <div class="bg-white p-4 rounded-2xl border shadow-sm">
@@ -61,7 +57,6 @@
       <p id="statTotalRevenue" class="text-2xl font-black text-green-600 mt-1">₹0</p>
     </div>
   </div>
-
   <!-- ADD HOTEL SECTION -->
   <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-3">
     <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">🏨 Add New Hotel</h2>
@@ -69,7 +64,6 @@
     <input id="resImg" type="text" placeholder="Hotel Image URL (optional)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
     <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Hotel</button>
   </div>
-
   <!-- SERVICE RADIUS -->
   <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-4">
     <div class="flex items-center gap-3">
@@ -101,7 +95,6 @@
     <button id="saveRadiusBtn" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Radius</button>
     <div id="radiusSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">✅ Radius saved!</div>
   </div>
-
   <!-- ZONE MANAGER -->
   <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-4">
     <div class="flex items-center gap-3">
@@ -136,14 +129,12 @@
       <div id="savedZonesList" class="space-y-2"><p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p></div>
     </div>
   </div>
-
-  <!-- HOTELS & MENUS SECTION (ABOVE ORDERS) -->
+  <!-- HOTELS & MENUS SECTION -->
   <div class="space-y-3">
     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 pt-2">🏨 Hotels & Menus</p>
     <div id="hotelList" class="space-y-4"></div>
   </div>
-
-  <!-- DELIVERY PARTNERS SECTION (ABOVE ORDERS) -->
+  <!-- DELIVERY PARTNERS SECTION -->
   <div class="bg-white rounded-[2rem] border shadow-sm p-5 space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="font-black text-gray-800 text-sm uppercase">🛵 Delivery Partners</h2>
@@ -153,8 +144,7 @@
       <p class="text-center text-gray-400 text-xs py-3">Loading partners...</p>
     </div>
   </div>
-
-  <!-- LIVE ORDERS & ASSIGNMENTS (NOW BELOW HOTELS & PARTNERS) -->
+  <!-- LIVE ORDERS & ASSIGNMENTS -->
   <div class="space-y-3">
     <div class="flex justify-between items-center ml-1">
       <h2 class="font-black text-gray-700 text-xs uppercase tracking-widest">📦 Incoming & Active Orders</h2>
@@ -164,9 +154,7 @@
       <p class="text-center text-gray-400 text-sm py-6">No orders found.</p>
     </div>
   </div>
-
 </div>
-
 <!-- MENU MODAL -->
 <div id="menuModal" class="overlay fixed inset-0 z-40 hidden flex items-end justify-center">
   <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col" style="max-height:88vh">
@@ -180,7 +168,6 @@
     <div id="menuList" class="overflow-y-auto p-4 pt-2 space-y-3 flex-1"></div>
   </div>
 </div>
-
 <!-- ADD/EDIT ITEM MODAL -->
 <div id="itemModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
   <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" style="max-height:88vh;overflow-y:auto">
@@ -205,7 +192,6 @@
     <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
   </div>
 </div>
-
 <!-- ADD/EDIT DELIVERY BOY MODAL -->
 <div id="boyModal" class="overlay fixed inset-0 z-[150] hidden flex items-center justify-center p-4">
   <div class="sheet bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4">
@@ -234,7 +220,6 @@
     </div>
   </div>
 </div>
-
 <!-- DELETE ZONE MODAL -->
 <div id="deleteZoneModal" class="overlay fixed inset-0 z-50 hidden flex items-center justify-center p-6">
   <div class="sheet bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 text-center">
@@ -247,10 +232,8 @@
     </div>
   </div>
 </div>
-
 <!-- BANNER NOTIFICATION -->
 <div id="adminBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl font-black text-sm text-white text-center max-w-xs w-[90vw] shadow-xl opacity-0 pointer-events-none transition-opacity duration-300"></div>
-
 <!-- BOTTOM NAV -->
 <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
   <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
@@ -259,7 +242,6 @@
   <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
   <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
-
 <!-- FIREBASE SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -273,23 +255,19 @@ firebase.initializeApp({
 });
 var db = firebase.database();
 var activeDeliveryPartners = {};
-
 function showToast(msg, color){
   var t = document.getElementById('adminBanner');
   t.textContent = msg;
   t.style.background = color === 'red' ? '#dc2626' : color === 'green' ? '#16a34a' : '#2563eb';
   t.style.opacity = '1'; clearTimeout(t._t); t._t = setTimeout(function(){t.style.opacity = '0';}, 3000);
 }
-
 setTimeout(function(){
   document.getElementById('loadingScreen').style.display = 'none';
 }, 600);
-
 document.getElementById('refreshBtn').addEventListener('click', function(){
   showToast('🔄 Dashboard Refreshed', 'blue');
   initAdminData();
 });
-
 /* RADIUS CONTROLS */
 var adminRadius = 200; var MIN_R = 50, MAX_R = 1000, STEP_R = 50;
 function updateRadiusUI(r){
@@ -310,7 +288,6 @@ document.getElementById('saveRadiusBtn').addEventListener('click', function(){
   db.ref('settings/serviceRadius').set(adminRadius);
   var m = document.getElementById('radiusSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');}, 3000);
 });
-
 /* ZONE MANAGER */
 var zoneLat = 17.385, zoneLng = 78.4867, zoneRadius = 200, zoneMap, zoneCenterMarker, zoneCircleLayer;
 var editingZoneId = null, deleteZoneTargetId = null;
@@ -320,7 +297,6 @@ setTimeout(function(){
   drawZoneOnMap(zoneLat, zoneLng, zoneRadius);
   zoneMap.on('click', function(e){ drawZoneOnMap(e.latlng.lat, e.latlng.lng, zoneRadius); });
 }, 200);
-
 function drawZoneOnMap(lat, lng, radius){
   zoneLat = lat; zoneLng = lng;
   document.getElementById('zoneCoordsText').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
@@ -334,7 +310,6 @@ function drawZoneOnMap(lat, lng, radius){
   else zoneCircleLayer = L.circle([lat, lng], {radius: radius, color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.12, weight: 2.5, dashArray: '6,4'}).addTo(zoneMap);
   zoneMap.setView([lat, lng], 15);
 }
-
 function updateZoneRadius(val){
   zoneRadius = Math.min(2000, Math.max(50, val));
   document.getElementById('zoneRadiusSlider').value = zoneRadius;
@@ -354,7 +329,6 @@ document.getElementById('useMyLocZoneBtn').addEventListener('click', function(){
     btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location'; alert('Location denied');
   }, {enableHighAccuracy: true});
 });
-
 document.getElementById('saveZoneBtn').addEventListener('click', function(){
   if(!zoneCenterMarker){ alert('⚠️ Tap the map to set a center point first!'); return; }
   var name = document.getElementById('zoneNameInput').value.trim() || 'Delivery Zone';
@@ -372,7 +346,6 @@ document.getElementById('saveZoneBtn').addEventListener('click', function(){
   btn.innerHTML = '<i class="fas fa-save"></i> Save Zone'; btn.disabled = false;
   var m = document.getElementById('zoneSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');}, 3000);
 });
-
 db.ref('zones').on('value', function(snap){
   var zones = snap.val() || {}, list = document.getElementById('savedZonesList'), keys = Object.keys(zones);
   if(!keys.length){ list.innerHTML = '<p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p>'; return; }
@@ -406,7 +379,6 @@ document.getElementById('confirmDeleteZone').addEventListener('click', function(
   db.ref('zones/' + deleteZoneTargetId).remove();
   document.getElementById('deleteZoneModal').classList.add('hidden'); deleteZoneTargetId = null; showToast('🗑️ Zone deleted', 'red');
 });
-
 /* DELIVERY PARTNERS & ACCOUNTS */
 document.getElementById('openAddBoyModal').addEventListener('click', function(){
   document.getElementById('boyModalTitle').textContent = 'Add Delivery Partner';
@@ -420,7 +392,6 @@ document.getElementById('openAddBoyModal').addEventListener('click', function(){
 document.getElementById('closeBoyModal').addEventListener('click', function(){
   document.getElementById('boyModal').classList.add('hidden');
 });
-
 document.getElementById('saveBoyBtn').addEventListener('click', function(){
   var u = document.getElementById('boyUsername').value.trim().toLowerCase().replace(/\s/g, '');
   var p = document.getElementById('boyPassword').value.trim();
@@ -446,19 +417,16 @@ document.getElementById('saveBoyBtn').addEventListener('click', function(){
     }
   });
 });
-
 function toggleBoyStatus(username, currentStatus){
   db.ref('deliveryAccounts/' + username).update({ active: !currentStatus });
   showToast('Partner status updated', 'blue');
 }
-
 function deleteBoy(username){
   if(confirm('Are you sure you want to delete delivery partner @' + username + '?')) {
     db.ref('deliveryAccounts/' + username).remove();
     showToast('Partner deleted', 'red');
   }
 }
-
 function initAdminData(){
   db.ref('deliveryAccounts').on('value', function(snap){
     var listEl = document.getElementById('deliveryPartnersList');
@@ -494,7 +462,6 @@ function initAdminData(){
     loadAdminOrders();
   });
 }
-
 /* LIVE ORDERS & STATS */
 function loadAdminOrders(){
   db.ref('orders').on('value', function(snap){
@@ -572,7 +539,6 @@ function loadAdminOrders(){
     document.getElementById('activeOrdersCount').textContent = activeCount + ' Active';
   });
 }
-
 function assignOrderToPartner(orderKey, boyUsername){
   if(!boyUsername){
     db.ref('orders/' + orderKey).update({ assignedTo: null, assignedName: null, assignedPhone: null });
@@ -592,14 +558,12 @@ function assignOrderToPartner(orderKey, boyUsername){
     });
   });
 }
-
 function updateOrderStatus(orderKey, status){
   if(!confirm('Mark order as ' + status + '?')) return;
   db.ref('orders/' + orderKey).update({ status: status }, function(err){
     if(!err) showToast('Order status updated', 'blue');
   });
 }
-
 /* HOTEL & MENU MANAGEMENT */
 var activeResId = null, editKey = null, menuCache = {};
 db.ref('restaurants').on('value', function(snap){
@@ -618,21 +582,18 @@ db.ref('restaurants').on('value', function(snap){
   document.querySelectorAll('.openMenu').forEach(function(btn){ btn.addEventListener('click', function(){ openMenuModal(btn.dataset.hid, btn.dataset.hname); }); });
   document.querySelectorAll('.delHotel').forEach(function(btn){ btn.addEventListener('click', function(){ if(confirm('Delete hotel and all menu items?')) db.ref('restaurants/' + btn.dataset.hid).remove(); }); });
 });
-
 window.addRestaurant = function(){
   var name = document.getElementById('resName').value.trim(); if(!name){ alert('Please enter hotel name!'); return; }
   var image = document.getElementById('resImg').value.trim() || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
   db.ref('restaurants').push({name: name, image: image});
   document.getElementById('resName').value = ''; document.getElementById('resImg').value = '';
 };
-
 function openMenuModal(resId, resName){
   activeResId = resId; editKey = null;
   document.getElementById('menuModalTitle').textContent = '🍽️ ' + resName;
   document.getElementById('menuModal').classList.remove('hidden'); loadMenuList();
 }
 window.closeMenuModal = function(){ document.getElementById('menuModal').classList.add('hidden'); activeResId = null; };
-
 function loadMenuList(){
   var list = document.getElementById('menuList');
   list.innerHTML = '<p class="text-center text-gray-300 text-xs py-6">Loading…</p>';
@@ -678,7 +639,6 @@ function loadMenuList(){
     });
   });
 }
-
 window.openItemForm = function(key){
   editKey = key; ['fDish', 'fPrice', 'fImg'].forEach(function(id){ document.getElementById(id).value = ''; });
   document.getElementById('previewWrap').classList.add('hidden');
@@ -692,13 +652,11 @@ window.openItemForm = function(key){
   }
   document.getElementById('itemModal').classList.remove('hidden');
 };
-
 window.closeItemModal = function(){ document.getElementById('itemModal').classList.add('hidden'); editKey = null; };
 window.previewImg = function(){
   var url = document.getElementById('fImg').value.trim(); if(!url){ alert('Enter image URL first!'); return; }
   document.getElementById('previewImgEl').src = url; document.getElementById('previewWrap').classList.remove('hidden');
 };
-
 window.saveItem = function(){
   var dish = document.getElementById('fDish').value.trim(), price = parseFloat(document.getElementById('fPrice').value);
   var img = document.getElementById('fImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
@@ -710,7 +668,6 @@ window.saveItem = function(){
   else db.ref('restaurants/' + activeResId + '/menu').push(data);
   window.closeItemModal(); loadMenuList();
 };
-
 /* Initial Launch Call */
 initAdminData();
 </script>
