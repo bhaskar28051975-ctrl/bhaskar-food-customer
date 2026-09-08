@@ -176,26 +176,33 @@
 </div>
 <!-- ADD/EDIT ITEM MODAL -->
 <div id="itemModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" style="max-height:88vh;overflow-y:auto">
-    <div class="flex justify-between items-center">
+  <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col" style="max-height:85vh;">
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-5 border-b sticky top-0 bg-white rounded-t-3xl z-10">
       <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
       <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
-      <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+    <!-- Scrollable Form Inputs Container -->
+    <div class="p-6 space-y-4 overflow-y-auto flex-1">
+      <div>
+        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
+        <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Price (₹) *</label>
+        <input id="fPrice" type="number" placeholder="e.g. 250" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Image URL</label>
+        <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+        <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
+      </div>
+      <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
     </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Price (₹) *</label>
-      <input id="fPrice" type="number" placeholder="e.g. 250" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
+    <!-- Sticky Footer Button -->
+    <div class="p-4 border-t bg-white sticky bottom-0 z-10">
+      <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
     </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Image URL</label>
-      <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-      <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
-    </div>
-    <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
-    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
   </div>
 </div>
 <!-- ADD/EDIT DELIVERY BOY MODAL -->
@@ -570,10 +577,8 @@ function updateOrderStatus(orderKey, status){
     if(!err) showToast('Order status updated', 'blue');
   });
 }
-
 /* HOTEL & MENU MANAGEMENT WITH MOVE UP / MOVE DOWN */
 var activeResId = null, editKey = null, menuCache = {};
-
 db.ref('restaurants').on('value', function(snap){
   var list = document.getElementById('hotelList'); list.innerHTML = '';
   if(!snap.exists()){ list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No hotels yet.</p>'; return; }
@@ -589,7 +594,6 @@ db.ref('restaurants').on('value', function(snap){
     var ordB = b.val.order !== undefined ? b.val.order : 0;
     return ordA - ordB;
   });
-
   hotels.forEach(function(item, index){
     var r = item.val, hid = item.id, cnt = r.menu ? Object.keys(r.menu).length : 0;
     var div = document.createElement('div'); div.className = 'p-4 bg-white rounded-2xl shadow border space-y-3';
@@ -605,7 +609,6 @@ db.ref('restaurants').on('value', function(snap){
       '<button data-hid="' + hid + '" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>';
     list.appendChild(div);
   });
-
   // Attach event listeners for reordering hotels
   list.querySelectorAll('.moveHotelUp').forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -619,11 +622,9 @@ db.ref('restaurants').on('value', function(snap){
       if (idx < hotels.length - 1) moveHotel(idx, 1, hotels);
     });
   });
-
   document.querySelectorAll('.openMenu').forEach(function(btn){ btn.addEventListener('click', function(){ openMenuModal(btn.dataset.hid, btn.dataset.hname); }); });
   document.querySelectorAll('.delHotel').forEach(function(btn){ btn.addEventListener('click', function(){ if(confirm('Delete hotel and all menu items?')) db.ref('restaurants/' + btn.dataset.hid).remove(); }); });
 });
-
 function moveHotel(index, direction, hotels){
   var newIdx = index + direction;
   var temp = hotels[index];
@@ -638,21 +639,18 @@ function moveHotel(index, direction, hotels){
     showToast('✅ Hotel order updated', 'green');
   });
 }
-
 window.addRestaurant = function(){
   var name = document.getElementById('resName').value.trim(); if(!name){ alert('Please enter hotel name!'); return; }
   var image = document.getElementById('resImg').value.trim() || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
   db.ref('restaurants').push({name: name, image: image, order: Date.now()});
   document.getElementById('resName').value = ''; document.getElementById('resImg').value = '';
 };
-
 function openMenuModal(resId, resName){
   activeResId = resId; editKey = null;
   document.getElementById('menuModalTitle').textContent = '🍽️ ' + resName;
   document.getElementById('menuModal').classList.remove('hidden'); loadMenuList();
 }
 window.closeMenuModal = function(){ document.getElementById('menuModal').classList.add('hidden'); activeResId = null; };
-
 function loadMenuList(){
   var list = document.getElementById('menuList');
   list.innerHTML = '<p class="text-center text-gray-300 text-xs py-6">Loading…</p>';
@@ -664,13 +662,16 @@ function loadMenuList(){
     snap.forEach(function(child){
       dishes.push({key: child.key, val: child.val()});
     });
-
     dishes.sort(function(a, b){
       var ordA = a.val.order !== undefined ? a.val.order : 0;
       var ordB = b.val.order !== undefined ? b.val.order : 0;
       return ordA - ordB;
     });
-
+    dishes.sort(function(a, b){
+      var ordA = a.val.order !== undefined ? a.val.order : 0;
+      var ordB = b.val.order !== undefined ? b.val.order : 0;
+      return ordA - ordB;
+    });
     dishes.forEach(function(item, index){
       var m = item.val, key = item.key; menuCache[key] = m;
       var isOos = !!m.outOfStock;
@@ -713,7 +714,6 @@ function loadMenuList(){
       });
       list.appendChild(row);
     });
-
     // Attach event listeners for reordering menu items
     list.querySelectorAll('.moveMenuUp').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -729,7 +729,6 @@ function loadMenuList(){
     });
   });
 }
-
 function moveMenuItem(index, direction, dishes){
   var newIdx = index + direction;
   var temp = dishes[index];
@@ -745,7 +744,6 @@ function moveMenuItem(index, direction, dishes){
     loadMenuList();
   });
 }
-
 window.openItemForm = function(key){
   editKey = key; ['fDish', 'fPrice', 'fImg'].forEach(function(id){ document.getElementById(id).value = ''; });
   document.getElementById('previewWrap').classList.add('hidden');
