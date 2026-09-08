@@ -1,674 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-<title>Admin Dashboard – Bhaskar Food</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-.overlay{background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)}
-.sheet{animation:su .3s ease}
-@keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-#zoneMap{height:300px;width:100%;border-radius:1rem;z-index:1}
-.oos-toggle{width:52px;height:28px;border-radius:99px;cursor:pointer;display:flex;align-items:center;padding:3px;transition:background .25s;flex-shrink:0}
-.oos-toggle .knob{width:22px;height:22px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .25s}
-.oos-toggle.oos-on{background:#dc2626}
-.oos-toggle.oos-on .knob{transform:translateX(24px)}
-.oos-toggle.oos-off{background:#22c55e}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Restaurant Ordering</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    .oos-toggle { width: 40px; height: 22px; background: #e5e7eb; border-radius: 9999px; position: relative; cursor: pointer; transition: background 0.2s; }
+    .oos-toggle .knob { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .oos-toggle.oos-on { background: #dc2626; }
+    .oos-toggle.oos-on .knob { transform: translateX(18px); }
+  </style>
 </head>
-<body class="bg-gray-50 pb-28">
-<!-- LOADING / AUTH -->
-<div id="loadingScreen" class="fixed inset-0 bg-blue-600 z-[300] flex flex-col items-center justify-center">
-  <div class="text-6xl mb-4">⚙️</div>
-  <p class="text-white font-black text-xl uppercase">Bhaskar Food</p>
-  <p class="text-blue-200 text-sm mt-2">Admin Control Panel</p>
-  <div class="mt-6 flex gap-2">
-    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:0s"></div>
-    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.15s"></div>
-    <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay:.3s"></div>
-  </div>
-</div>
-<!-- TOP HEADER -->
-<div class="bg-blue-600 text-white p-6 shadow-xl rounded-b-[2.5rem]">
-  <div class="max-w-md mx-auto flex justify-between items-center">
-    <div>
-      <p class="text-[10px] font-black uppercase opacity-70 tracking-widest">Management Hub</p>
-      <h1 class="text-2xl font-black italic mt-0.5">Admin Dashboard</h1>
-    </div>
-    <button id="refreshBtn" class="bg-white/20 p-3 rounded-2xl active:scale-90" title="Refresh">
-      <i class="fa-solid fa-rotate text-lg"></i>
-    </button>
-  </div>
-</div>
-<!-- MAIN CONTENT CONTAINER -->
-<div class="max-w-md mx-auto p-4 space-y-6">
-  <!-- STATS OVERVIEW -->
-  <div class="grid grid-cols-2 gap-3">
-    <div class="bg-white p-4 rounded-2xl border shadow-sm">
-      <p class="text-[10px] font-black text-gray-400 uppercase">Total Orders</p>
-      <p id="statTotalOrders" class="text-2xl font-black text-gray-800 mt-1">0</p>
-    </div>
-    <div class="bg-white p-4 rounded-2xl border shadow-sm">
-      <p class="text-[10px] font-black text-gray-400 uppercase">Total Revenue</p>
-      <p id="statTotalRevenue" class="text-2xl font-black text-green-600 mt-1">₹0</p>
-    </div>
-  </div>
-  <!-- ADD HOTEL SECTION -->
-  <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-3">
-    <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">🏨 Add New Hotel</h2>
-    <input id="resName" type="text" placeholder="Hotel Name *" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-red-400"/>
-    <input id="resImg" type="text" placeholder="Hotel Image URL (optional)" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-    <button onclick="addRestaurant()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Hotel</button>
-  </div>
-  <!-- SERVICE RADIUS -->
-  <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl">📡</div>
-      <div>
-        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Service Area Radius</h2>
-        <p class="text-[10px] text-gray-400 mt-0.5">Fixed for ALL customers</p>
+<body class="bg-gray-100 min-h-screen pb-20">
+
+  <!-- Header -->
+  <header class="bg-white shadow sticky top-0 z-30 px-4 py-3 flex justify-between items-center">
+    <h1 class="font-black text-lg text-gray-800">👑 Admin Dashboard</h1>
+    <a href="index.html" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-xl font-bold text-xs">View Customer App ➔</a>
+  </header>
+
+  <main class="max-w-md mx-auto p-4 space-y-6">
+    
+    <!-- Add Hotel Section -->
+    <section class="bg-white p-4 rounded-2xl shadow space-y-3">
+      <h2 class="font-black text-sm text-gray-700 uppercase">Add New Hotel / Restaurant</h2>
+      <input type="text" id="newHotelName" placeholder="Hotel Name (e.g., Grand Kitchen)" class="w-full p-3 bg-gray-50 border rounded-xl text-sm font-medium outline-none focus:border-blue-500">
+      <input type="text" id="newHotelImg" placeholder="Image URL (optional)" class="w-full p-3 bg-gray-50 border rounded-xl text-sm font-medium outline-none focus:border-blue-500">
+      <button onclick="addHotel()" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95">➕ Add Hotel</button>
+    </section>
+
+    <!-- Hotel List Section -->
+    <section class="space-y-3">
+      <h2 class="font-black text-sm text-gray-700 uppercase px-1">Manage Hotels & Sorting</h2>
+      <div id="hotelList" class="space-y-3">
+        <p class="text-center text-gray-400 text-xs py-6">Loading hotels...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Menu Management Modal -->
+  <div id="menuModal" class="fixed inset-0 bg-black/60 z-50 hidden flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
+        <div>
+          <h3 id="modalHotelTitle" class="font-black text-base uppercase">Menu Management</h3>
+          <p class="text-xs text-gray-400">Reorder dishes or update availability</p>
+        </div>
+        <button onclick="closeMenuModal()" class="w-8 h-8 bg-gray-800 rounded-full font-bold text-sm">✕</button>
+      </div>
+
+      <!-- Add/Edit Dish Form inside Modal -->
+      <div class="p-4 bg-gray-50 border-b space-y-2">
+        <input type="hidden" id="editDishKey">
+        <input type="text" id="dishName" placeholder="Dish Name" class="w-full p-2.5 bg-white border rounded-xl text-xs font-medium outline-none">
+        <div class="flex gap-2">
+          <input type="number" id="dishPrice" placeholder="Price (₹)" class="w-1/2 p-2.5 bg-white border rounded-xl text-xs font-medium outline-none">
+          <input type="text" id="dishImg" placeholder="Image URL" class="w-1/2 p-2.5 bg-white border rounded-xl text-xs font-medium outline-none">
+        </div>
+        <button onclick="saveDish()" id="saveDishBtn" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase shadow active:scale-95">➕ Save Dish</button>
+      </div>
+
+      <!-- Dish List with Up/Down Buttons -->
+      <div id="menuList" class="p-4 overflow-y-auto space-y-3 flex-1">
+        <p class="text-center text-gray-400 text-xs py-6">Select a hotel menu...</p>
       </div>
     </div>
-    <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-      <p class="text-[10px] font-black text-gray-500 uppercase mb-1">Current Radius</p>
-      <p class="font-black text-4xl text-red-600" id="currentRadiusDisplay">—</p>
-      <p class="text-xs text-gray-400 mt-1">metres from order location</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <button id="radiusMinusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 border border-red-200">−</button>
-      <div class="flex-1">
-        <div class="bg-gray-100 rounded-full h-3 overflow-hidden"><div id="adminRadiusBar" class="bg-red-500 h-3 rounded-full transition-all" style="width:20%"></div></div>
-        <div class="flex justify-between text-[9px] text-gray-400 font-bold mt-1 px-1"><span>50m</span><span>250m</span><span>500m</span><span>750m</span><span>1000m</span></div>
-      </div>
-      <button id="radiusPlusBtn" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl font-black text-2xl flex items-center justify-center active:scale-95 border border-red-200">+</button>
-    </div>
-    <div class="grid grid-cols-4 gap-2">
-      <button data-r="100" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">100m</button>
-      <button data-r="200" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">200m</button>
-      <button data-r="500" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">500m</button>
-      <button data-r="1000" class="preset-btn py-2 rounded-xl border font-black text-xs text-gray-600 bg-gray-50 active:scale-95">1km</button>
-    </div>
-    <button id="saveRadiusBtn" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Radius</button>
-    <div id="radiusSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">✅ Radius saved!</div>
   </div>
-  <!-- ZONE MANAGER -->
-  <div class="bg-white p-6 rounded-[2rem] shadow-xl border space-y-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-xl">🗺️</div>
-      <div>
-        <h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Delivery Zone Manager</h2>
-        <p class="text-[10px] text-gray-400 mt-0.5">Set center point + radius on map</p>
-      </div>
-    </div>
-    <div class="rounded-2xl overflow-hidden border border-gray-200"><div id="zoneMap"></div></div>
-    <div class="flex items-center gap-2">
-      <div class="flex-1 bg-gray-50 border rounded-xl p-2">
-        <p class="text-[10px] font-black text-gray-400 uppercase">Center Point</p>
-        <p id="zoneCoordsText" class="text-xs font-black text-gray-600 font-mono">Tap map to set</p>
-      </div>
-      <button id="useMyLocZoneBtn" class="bg-purple-600 text-white px-4 py-3 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1 shrink-0"><i class="fas fa-crosshairs"></i> My Location</button>
-    </div>
-    <div class="flex items-center justify-between">
-      <p class="font-black text-sm text-gray-700">Zone Radius</p>
-      <div class="flex items-center gap-2">
-        <button id="zoneRadiusDown" class="w-9 h-9 bg-purple-100 text-purple-600 rounded-xl font-black text-xl flex items-center justify-center active:scale-90">−</button>
-        <span id="zoneRadiusDisplay" class="font-black text-base text-purple-600 w-20 text-center">200 m</span>
-        <button id="zoneRadiusUp" class="w-9 h-9 bg-purple-600 text-white rounded-xl font-black text-xl flex items-center justify-center active:scale-90">+</button>
-      </div>
-    </div>
-    <input type="range" id="zoneRadiusSlider" min="50" max="2000" value="200" step="50" class="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-purple-600"/>
-    <input id="zoneNameInput" type="text" placeholder="Zone Name e.g. Main Market…" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-bold focus:outline-none focus:border-purple-400"/>
-    <button id="saveZoneBtn" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-save"></i> Save Zone</button>
-    <div id="zoneSavedMsg" class="hidden text-center text-green-600 font-black text-sm py-1">✅ Zone saved!</div>
-    <div>
-      <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-2">Saved Zones</p>
-      <div id="savedZonesList" class="space-y-2"><p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p></div>
-    </div>
-  </div>
-  <!-- HOTELS & MENUS SECTION -->
-  <div class="space-y-3">
-    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 pt-2">🏨 Hotels & Menus</p>
-    <div id="hotelList" class="space-y-4"></div>
-  </div>
-  <!-- DELIVERY PARTNERS SECTION -->
-  <div class="bg-white rounded-[2rem] border shadow-sm p-5 space-y-4">
-    <div class="flex justify-between items-center">
-      <h2 class="font-black text-gray-800 text-sm uppercase">🛵 Delivery Partners</h2>
-      <button id="openAddBoyModal" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-black text-xs uppercase active:scale-95">+ Add Partner</button>
-    </div>
-    <div id="deliveryPartnersList" class="space-y-2">
-      <p class="text-center text-gray-400 text-xs py-3">Loading partners...</p>
-    </div>
-  </div>
-  <!-- LIVE ORDERS & ASSIGNMENTS -->
-  <div class="space-y-3">
-    <div class="flex justify-between items-center ml-1">
-      <h2 class="font-black text-gray-700 text-xs uppercase tracking-widest">📦 Incoming & Active Orders</h2>
-      <span id="activeOrdersCount" class="text-[10px] bg-blue-100 text-blue-600 font-black px-2 py-0.5 rounded-full">0 Active</span>
-    </div>
-    <div id="adminOrdersList" class="space-y-4">
-      <p class="text-center text-gray-400 text-sm py-6">No orders found.</p>
-    </div>
-  </div>
-</div>
-<!-- MENU MODAL -->
-<div id="menuModal" class="overlay fixed inset-0 z-40 hidden flex items-end justify-center">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col" style="max-height:88vh">
-    <div class="flex justify-between items-center p-5 border-b sticky top-0 bg-white rounded-t-3xl z-10">
-      <h3 id="menuModalTitle" class="font-black text-gray-800 text-sm uppercase">Menu</h3>
-      <button onclick="closeMenuModal()" class="text-gray-400 text-2xl leading-none">✕</button>
-    </div>
-    <div class="p-4 pb-2">
-      <button onclick="openItemForm(null)" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-xs uppercase active:scale-95">➕ Add New Dish</button>
-    </div>
-    <div id="menuList" class="overflow-y-auto p-4 pt-2 space-y-3 flex-1"></div>
-  </div>
-</div>
-<!-- ADD/EDIT ITEM MODAL -->
-<div id="itemModal" class="overlay fixed inset-0 z-[200] hidden flex items-end justify-center">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 pb-28 space-y-4 shadow-2xl overflow-y-auto" style="max-height:85vh;">
-    <div class="flex justify-between items-center">
-      <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
-      <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none p-2">✕</button>
-    </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
-      <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-    </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Price (₹) *</label>
-      <input id="fPrice" type="number" placeholder="e.g. 250" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-    </div>
-    <div>
-      <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Image URL</label>
-      <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
-      <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
-    </div>
-    <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
-    <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow-lg active:scale-95 mt-4">💾 Save Dish</button>
-  </div>
-</div>
-<div id="boyModal" class="overlay fixed inset-0 z-[150] hidden flex items-center justify-center p-4">
-  <div class="sheet bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4">
-    <div class="flex justify-between items-center">
-      <h3 class="font-black text-gray-800 text-sm uppercase" id="boyModalTitle">Add Delivery Partner</h3>
-      <button id="closeBoyModal" class="text-gray-400 text-xl leading-none">✕</button>
-    </div>
-    <div class="space-y-3">
-      <div>
-        <label class="text-[10px] font-black text-gray-400 uppercase">Username (Login ID) *</label>
-        <input id="boyUsername" type="text" placeholder="e.g. rahul" class="w-full p-3 border-2 rounded-xl bg-gray-50 font-bold text-sm mt-1 focus:outline-none focus:border-blue-500"/>
-      </div>
-      <div>
-        <label class="text-[10px] font-black text-gray-400 uppercase">Password *</label>
-        <input id="boyPassword" type="text" placeholder="e.g. pass123" class="w-full p-3 border-2 rounded-xl bg-gray-50 font-bold text-sm mt-1 focus:outline-none focus:border-blue-500"/>
-      </div>
-      <div>
-        <label class="text-[10px] font-black text-gray-400 uppercase">Full Name *</label>
-        <input id="boyName" type="text" placeholder="e.g. Rahul Sharma" class="w-full p-3 border-2 rounded-xl bg-gray-50 font-bold text-sm mt-1 focus:outline-none focus:border-blue-500"/>
-      </div>
-      <div>
-        <label class="text-[10px] font-black text-gray-400 uppercase">Phone Number</label>
-        <input id="boyPhone" type="tel" placeholder="e.g. 9876543210" class="w-full p-3 border-2 rounded-xl bg-gray-50 font-bold text-sm mt-1 focus:outline-none focus:border-blue-500"/>
-      </div>
-      <button id="saveBoyBtn" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-black text-sm uppercase shadow-md active:scale-95 mt-2">💾 Save Partner Account</button>
-    </div>
-  </div>
-</div>
-<!-- DELETE ZONE MODAL -->
-<div id="deleteZoneModal" class="overlay fixed inset-0 z-50 hidden flex items-center justify-center p-6">
-  <div class="sheet bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 text-center">
-    <div class="text-4xl">🗑️</div>
-    <h3 class="font-black text-gray-800 text-lg">Delete Zone?</h3>
-    <p class="text-sm text-gray-500" id="deleteZoneNameText"></p>
-    <div class="flex gap-3">
-      <button id="cancelDeleteZone" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-black text-sm uppercase active:scale-95">Cancel</button>
-      <button id="confirmDeleteZone" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-black text-sm uppercase active:scale-95">Delete</button>
-    </div>
-  </div>
-</div>
-<!-- BANNER NOTIFICATION -->
-<div id="adminBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl font-black text-sm text-white text-center max-w-xs w-[90vw] shadow-xl opacity-0 pointer-events-none transition-opacity duration-300"></div>
-<!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-[100]">
-  <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
-  <a href="admin.html"   class="flex flex-col items-center gap-1 text-blue-600"><i class="fa-solid fa-gears text-xl"></i><span class="text-[9px] font-bold">Admin</span></a>
-  <a href="kitchen.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-utensils text-xl"></i><span class="text-[9px] font-bold">Kitchen</span></a>
-  <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
-  <a href="reports.html"  class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
-</div>
-<!-- FIREBASE SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAT074ME7aIbb4R2VzgZZGdw8F3alL-xbA",
-  authDomain: "bhaskar-food-app.firebaseapp.com",
-  databaseURL: "https://bhaskar-food-app-default-rtdb.firebaseio.com",
-  projectId: "bhaskar-food-app",
-  appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
-});
-var db = firebase.database();
-var activeDeliveryPartners = {};
-function showToast(msg, color){
-  var t = document.getElementById('adminBanner');
-  t.textContent = msg;
-  t.style.background = color === 'red' ? '#dc2626' : color === 'green' ? '#16a34a' : '#2563eb';
-  t.style.opacity = '1'; clearTimeout(t._t); t._t = setTimeout(function(){t.style.opacity = '0';}, 3000);
-}
-setTimeout(function(){
-  document.getElementById('loadingScreen').style.display = 'none';
-}, 600);
-document.getElementById('refreshBtn').addEventListener('click', function(){
-  showToast('🔄 Dashboard Refreshed', 'blue');
-  initAdminData();
-});
-/* RADIUS CONTROLS */
-var adminRadius = 200; var MIN_R = 50, MAX_R = 1000, STEP_R = 50;
-function updateRadiusUI(r){
-  adminRadius = r;
-  document.getElementById('currentRadiusDisplay').textContent = r + 'm';
-  document.getElementById('adminRadiusBar').style.width = ((r - MIN_R) / (MAX_R - MIN_R) * 100) + '%';
-  document.querySelectorAll('.preset-btn').forEach(function(b){
-    var a = parseInt(b.dataset.r) === r;
-    b.classList.toggle('bg-red-600', a); b.classList.toggle('text-white', a);
-    b.classList.toggle('border-red-600', a); b.classList.toggle('bg-gray-50', !a); b.classList.toggle('text-gray-600', !a);
-  });
-}
-db.ref('settings/serviceRadius').on('value', function(snap){ updateRadiusUI(parseInt(snap.val()) || 200); });
-document.getElementById('radiusMinusBtn').addEventListener('click', function(){ updateRadiusUI(Math.max(MIN_R, adminRadius - STEP_R)); });
-document.getElementById('radiusPlusBtn').addEventListener('click', function(){ updateRadiusUI(Math.min(MAX_R, adminRadius + STEP_R)); });
-document.querySelectorAll('.preset-btn').forEach(function(btn){ btn.addEventListener('click', function(){ updateRadiusUI(parseInt(btn.dataset.r)); }); });
-document.getElementById('saveRadiusBtn').addEventListener('click', function(){
-  db.ref('settings/serviceRadius').set(adminRadius);
-  var m = document.getElementById('radiusSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');}, 3000);
-});
-/* ZONE MANAGER */
-var zoneLat = 17.385, zoneLng = 78.4867, zoneRadius = 200, zoneMap, zoneCenterMarker, zoneCircleLayer;
-var editingZoneId = null, deleteZoneTargetId = null;
-setTimeout(function(){
-  zoneMap = L.map('zoneMap', {zoomControl: true, attributionControl: false}).setView([zoneLat, zoneLng], 14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(zoneMap);
-  drawZoneOnMap(zoneLat, zoneLng, zoneRadius);
-  zoneMap.on('click', function(e){ drawZoneOnMap(e.latlng.lat, e.latlng.lng, zoneRadius); });
-}, 200);
-function drawZoneOnMap(lat, lng, radius){
-  zoneLat = lat; zoneLng = lng;
-  document.getElementById('zoneCoordsText').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
-  var icon = L.divIcon({html: '<div style="width:16px;height:16px;background:#7c3aed;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>', iconSize: [16, 16], className: ''});
-  if(zoneCenterMarker) zoneCenterMarker.setLatLng([lat, lng]);
-  else {
-    zoneCenterMarker = L.marker([lat, lng], {icon: icon, draggable: true}).addTo(zoneMap).bindPopup('📍 Zone Center');
-    zoneCenterMarker.on('dragend', function(e){ var p = e.target.getLatLng(); drawZoneOnMap(p.lat, p.lng, zoneRadius); });
-  }
-  if(zoneCircleLayer){ zoneCircleLayer.setLatLng([lat, lng]); zoneCircleLayer.setRadius(radius); }
-  else zoneCircleLayer = L.circle([lat, lng], {radius: radius, color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.12, weight: 2.5, dashArray: '6,4'}).addTo(zoneMap);
-  zoneMap.setView([lat, lng], 15);
-}
-function updateZoneRadius(val){
-  zoneRadius = Math.min(2000, Math.max(50, val));
-  document.getElementById('zoneRadiusSlider').value = zoneRadius;
-  document.getElementById('zoneRadiusDisplay').textContent = zoneRadius >= 1000 ? (zoneRadius / 1000).toFixed(1) + ' km' : zoneRadius + ' m';
-  if(zoneCircleLayer) zoneCircleLayer.setRadius(zoneRadius);
-}
-document.getElementById('zoneRadiusSlider').addEventListener('input', function(e){ updateZoneRadius(parseInt(e.target.value)); });
-document.getElementById('zoneRadiusUp').addEventListener('click', function(){ updateZoneRadius(zoneRadius + 50); });
-document.getElementById('zoneRadiusDown').addEventListener('click', function(){ updateZoneRadius(zoneRadius - 50); });
-document.getElementById('useMyLocZoneBtn').addEventListener('click', function(){
-  if(!navigator.geolocation){ alert('GPS not supported'); return; }
-  var btn = document.getElementById('useMyLocZoneBtn'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-  navigator.geolocation.getCurrentPosition(function(pos){
-    drawZoneOnMap(pos.coords.latitude, pos.coords.longitude, zoneRadius);
-    btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
-  }, function(){
-    btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location'; alert('Location denied');
-  }, {enableHighAccuracy: true});
-});
-document.getElementById('saveZoneBtn').addEventListener('click', function(){
-  if(!zoneCenterMarker){ alert('⚠️ Tap the map to set a center point first!'); return; }
-  var name = document.getElementById('zoneNameInput').value.trim() || 'Delivery Zone';
-  var btn = document.getElementById('saveZoneBtn'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; btn.disabled = true;
-  var data = {name: name, lat: zoneLat, lng: zoneLng, radius: zoneRadius, updatedAt: Date.now()};
-  if(editingZoneId){
-    db.ref('zones/' + editingZoneId).set(Object.assign({}, data, {id: editingZoneId}));
-    editingZoneId = null;
-  } else {
-    var nr = db.ref('zones').push(); nr.set(Object.assign({}, data, {id: nr.key}));
-  }
-  db.ref('settings/serviceRadius').set(zoneRadius);
-  db.ref('settings/zoneCenter').set({lat: zoneLat, lng: zoneLng});
-  document.getElementById('zoneNameInput').value = '';
-  btn.innerHTML = '<i class="fas fa-save"></i> Save Zone'; btn.disabled = false;
-  var m = document.getElementById('zoneSavedMsg'); m.classList.remove('hidden'); setTimeout(function(){m.classList.add('hidden');}, 3000);
-});
-db.ref('zones').on('value', function(snap){
-  var zones = snap.val() || {}, list = document.getElementById('savedZonesList'), keys = Object.keys(zones);
-  if(!keys.length){ list.innerHTML = '<p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p>'; return; }
-  list.innerHTML = '';
-  keys.forEach(function(id){
-    var z = zones[id], rD = z.radius >= 1000 ? (z.radius / 1000).toFixed(1) + ' km' : z.radius + ' m';
-    var card = document.createElement('div'); card.className = 'bg-purple-50 border border-purple-200 rounded-2xl p-3 flex items-center gap-3';
-    card.innerHTML = '<div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-lg shrink-0">📍</div>' +
-      '<div class="flex-1 min-w-0"><p class="font-black text-sm text-gray-800 truncate">' + z.name + '</p>' +
-      '<p class="text-[10px] text-gray-500 font-bold mt-0.5">Radius: <span class="text-purple-600">' + rD + '</span></p></div>' +
-      '<div class="flex gap-1.5 shrink-0">' +
-      '<button class="editZoneBtn w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="' + id + '"><i class="fas fa-edit"></i></button>' +
-      '<button class="delZoneBtn w-9 h-9 bg-red-100 text-red-500 rounded-xl flex items-center justify-center active:scale-90 text-xs" data-id="' + id + '"><i class="fas fa-trash"></i></button>' +
-      '</div>';
-    card.querySelector('.editZoneBtn').addEventListener('click', function(){
-      editingZoneId = id; document.getElementById('zoneNameInput').value = z.name;
-      updateZoneRadius(z.radius); drawZoneOnMap(z.lat, z.lng, z.radius);
-      document.getElementById('saveZoneBtn').innerHTML = '<i class="fas fa-edit"></i> Update Zone';
-      document.getElementById('saveZoneBtn').scrollIntoView({behavior: 'smooth', block: 'center'}); showToast('📝 Editing: ' + z.name, 'blue');
-    });
-    card.querySelector('.delZoneBtn').addEventListener('click', function(){
-      deleteZoneTargetId = id; document.getElementById('deleteZoneNameText').textContent = '"' + z.name + '"';
-      document.getElementById('deleteZoneModal').classList.remove('hidden');
-    });
-    list.appendChild(card);
-  });
-});
-document.getElementById('cancelDeleteZone').addEventListener('click', function(){ document.getElementById('deleteZoneModal').classList.add('hidden'); deleteZoneTargetId = null; });
-document.getElementById('confirmDeleteZone').addEventListener('click', function(){
-  if(!deleteZoneTargetId) return;
-  db.ref('zones/' + deleteZoneTargetId).remove();
-  document.getElementById('deleteZoneModal').classList.add('hidden'); deleteZoneTargetId = null; showToast('🗑️ Zone deleted', 'red');
-});
-/* DELIVERY PARTNERS & ACCOUNTS */
-document.getElementById('openAddBoyModal').addEventListener('click', function(){
-  document.getElementById('boyModalTitle').textContent = 'Add Delivery Partner';
-  document.getElementById('boyUsername').value = '';
-  document.getElementById('boyUsername').disabled = false;
-  document.getElementById('boyPassword').value = '';
-  document.getElementById('boyName').value = '';
-  document.getElementById('boyPhone').value = '';
-  document.getElementById('boyModal').classList.remove('hidden');
-});
-document.getElementById('closeBoyModal').addEventListener('click', function(){
-  document.getElementById('boyModal').classList.add('hidden');
-});
-document.getElementById('saveBoyBtn').addEventListener('click', function(){
-  var u = document.getElementById('boyUsername').value.trim().toLowerCase().replace(/\s/g, '');
-  var p = document.getElementById('boyPassword').value.trim();
-  var name = document.getElementById('boyName').value.trim();
-  var phone = document.getElementById('boyPhone').value.trim();
-  
-  if(!u || !p || !name){ alert('Please fill username, password, and name.'); return; }
-  
-  db.ref('deliveryAccounts/' + u).set({
-    username: u,
-    password: p,
-    name: name,
-    phone: phone,
-    active: true,
-    createdAt: Date.now()
-  }, function(err){
-    if(err){
-      showToast('❌ Failed to save partner', 'red');
-    } else {
-      showToast('✅ Delivery partner saved successfully!', 'green');
-      document.getElementById('boyModal').classList.add('hidden');
-      initAdminData();
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+
+  <script>
+    // Initialize Firebase (Replace with your own config if needed)
+    const firebaseConfig = {
+      databaseURL: "https://shirdi-project-default-rtdb.firebaseio.com/" // Update with your DB URL
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let activeResId = null;
+    let menuCache = {};
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.opacity = '1';
+      setTimeout(() => { t.style.opacity = '0'; }, 2000);
     }
-  });
-});
-function toggleBoyStatus(username, currentStatus){
-  db.ref('deliveryAccounts/' + username).update({ active: !currentStatus });
-  showToast('Partner status updated', 'blue');
-}
-function deleteBoy(username){
-  if(confirm('Are you sure you want to delete delivery partner @' + username + '?')) {
-    db.ref('deliveryAccounts/' + username).remove();
-    showToast('Partner deleted', 'red');
-  }
-}
-function initAdminData(){
-  db.ref('deliveryAccounts').on('value', function(snap){
-    var listEl = document.getElementById('deliveryPartnersList');
-    listEl.innerHTML = '';
-    activeDeliveryPartners = {};
-    
-    if(!snap.exists()){
-      listEl.innerHTML = '<p class="text-center text-gray-400 text-xs py-3">No delivery partners registered yet.</p>';
-      loadAdminOrders();
-      return;
-    }
-    
-    snap.forEach(function(child){
-      var boy = child.val();
-      var key = child.key;
-      if(boy.active !== false) {
-        activeDeliveryPartners[key] = boy.name || key;
-      }
+
+    // Add Hotel
+    function addHotel() {
+      const name = document.getElementById('newHotelName').value.trim();
+      const image = document.getElementById('newHotelImg').value.trim();
+      if (!name) { alert('Please enter a hotel name'); return; }
       
-      var dDiv = document.createElement('div');
-      dDiv.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-xl border text-xs';
-      dDiv.innerHTML = 
-        '<div>' +
-          '<p class="font-black text-gray-800">' + (boy.name || key) + ' <span class="text-[10px] text-gray-400 font-normal">(@' + key + ')</span></p>' +
-          '<p class="text-blue-600 font-bold mt-0.5">📞 ' + (boy.phone || 'No phone') + '</p>' +
-        '</div>' +
-        '<div class="flex items-center gap-2">' +
-          '<button onclick="toggleBoyStatus(\'' + key + '\', ' + (boy.active !== false) + ')" class="px-2.5 py-1 rounded-lg font-black ' + (boy.active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '">' + (boy.active !== false ? 'Active' : 'Disabled') + '</button>' +
-          '<button onclick="deleteBoy(\'' + key + '\')" class="text-gray-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>' +
-        '</div>';
-      listEl.appendChild(dDiv);
-    });
-    loadAdminOrders();
-  });
-}
-/* LIVE ORDERS & STATS */
-function loadAdminOrders(){
-  db.ref('orders').on('value', function(snap){
-    var ordersListEl = document.getElementById('adminOrdersList');
-    ordersListEl.innerHTML = '';
-    
-    var totalOrders = 0;
-    var totalRevenue = 0;
-    var activeCount = 0;
-    
-    if(!snap.exists()){
-      ordersListEl.innerHTML = '<p class="text-center text-gray-400 text-sm py-6">No orders found.</p>';
-      document.getElementById('statTotalOrders').textContent = '0';
-      document.getElementById('statTotalRevenue').textContent = '₹0';
-      document.getElementById('activeOrdersCount').textContent = '0 Active';
-      return;
-    }
-    
-    var orderKeys = [];
-    snap.forEach(function(child){
-      orderKeys.push({key: child.key, val: child.val()});
-    });
-    orderKeys.reverse();
-    
-    orderKeys.forEach(function(item){
-      var k = item.key;
-      var o = item.val;
-      
-      totalOrders++;
-      if(o.status !== 'cancelled') {
-        totalRevenue += parseFloat(o.totalAmount || 0);
-      }
-      if(o.status !== 'completed' && o.status !== 'settled' && o.status !== 'cancelled'){
-        activeCount++;
-      }
-      
-      var statusColor = o.status === 'completed' ? 'bg-green-100 text-green-700' : o.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700';
-      
-      var partnerOptions = '<option value="">-- Choose Delivery Partner --</option>';
-      for(var bKey in activeDeliveryPartners){
-        var isSelected = (o.assignedTo === bKey) ? 'selected' : '';
-        partnerOptions += '<option value="' + bKey + '" ' + isSelected + '>' + activeDeliveryPartners[bKey] + ' (@' + bKey + ')</option>';
-      }
-      
-      var oDiv = document.createElement('div');
-      oDiv.className = 'bg-white rounded-2xl border p-4 shadow-sm space-y-3';
-      oDiv.innerHTML = 
-        '<div class="flex justify-between items-start">' +
-          '<div>' +
-            '<p class="font-black text-gray-800 text-sm">' + (o.customerName || 'Customer') + ' <span class="text-xs font-normal text-gray-500">(' + (o.customerPhone || 'No phone') + ')</span></p>' +
-            '<p class="text-[10px] text-gray-400 mt-0.5">' + (o.items || 'No items description') + '</p>' +
-          '</div>' +
-          '<div class="text-right">' +
-            '<p class="font-black text-base text-gray-800">₹' + (o.totalAmount || 0) + '</p>' +
-            '<span class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase ' + statusColor + '">' + (o.status || 'pending') + '</span>' +
-          '</div>' +
-        '</div>' +
-        (o.address ? '<div class="bg-gray-50 p-2.5 rounded-xl text-xs text-gray-600">📍 ' + o.address + '</div>' : '') +
-        '<div class="border-t pt-2.5 flex flex-col sm:flex-row items-center justify-between gap-2">' +
-          '<div class="w-full sm:w-auto flex-1">' +
-            '<label class="text-[9px] font-black text-gray-400 uppercase block mb-1">Assign to Delivery Partner:</label>' +
-            '<select onchange="assignOrderToPartner(\'' + k + '\', this.value)" class="w-full text-xs font-bold border-2 rounded-xl p-2 bg-gray-50 focus:outline-none focus:border-blue-500">' +
-              partnerOptions +
-            '</select>' +
-          '</div>' +
-          '<div class="w-full sm:w-auto flex gap-2 justify-end mt-2 sm:mt-0">' +
-            '<button onclick="updateOrderStatus(\'' + k + '\', \'cancelled\')" class="px-3 py-2 bg-red-50 text-red-600 rounded-xl font-black text-xs uppercase">Cancel</button>' +
-          '</div>' +
-        '</div>';
-      ordersListEl.appendChild(oDiv);
-    });
-    
-    document.getElementById('statTotalOrders').textContent = totalOrders;
-    document.getElementById('statTotalRevenue').textContent = '₹' + totalRevenue;
-    document.getElementById('activeOrdersCount').textContent = activeCount + ' Active';
-  });
-}
-function assignOrderToPartner(orderKey, boyUsername){
-  if(!boyUsername){
-    db.ref('orders/' + orderKey).update({ assignedTo: null, assignedName: null, assignedPhone: null });
-    showToast('Order unassigned', 'blue');
-    return;
-  }
-  db.ref('deliveryAccounts/' + boyUsername).once('value', function(snap){
-    if(!snap.exists()) return;
-    var boy = snap.val();
-    db.ref('orders/' + orderKey).update({
-      assignedTo: boyUsername,
-      assignedName: boy.name || boyUsername,
-      assignedPhone: boy.phone || '',
-      status: 'out_for_delivery'
-    }, function(err){
-      if(!err) showToast('✅ Order assigned successfully!', 'green');
-    });
-  });
-}
-function updateOrderStatus(orderKey, status){
-  if(!confirm('Mark order as ' + status + '?')) return;
-  db.ref('orders/' + orderKey).update({ status: status }, function(err){
-    if(!err) showToast('Order status updated', 'blue');
-  });
-}
-/* HOTEL & MENU MANAGEMENT */
-var activeResId = null, editKey = null, menuCache = {};
-db.ref('restaurants').on('value', function(snap){
-  var list = document.getElementById('hotelList'); list.innerHTML = '';
-  if(!snap.exists()){ list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No hotels yet.</p>'; return; }
-  snap.forEach(function(child){
-    var r = child.val(), hid = child.key, cnt = r.menu ? Object.keys(r.menu).length : 0;
-    var div = document.createElement('div'); div.className = 'p-4 bg-white rounded-2xl shadow border';
-    div.innerHTML = '<div class="flex items-center gap-3 mb-3">' +
-      '<img src="' + (r.image || '') + '" onerror="this.src=\'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400\'" class="w-14 h-14 rounded-xl object-cover flex-shrink-0"/>' +
-      '<div><p class="font-black text-sm text-red-600 uppercase">' + r.name + '</p><p class="text-xs text-gray-400">' + cnt + ' dish' + (cnt !== 1 ? 'es' : '') + '</p></div></div>' +
-      '<button data-hid="' + hid + '" data-hname="' + r.name + '" class="openMenu w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 mb-2">🍽️ Manage Menu</button>' +
-      '<button data-hid="' + hid + '" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>';
-    list.appendChild(div);
-  });
-  document.querySelectorAll('.openMenu').forEach(function(btn){ btn.addEventListener('click', function(){ openMenuModal(btn.dataset.hid, btn.dataset.hname); }); });
-  document.querySelectorAll('.delHotel').forEach(function(btn){ btn.addEventListener('click', function(){ if(confirm('Delete hotel and all menu items?')) db.ref('restaurants/' + btn.dataset.hid).remove(); }); });
-});
-window.addRestaurant = function(){
-  var name = document.getElementById('resName').value.trim(); if(!name){ alert('Please enter hotel name!'); return; }
-  var image = document.getElementById('resImg').value.trim() || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
-  db.ref('restaurants').push({name: name, image: image});
-  document.getElementById('resName').value = ''; document.getElementById('resImg').value = '';
-};
-function openMenuModal(resId, resName){
-  activeResId = resId; editKey = null;
-  document.getElementById('menuModalTitle').textContent = '🍽️ ' + resName;
-  document.getElementById('menuModal').classList.remove('hidden'); loadMenuList();
-}
-window.closeMenuModal = function(){ document.getElementById('menuModal').classList.add('hidden'); activeResId = null; };
-function loadMenuList(){
-  var list = document.getElementById('menuList');
-  list.innerHTML = '<p class="text-center text-gray-300 text-xs py-6">Loading…</p>';
-  db.ref('restaurants/' + activeResId + '/menu').once('value', function(snap){
-    menuCache = {}; list.innerHTML = '';
-    if(!snap.exists()){ list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No dishes yet.</p>'; return; }
-    snap.forEach(function(child){
-      var m = child.val(), key = child.key; menuCache[key] = m;
-      var isOos = !!m.outOfStock;
-      var row = document.createElement('div'); row.className = 'bg-gray-50 rounded-2xl p-3 border space-y-2';
-      row.innerHTML = '<div class="flex items-center gap-3">' +
-        '<img src="' + (m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200') + '" onerror="this.src=\'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200\'" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" style="' + (isOos ? 'filter:grayscale(70%)' : '') + '"/>' +
-        '<div class="flex-1 min-w-0">' +
-          '<p class="font-black text-sm text-gray-800">' + m.dish + '</p>' +
-          '<p class="text-red-600 font-bold text-sm">₹' + m.price + '</p>' +
-          '<div class="flex items-center gap-2 mt-1.5">' +
-            '<div class="oos-toggle ' + (isOos ? 'oos-on' : 'oos-off') + '" data-key="' + key + '" title="Toggle stock"><div class="knob"></div></div>' +
-            '<span class="oos-label text-[10px] font-black ' + (isOos ? 'text-red-600' : 'text-green-600') + '">' + (isOos ? '🚫 Out of Stock' : '✅ Available') + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="flex flex-col gap-1.5 shrink-0">' +
-          '<button data-key="' + key + '" class="editBtn bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">✏️ Edit</button>' +
-          '<button data-key="' + key + '" class="delBtn bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase">🗑️ Del</button>' +
-        '</div>' +
-      '</div>';
-      row.querySelector('.oos-toggle').addEventListener('click', function(){
-        var newOos = !this.classList.contains('oos-on');
-        this.classList.toggle('oos-on', newOos); this.classList.toggle('oos-off', !newOos);
-        var label = row.querySelector('.oos-label');
-        label.textContent = newOos ? '🚫 Out of Stock' : '✅ Available';
-        label.className = 'oos-label text-[10px] font-black ' + (newOos ? 'text-red-600' : 'text-green-600');
-        row.querySelector('img').style.filter = newOos ? 'grayscale(70%)' : '';
-        db.ref('restaurants/' + activeResId + '/menu/' + this.dataset.key + '/outOfStock').set(newOos);
-        menuCache[this.dataset.key].outOfStock = newOos;
-        showToast(newOos ? '🚫 Marked Out of Stock' : '✅ Marked Available', 'blue');
+      db.ref('restaurants').once('value', function(snap) {
+        const count = snap.numChildren();
+        db.ref('restaurants').push({
+          name: name,
+          image: image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400',
+          order: count
+        }, function(error) {
+          if (!error) {
+            document.getElementById('newHotelName').value = '';
+            document.getElementById('newHotelImg').value = '';
+            showToast('✅ Hotel Added Successfully');
+          }
+        });
       });
-      row.querySelector('.editBtn').addEventListener('click', function(){ openItemForm(this.dataset.key); });
-      row.querySelector('.delBtn').addEventListener('click', function(){
-        if(!confirm('Delete this dish?')) return;
-        db.ref('restaurants/' + activeResId + '/menu/' + this.dataset.key).remove(); loadMenuList();
+    }
+
+    // Load & Render Hotels with Up/Down Buttons
+    db.ref('restaurants').on('value', function(snap) {
+      const list = document.getElementById('hotelList'); list.innerHTML = '';
+      if (!snap.exists()) { list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No hotels yet.</p>'; return; }
+      
+      let hotels = [];
+      snap.forEach(function(child) {
+        let r = child.val(); r.id = child.key;
+        if (r.order === undefined) r.order = 0;
+        hotels.push(r);
       });
-      list.appendChild(row);
+      hotels.sort((a, b) => a.order - b.order);
+
+      hotels.forEach((r, index) => {
+        let hid = r.id, cnt = r.menu ? Object.keys(r.menu).length : 0;
+        let div = document.createElement('div');
+        div.className = 'p-4 bg-white rounded-2xl shadow border space-y-3';
+        div.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="${r.image || ''}" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'" class="w-14 h-14 rounded-xl object-cover flex-shrink-0"/>
+              <div class="min-w-0">
+                <p class="font-black text-sm text-red-600 uppercase truncate">${r.name}</p>
+                <p class="text-xs text-gray-400">${cnt} dish${cnt !== 1 ? 'es' : ''}</p>
+              </div>
+            </div>
+            <!-- Hotel Up/Down Buttons -->
+            <div class="flex flex-col gap-1 shrink-0">
+              <button onclick="moveHotel('${hid}', -1)" ${index === 0 ? 'disabled class="w-8 h-8 bg-gray-100 text-gray-300 rounded-lg flex items-center justify-center text-xs"' : 'class="w-8 h-8 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center text-xs active:scale-95"'}>▲</button>
+              <button onclick="moveHotel('${hid}', 1)" ${index === hotels.length - 1 ? 'disabled class="w-8 h-8 bg-gray-100 text-gray-300 rounded-lg flex items-center justify-center text-xs"' : 'class="w-8 h-8 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center text-xs active:scale-95"'}>▼</button>
+            </div>
+          </div>
+          <button data-hid="${hid}" data-hname="${r.name}" class="openMenu w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95">🍽️ Manage Menu</button>
+          <button data-hid="${hid}" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>
+        `;
+        list.appendChild(div);
+      });
+
+      document.querySelectorAll('.openMenu').forEach(btn => {
+        btn.addEventListener('click', () => openMenuModal(btn.dataset.hid, btn.dataset.hname));
+      });
+      document.querySelectorAll('.delHotel').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm('Delete this hotel and all its menu items?')) db.ref('restaurants/' + btn.dataset.hid).remove();
+        });
+      });
     });
-  });
-}
-window.openItemForm = function(key){
-  editKey = key; ['fDish', 'fPrice', 'fImg'].forEach(function(id){ document.getElementById(id).value = ''; });
-  document.getElementById('previewWrap').classList.add('hidden');
-  if(key && menuCache[key]){
-    var m = menuCache[key];
-    document.getElementById('itemModalTitle').textContent = '✏️ Edit Dish'; document.getElementById('itemSaveBtn').textContent = '✅ Update Dish';
-    document.getElementById('fDish').value = m.dish || ''; document.getElementById('fPrice').value = m.price || ''; document.getElementById('fImg').value = m.dishImg || '';
-    if(m.dishImg){ document.getElementById('previewImgEl').src = m.dishImg; document.getElementById('previewWrap').classList.remove('hidden'); }
-  } else {
-    document.getElementById('itemModalTitle').textContent = '➕ Add New Dish'; document.getElementById('itemSaveBtn').textContent = '💾 Save Dish';
-  }
-  document.getElementById('itemModal').classList.remove('hidden');
-};
-window.closeItemModal = function(){ document.getElementById('itemModal').classList.add('hidden'); editKey = null; };
-window.previewImg = function(){
-  var url = document.getElementById('fImg').value.trim(); if(!url){ alert('Enter image URL first!'); return; }
-  document.getElementById('previewImgEl').src = url; document.getElementById('previewWrap').classList.remove('hidden');
-};
-window.saveItem = function(){
-  var dish = document.getElementById('fDish').value.trim(), price = parseFloat(document.getElementById('fPrice').value);
-  var img = document.getElementById('fImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-  if(!dish){ alert('⚠️ Dish name required!'); return; } if(!price || isNaN(price)){ alert('⚠️ Enter valid price!'); return; }
-  if(!activeResId){ alert('Error: no restaurant selected.'); return; }
-  var existOos = editKey && menuCache[editKey] ? (menuCache[editKey].outOfStock || false) : false;
-  var data = {dish: dish, price: price, dishImg: img, outOfStock: existOos};
-  if(editKey) db.ref('restaurants/' + activeResId + '/menu/' + editKey).set(data);
-  else db.ref('restaurants/' + activeResId + '/menu').push(data);
-  window.closeItemModal(); loadMenuList();
-};
-/* Initial Launch Call */
-initAdminData();
-</script>
+
+    // Move Hotel Helper
+    window.moveHotel = function(hid, direction) {
+      db.ref('restaurants').once('value', function(snap) {
+        let hotels = [];
+        snap.forEach(child => {
+          let h = child.val(); h.id = child.key; if (h.order === undefined) h.order = 0;
+          hotels.push(h);
+        });
+        hotels.sort((a, b) => a.order - b.order);
+        let idx = hotels.findIndex(h => h.id === hid);
+        if (idx < 0) return;
+        let targetIdx = idx + direction;
+        if (targetIdx < 0 || targetIdx >= hotels.length) return;
+
+        let temp = hotels[idx].order;
+        hotels[idx].order = hotels[targetIdx].order;
+        hotels[targetIdx].order = temp;
+        if (hotels[idx].order === hotels[targetIdx].order) {
+          hotels[idx].order = idx + direction;
+          hotels[targetIdx].order = idx;
+        }
+
+        let updates = {};
+        updates[hotels[idx].id + '/order'] = hotels[idx].order;
+        updates[hotels[targetIdx].id + '/order'] = hotels[targetIdx].order;
+        db.ref('restaurants').update(updates);
+      });
+    };
+
+    // Modal Control
+    function openMenuModal(hid, hname) {
+      activeResId = hid;
+      document.getElementById('modalHotelTitle').textContent = hname;
+      document.getElementById('menuModal').classList.remove('hidden');
+      clearDishForm();
+      loadMenuList();
+    }
+
+    function closeMenuModal() {
+      document.getElementById('menuModal').classList.add('hidden');
+      activeResId = null;
+    }
+
+    function clearDishForm() {
+      document.getElementById('editDishKey').value = '';
+      document.getElementById('dishName').value = '';
+      document.getElementById('dishPrice').value = '';
+      document.getElementById('dishImg').value = '';
+      document.getElementById('saveDishBtn').textContent = '➕ Save Dish';
+    }
+
+    // Load Menu List for Active Hotel with Up/Down Buttons
+    function loadMenuList() {
+      if (!activeResId) return;
+      const list = document.getElementById('menuList');
+      list.innerHTML = '<p class="text-center text-gray-300 text-xs py-6">Loading dishes...</p>';
+      
+      db.ref('restaurants/' + activeResId + '/menu').once('value', function(snap) {
+        menuCache = {}; list.innerHTML = '';
+        if (!snap.exists()) { list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No dishes yet.</p>'; return; }
+        
+        let items = [];
+        snap.forEach(child => {
+          let m = child.val(); m.id = child.key; if (m.order === undefined) m.order = 0;
+          items.push(m);
+        });
+        items.sort((a, b) => a.order - b.order);
+
+        items.forEach((m, index) => {
+          let key = m.id; menuCache[key] = m;
+          let isOos = !!m.outOfStock;
+          let row = document.createElement('div');
+          row.className = 'bg-gray-50 rounded-2xl p-3 border flex items-center gap-3';
+          row.innerHTML = `
+            <!-- Menu Item Up/Down Buttons -->
+            <div class="flex flex-col gap-1 shrink-0">
+              <button onclick="moveMenuItem('${key}', -1)" ${index === 0 ? 'disabled class="w-7 h-7 bg-gray-200 text-gray-300 rounded-lg flex items-center justify-center text-[10px]"' : 'class="w-7 h-7 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center text-[10px] active:scale-95"'}>▲</button>
+              <button onclick="moveMenuItem('${key}', 1)" ${index === items.length - 1 ? 'disabled class="w-7 h-7 bg-gray-200 text-gray-300 rounded-lg flex items-center justify-center text-[10px]"' : 'class="w-7 h-7 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center text-[10px] active:scale-95"'}>▼</button>
+            </div>
+            <img src="${m.dishImg || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" style="${isOos ? 'filter:grayscale(70%)' : ''}"/>
+            <div class="flex-1 min-w-0">
+              <p class="font-black text-sm text-gray-800 truncate">${m.dish}</p>
+              <p class="text-red-600 font-bold text-xs">₹${m.price}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="oos-toggle ${isOos ? 'oos-on' : 'oos-off'}" data-key="${key}"><div class="knob"></div></div>
+                <span class="oos-label text-[9px] font-black ${isOos ? 'text-red-600' : 'text-green-600'}">${isOos ? '🚫 Out of Stock' : '✅ Available'}</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1 shrink-0">
+              <button data-key="${key}" class="editBtn bg-blue-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase">✏️ Edit</button>
+              <button data-key="${key}" class="delBtn bg-red-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase">🗑️ Del</button>
+            </div>
+          `;
+
+          row.querySelector('.oos-toggle').addEventListener('click', function() {
+            let newOos = !this.classList.contains('oos-on');
+            this.classList.toggle('oos-on', newOos); this.classList.toggle('oos-off', !newOos);
+            let label = row.querySelector('.oos-label');
+            label.textContent = newOos ? '🚫 Out of Stock' : '✅ Available';
+            label.className = 'oos-label text-[9px] font-black ' + (newOos ? 'text-red-600' : 'text-green-600');
+            row.querySelector('img').style.filter = newOos ? 'grayscale(70%)' : '';
+            db.ref('restaurants/' + activeResId + '/menu/' + this.dataset.key + '/outOfStock').set(newOos);
+            menuCache[this.dataset.key].outOfStock = newOos;
+            showToast(newOos ? '🚫 Marked Out of Stock' : '✅ Marked Available');
+          });
+
+          row.querySelector('.editBtn').addEventListener('click', function() {
+            let k = this.dataset.key, item = menuCache[k];
+            document.getElementById('editDishKey').value = k;
+            document.getElementById('dishName').value = item.dish;
+            document.getElementById('dishPrice').value = item.price;
+            document.getElementById('dishImg').value = item.dishImg || '';
+            document.getElementById('saveDishBtn').textContent = '💾 Update Dish';
+          });
+
+          row.querySelector('.delBtn').addEventListener('click', function() {
+            if (!confirm('Delete this dish?')) return;
+            db.ref('restaurants/' + activeResId + '/menu/' + this.dataset.key).remove();
+            loadMenuList();
+          });
+
+          list.appendChild(row);
+        });
+      });
+    }
+
+    // Move Menu Item Helper
+    window.moveMenuItem = function(itemId, direction) {
+      if (!activeResId) return;
+      db.ref('restaurants/' + activeResId + '/menu').once('value', function(snap) {
+        let items = [];
+        snap.forEach(child => {
+          let item = child.val(); item.id = child.key; if (item.order === undefined) item.order = 0;
+          items.push(item);
+        });
+        items.sort((a, b) => a.order - b.order);
+        let idx = items.findIndex(i => i.id === itemId);
+        if (idx < 0) return;
+        let targetIdx = idx + direction;
+        if (targetIdx < 0 || targetIdx >= items.length) return;
+
+        let temp = items[idx].order;
+        items[idx].order = items[targetIdx].order;
+        items[targetIdx].order = temp;
+        if (items[idx].order === items[targetIdx].order) {
+          items[idx].order = idx + direction;
+          items[targetIdx].order = idx;
+        }
+
+        let updates = {};
+        updates[items[idx].id + '/order'] = items[idx].order;
+        updates[items[targetIdx].id + '/order'] = items[targetIdx].order;
+        db.ref('restaurants/' + activeResId + '/menu').update(updates, function() {
+          loadMenuList();
+        });
+      });
+    };
+
+    // Save / Update Dish
+    function saveDish() {
+      if (!activeResId) return;
+      let key = document.getElementById('editDishKey').value;
+      let name = document.getElementById('dishName').value.trim();
+      let price = parseFloat(document.getElementById('dishPrice').value);
+      let img = document.getElementById('dishImg').value.trim();
+
+      if (!name || isNaN(price)) { alert('Please enter valid dish name and price'); return; }
+
+      if (key) {
+        db.ref('restaurants/' + activeResId + '/menu/' + key).update({ dish: name, price: price, dishImg: img }, function() {
+          clearDishForm(); loadMenuList(); showToast('✅ Dish Updated');
+        });
+      } else {
+        db.ref('restaurants/' + activeResId + '/menu').once('value', function(snap) {
+          let count = snap.numChildren();
+          let newRef = db.ref('restaurants/' + activeResId + '/menu').push();
+          newRef.set({ dish: name, price: price, dishImg: img, outOfStock: false, order: count }, function() {
+            clearDishForm(); loadMenuList(); showToast('✅ Dish Added');
+          });
+        });
+      }
+    }
+  </script>
 </body>
 </html>
