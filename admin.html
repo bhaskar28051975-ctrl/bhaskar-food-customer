@@ -129,7 +129,7 @@
       <div id="savedZonesList" class="space-y-2"><p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p></div>
     </div>
   </div>
-  <!-- HOTELS & MENUS SECTION (ABOVE ORDERS) -->
+  <!-- HOTELS & MENUS SECTION -->
   <div class="space-y-3">
     <div class="flex justify-between items-center ml-1">
       <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-2">🏨 Hotels & Menus</p>
@@ -137,7 +137,7 @@
     </div>
     <div id="hotelList" class="space-y-4"></div>
   </div>
-  <!-- DELIVERY PARTNERS SECTION (ABOVE ORDERS) -->
+  <!-- DELIVERY PARTNERS SECTION -->
   <div class="bg-white rounded-[2rem] border shadow-sm p-5 space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="font-black text-gray-800 text-sm uppercase">🛵 Delivery Partners</h2>
@@ -147,7 +147,7 @@
       <p class="text-center text-gray-400 text-xs py-3">Loading partners...</p>
     </div>
   </div>
-  <!-- LIVE ORDERS & ASSIGNMENTS (NOW BELOW HOTELS & PARTNERS) -->
+  <!-- LIVE ORDERS & ASSIGNMENTS -->
   <div class="space-y-3">
     <div class="flex justify-between items-center ml-1">
       <h2 class="font-black text-gray-700 text-xs uppercase tracking-widest">📦 Incoming & Active Orders</h2>
@@ -176,14 +176,15 @@
 </div>
 <!-- ADD/EDIT ITEM MODAL -->
 <div id="itemModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col" style="max-height:85vh;">
+  <!-- FIX APPLIED: Flex column layout with explicit max height and safe padding to ensure button is never cut off -->
+  <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col max-h-[75vh]">
     <!-- Modal Header -->
-    <div class="flex justify-between items-center p-5 border-b sticky top-0 bg-white rounded-t-3xl z-10">
+    <div class="flex justify-between items-center p-4 border-b bg-white rounded-t-3xl shrink-0">
       <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
       <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none">✕</button>
     </div>
     <!-- Scrollable Form Inputs Container -->
-    <div class="p-6 space-y-4 overflow-y-auto flex-1">
+    <div class="p-5 space-y-3 overflow-y-auto flex-1">
       <div>
         <label class="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Dish Name *</label>
         <input id="fDish" type="text" placeholder="e.g. Paneer Tikka" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
@@ -197,11 +198,11 @@
         <input id="fImg" type="text" placeholder="https://..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:outline-none focus:border-red-400"/>
         <button onclick="previewImg()" class="mt-1 text-[10px] text-red-500 font-bold underline">Preview Image</button>
       </div>
-      <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-36 object-cover"/></div>
+      <div id="previewWrap" class="hidden rounded-xl overflow-hidden border"><img id="previewImgEl" src="" class="w-full h-32 object-cover"/></div>
     </div>
     <!-- Sticky Footer Button -->
-    <div class="p-4 border-t bg-white sticky bottom-0 z-10">
-      <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase shadow active:scale-95">💾 Save Dish</button>
+    <div class="p-4 border-t bg-white shrink-0 pb-safe">
+      <button id="itemSaveBtn" onclick="saveItem()" class="w-full bg-red-600 text-white py-3.5 rounded-xl font-black uppercase shadow active:scale-95 text-sm">💾 Save Dish</button>
     </div>
   </div>
 </div>
@@ -588,7 +589,6 @@ db.ref('restaurants').on('value', function(snap){
     hotels.push({id: child.key, val: child.val()});
   });
   
-  // Sort by order property
   hotels.sort(function(a, b){
     var ordA = a.val.order !== undefined ? a.val.order : 0;
     var ordB = b.val.order !== undefined ? b.val.order : 0;
@@ -609,7 +609,6 @@ db.ref('restaurants').on('value', function(snap){
       '<button data-hid="' + hid + '" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>';
     list.appendChild(div);
   });
-  // Attach event listeners for reordering hotels
   list.querySelectorAll('.moveHotelUp').forEach(function(btn){
     btn.addEventListener('click', function(){
       var idx = parseInt(btn.dataset.index);
@@ -667,11 +666,6 @@ function loadMenuList(){
       var ordB = b.val.order !== undefined ? b.val.order : 0;
       return ordA - ordB;
     });
-    dishes.sort(function(a, b){
-      var ordA = a.val.order !== undefined ? a.val.order : 0;
-      var ordB = b.val.order !== undefined ? b.val.order : 0;
-      return ordA - ordB;
-    });
     dishes.forEach(function(item, index){
       var m = item.val, key = item.key; menuCache[key] = m;
       var isOos = !!m.outOfStock;
@@ -714,7 +708,6 @@ function loadMenuList(){
       });
       list.appendChild(row);
     });
-    // Attach event listeners for reordering menu items
     list.querySelectorAll('.moveMenuUp').forEach(function(btn){
       btn.addEventListener('click', function(){
         var idx = parseInt(btn.dataset.index);
@@ -777,7 +770,6 @@ window.saveItem = function(){
   }
   window.closeItemModal(); loadMenuList();
 };
-/* Initial Launch Call */
 initAdminData();
 </script>
 </body>
