@@ -175,8 +175,8 @@
   </div>
 </div>
 <!-- ADD/EDIT ITEM MODAL -->
-<div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 pb-28 space-y-4" style="max-height:85vh;overflow-y:auto">
-  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" style="max-height:88vh;overflow-y:auto">
+<div id="itemModal" class="overlay fixed inset-0 z-50 hidden flex items-end justify-center">
+  <div class="sheet bg-white w-full max-w-md rounded-t-3xl p-6 pb-28 space-y-4" style="max-height:88vh;overflow-y:auto">
     <div class="flex justify-between items-center">
       <h3 id="itemModalTitle" class="font-black text-gray-800 text-sm uppercase">Add Dish</h3>
       <button onclick="closeItemModal()" class="text-gray-400 text-2xl leading-none">✕</button>
@@ -747,8 +747,6 @@ window.previewImg = function(){
   var url = document.getElementById('fImg').value.trim(); if(!url){ alert('Enter image URL first!'); return; }
   document.getElementById('previewImgEl').src = url; document.getElementById('previewWrap').classList.remove('hidden');
 };
-
-// FIXED: Explicitly attached saveItem to the window global scope
 window.saveItem = function(){
   var dish = document.getElementById('fDish').value.trim(), price = parseFloat(document.getElementById('fPrice').value);
   var img = document.getElementById('fImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
@@ -764,7 +762,6 @@ window.saveItem = function(){
   }
   window.closeItemModal(); loadMenuList();
 };
-
 /* Initial Launch Call */
 initAdminData();
 </script>
