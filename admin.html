@@ -129,7 +129,7 @@
       <div id="savedZonesList" class="space-y-2"><p class="text-xs text-gray-400 text-center py-3 font-bold">No zones saved yet</p></div>
     </div>
   </div>
-  <!-- HOTELS & MENUS SECTION (ABOVE ORDERS) -->
+  <!-- HOTELS & MENUS SECTION -->
   <div class="space-y-3">
     <div class="flex justify-between items-center ml-1">
       <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-2">🏨 Hotels & Menus</p>
@@ -137,7 +137,7 @@
     </div>
     <div id="hotelList" class="space-y-4"></div>
   </div>
-  <!-- DELIVERY PARTNERS SECTION (ABOVE ORDERS) -->
+  <!-- DELIVERY PARTNERS SECTION -->
   <div class="bg-white rounded-[2rem] border shadow-sm p-5 space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="font-black text-gray-800 text-sm uppercase">🛵 Delivery Partners</h2>
@@ -147,7 +147,7 @@
       <p class="text-center text-gray-400 text-xs py-3">Loading partners...</p>
     </div>
   </div>
-  <!-- LIVE ORDERS & ASSIGNMENTS (NOW BELOW HOTELS & PARTNERS) -->
+  <!-- LIVE ORDERS & ASSIGNMENTS -->
   <div class="space-y-3">
     <div class="flex justify-between items-center ml-1">
       <h2 class="font-black text-gray-700 text-xs uppercase tracking-widest">📦 Incoming & Active Orders</h2>
@@ -158,6 +158,28 @@
     </div>
   </div>
 </div>
+
+<!-- HOTEL IMAGE EDIT MODAL -->
+<div id="hotelImgModal" class="overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="sheet bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="font-black text-gray-800 text-sm uppercase">🖼️ Edit Hotel Image</h3>
+      <button onclick="closeHotelImgModal()" class="text-gray-400 text-xl leading-none">✕</button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-[10px] font-black text-gray-400 uppercase">New Image URL *</label>
+        <input id="editHotelImgUrl" type="text" placeholder="https://..." class="w-full p-3 border-2 rounded-xl bg-gray-50 font-bold text-sm mt-1 focus:outline-none focus:border-red-500"/>
+      </div>
+      <div id="hotelImgPreviewWrap" class="hidden rounded-xl overflow-hidden border">
+        <img id="hotelImgPreviewEl" src="" class="w-full h-36 object-cover"/>
+      </div>
+      <button onclick="previewHotelImg()" class="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-bold text-xs uppercase">Preview Image</button>
+      <button id="saveHotelImgBtn" class="w-full bg-red-600 text-white py-3.5 rounded-xl font-black text-sm uppercase shadow-md active:scale-95">💾 Save Hotel Image</button>
+    </div>
+  </div>
+</div>
+
 <!-- MENU MODAL -->
 <div id="menuModal" class="overlay fixed inset-0 z-40 hidden flex items-end justify-center">
   <div class="sheet bg-white w-full max-w-md rounded-t-3xl flex flex-col" style="max-height:88vh">
@@ -261,6 +283,8 @@ firebase.initializeApp({
 });
 var db = firebase.database();
 var activeDeliveryPartners = {};
+var editingHotelId = null;
+
 function showToast(msg, color){
   var t = document.getElementById('adminBanner');
   t.textContent = msg;
@@ -385,6 +409,42 @@ document.getElementById('confirmDeleteZone').addEventListener('click', function(
   db.ref('zones/' + deleteZoneTargetId).remove();
   document.getElementById('deleteZoneModal').classList.add('hidden'); deleteZoneTargetId = null; showToast('🗑️ Zone deleted', 'red');
 });
+
+/* HOTEL IMAGE EDIT FUNCTIONS */
+function openHotelImgModal(hid, currentImg) {
+  editingHotelId = hid;
+  document.getElementById('editHotelImgUrl').value = currentImg || '';
+  if (currentImg) {
+    document.getElementById('hotelImgPreviewEl').src = currentImg;
+    document.getElementById('hotelImgPreviewWrap').classList.remove('hidden');
+  } else {
+    document.getElementById('hotelImgPreviewWrap').classList.add('hidden');
+  }
+  document.getElementById('hotelImgModal').classList.remove('hidden');
+}
+function closeHotelImgModal() {
+  document.getElementById('hotelImgModal').classList.add('hidden');
+  editingHotelId = null;
+}
+function previewHotelImg() {
+  var url = document.getElementById('editHotelImgUrl').value.trim();
+  if (!url) { alert('Enter an image URL first!'); return; }
+  document.getElementById('hotelImgPreviewEl').src = url;
+  document.getElementById('hotelImgPreviewWrap').classList.remove('hidden');
+}
+document.getElementById('saveHotelImgBtn').addEventListener('click', function(){
+  if (!editingHotelId) return;
+  var newImg = document.getElementById('editHotelImgUrl').value.trim() || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
+  db.ref('restaurants/' + editingHotelId).update({ image: newImg }, function(err){
+    if (err) {
+      showToast('❌ Failed to update hotel image', 'red');
+    } else {
+      showToast('✅ Hotel image updated successfully!', 'green');
+      closeHotelImgModal();
+    }
+  });
+});
+
 /* DELIVERY PARTNERS & ACCOUNTS */
 document.getElementById('openAddBoyModal').addEventListener('click', function(){
   document.getElementById('boyModalTitle').textContent = 'Add Delivery Partner';
@@ -597,8 +657,11 @@ db.ref('restaurants').on('value', function(snap){
         '<button data-index="' + index + '" class="moveHotelDown bg-gray-100 hover:bg-gray-200 text-gray-700 w-8 h-8 rounded-lg font-black text-xs flex items-center justify-center ' + (index === hotels.length - 1 ? 'opacity-35 cursor-not-allowed' : '') + '">▼</button>' +
       '</div>' +
       '</div>' +
-      '<button data-hid="' + hid + '" data-hname="' + r.name + '" class="openMenu w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase shadow active:scale-95 mb-2">🍽️ Manage Menu</button>' +
-      '<button data-hid="' + hid + '" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline">🗑️ Remove Hotel</button>';
+      '<div class="grid grid-cols-2 gap-2">' +
+        '<button data-hid="' + hid + '" data-hname="' + r.name + '" class="openMenu bg-blue-600 text-white py-2.5 rounded-xl font-black text-xs uppercase shadow active:scale-95">🍽️ Menu</button>' +
+        '<button onclick="openHotelImgModal(\'' + hid + '\', \'' + (r.image || '') + '\')" class="bg-purple-100 text-purple-700 py-2.5 rounded-xl font-black text-xs uppercase active:scale-95">🖼️ Edit Image</button>' +
+      '</div>' +
+      '<button data-hid="' + hid + '" class="delHotel w-full text-gray-400 text-[9px] font-bold uppercase underline pt-1">🗑️ Remove Hotel</button>';
     list.appendChild(div);
   });
   list.querySelectorAll('.moveHotelUp').forEach(function(btn){
@@ -750,19 +813,19 @@ window.previewImg = function(){
 window.saveItem = function(){
   var dish = document.getElementById('fDish').value.trim(), price = parseFloat(document.getElementById('fPrice').value);
   var img = document.getElementById('fImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-  if(!dish){ alert('⚠️ Dish name required!'); return; } if(!price || isNaN(price)){ alert('⚠️ Enter valid price!'); return; }
-  if(!activeResId){ alert('Error: no restaurant selected.'); return; }
-  var existOos = editKey && menuCache[editKey] ? (menuCache[editKey].outOfStock || false) : false;
-  var data = {dish: dish, price: price, dishImg: img, outOfStock: existOos};
-  if(editKey) {
-    db.ref('restaurants/' + activeResId + '/menu/' + editKey).update(data);
+  if(!dish){ alert('⚠️ Dish name required!'); return; } if(!price || isNaN(price)){ alert('⚠️ Valid price required!'); return; }
+  var menuRef = db.ref('restaurants/' + activeResId + '/menu');
+  if(editKey){
+    menuRef.child(editKey).update({dish: dish, price: price, dishImg: img}, function(err){
+      if(!err){ showToast('✅ Dish updated!', 'green'); closeItemModal(); loadMenuList(); }
+    });
   } else {
-    data.order = Date.now();
-    db.ref('restaurants/' + activeResId + '/menu').push(data);
+    var newRef = menuRef.push();
+    newRef.set({dish: dish, price: price, dishImg: img, outOfStock: false, order: Date.now()}, function(err){
+      if(!err){ showToast('✅ Dish added!', 'green'); closeItemModal(); loadMenuList(); }
+    });
   }
-  window.closeItemModal(); loadMenuList();
 };
-/* Initial Launch Call */
 initAdminData();
 </script>
 </body>
