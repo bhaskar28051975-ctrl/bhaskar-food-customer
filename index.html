@@ -208,7 +208,7 @@ var shareModal = document.getElementById('share-modal');
 document.getElementById('shareAppBtn').addEventListener('click', function(){ document.getElementById('sharePhone').value = ''; shareModal.classList.remove('hidden'); });
 document.getElementById('closeShareBtn').addEventListener('click', function(){ shareModal.classList.add('hidden'); });
 shareModal.addEventListener('click', function(e){ if (e.target === shareModal) shareModal.classList.add('hidden'); });
-function shareText() { return encodeURIComponent('🍽️ *Bhaskar Food*\nOrder fresh meals!\n🔗 ' + window.location.href + '\n📞 9154095125'); }
+function shareText() { return encodeURIComponent('🌊✨ Hey! Check out *Bhaskar Food* — order your favorite fresh meals right from where you are while enjoying the scenic views of Marine Lines beach! 🛵🌴\n\n🔗 ' + window.location.href + '\n📞 9154095125'); }
 document.getElementById('sendWhatsAppBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('https://wa.me/91'+p+'?text='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
 document.getElementById('sendSMSBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('sms:+91'+p+'?body='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
 /* ZONE */
