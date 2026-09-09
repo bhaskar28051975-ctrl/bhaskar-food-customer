@@ -370,23 +370,19 @@ function renderMenu() {
     container.innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 text-center px-6"><div class="text-5xl">🍽️</div><p class="font-black text-gray-700 text-lg">Menu Coming Soon</p><p class="text-sm text-gray-400">No items available right now.</p><a href="tel:9154095125" class="bg-red-600 text-white px-6 py-3 rounded-2xl font-black text-sm">📞 Call 9154095125</a></div>'; return;
   }
   
-  // Sort restaurants by order
   var resKeys = Object.keys(resData).sort(function(a, b) {
     var ordA = resData[a].order !== undefined ? resData[a].order : 0;
     var ordB = resData[b].order !== undefined ? resData[b].order : 0;
     return ordA - ordB;
   });
-
   resKeys.forEach(function(resId) {
     var res = resData[resId]; var html = '';
     if (res.menu) {
-      // Sort menu items by order
       var menuKeys = Object.keys(res.menu).sort(function(a, b) {
         var ordA = res.menu[a].order !== undefined ? res.menu[a].order : 0;
         var ordB = res.menu[b].order !== undefined ? res.menu[b].order : 0;
         return ordA - ordB;
       });
-
       menuKeys.forEach(function(mId) {
         var m = res.menu[mId], price = parseInt(m.price) || 0;
         dishMap[mId] = { dish: m.dish, price: price };
@@ -484,7 +480,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', function() {
     speak('Order placed successfully! Your delivery is on the way.');
     cart = {}; updateUI();
     document.querySelectorAll('[data-mid]').forEach(function(row){ updateCardQty(row.dataset.mid); });
-    /* CANCEL BUTTON */
     var cancelBtn = document.getElementById('cancelOrderBtn');
     var cancelHint = document.getElementById('cancelHint');
     cancelBtn.classList.remove('hidden'); cancelHint.classList.remove('hidden');
