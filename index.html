@@ -36,14 +36,12 @@
     <button onclick="location.reload()" class="text-[10px] font-bold bg-gray-100 px-3 py-2 rounded-full uppercase">Refresh</button>
   </div>
 </header>
-
-<!-- MARINE LINES MESSAGE BANNER -->
+<!-- BANNER -->
 <div class="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100 px-4 py-3 text-center">
   <p class="text-xs font-bold text-gray-700 leading-relaxed">
     🌊✨ <strong>Breathe in the ocean breeze and treat yourself!</strong> Choose your favorite fresh food below, and place your order right from where you are. Sit back, relax, and enjoy the scenic views of Marine Lines beach while your fresh meal is delivered straight to you! 🛵🌴
   </p>
 </div>
-
 <!-- GPS BAR -->
 <div id="gpsBar" class="hidden sticky top-[73px] z-40 bg-green-600 text-white px-4 py-2 flex items-center justify-between gap-2">
   <div class="flex items-center gap-2 min-w-0">
@@ -127,14 +125,44 @@
           </div>
         </div>
       </div>
-      <!-- COD -->
-      <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
+
+      <!-- PAYMENT METHOD SELECTOR -->
+      <div class="space-y-2">
+        <label class="text-xs font-black text-gray-700 uppercase">Select Payment Method</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" id="payMethodUPI" onclick="setPaymentMethod('UPI')" class="p-3 rounded-2xl border-2 border-red-600 bg-red-50 text-red-700 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all">
+            <i class="fas fa-qrcode text-lg"></i> UPI Online Pay
+          </button>
+          <button type="button" id="payMethodCOD" onclick="setPaymentMethod('COD')" class="p-3 rounded-2xl border-2 border-gray-200 bg-gray-50 text-gray-600 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all">
+            <i class="fas fa-money-bill-wave text-lg"></i> Cash on Delivery
+          </button>
+        </div>
+      </div>
+
+      <!-- UPI PAYMENT SECTION -->
+      <div id="upiSection" class="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-3">
+        <p class="font-black text-xs text-purple-900 uppercase">Scan & Pay via any UPI App</p>
+        <div class="bg-white p-3 inline-block rounded-2xl shadow-sm border">
+          <img id="upiQrImg" src="" alt="UPI QR Code" class="w-40 h-40 mx-auto object-contain"/>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-500 font-bold">UPI ID: <span class="text-purple-700 font-mono select-all">paytmqr60d9x5@ptys</span></p>
+          <p class="text-[10px] text-gray-400 mt-0.5">Amount pre-filled: <span id="upiAmountText" class="font-black text-green-600">₹0</span></p>
+        </div>
+        <a id="upiIntentBtn" href="#" class="w-full bg-purple-600 text-white py-3 rounded-xl font-black uppercase text-xs shadow block active:scale-95">
+          <i class="fas fa-external-link-alt mr-1"></i> Pay via GPay / PhonePe / Paytm
+        </a>
+      </div>
+
+      <!-- COD SECTION -->
+      <div id="codSection" class="hidden bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
         <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-2xl shrink-0">💵</div>
         <div>
           <p class="font-black text-gray-800 text-sm">Cash on Delivery</p>
           <p class="text-xs text-gray-500 mt-0.5">Pay cash when your order arrives. No advance needed.</p>
         </div>
       </div>
+
       <div class="pt-1">
         <div class="flex justify-between items-center mb-3 px-1">
           <span class="text-gray-500 font-bold text-sm">Grand Total:</span>
@@ -153,7 +181,7 @@
     <p class="text-gray-500 text-sm font-bold" id="successMsg"></p>
     <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-left space-y-2">
       <div class="flex justify-between"><span class="text-xs text-gray-500 font-bold uppercase">Total</span><span class="font-black text-green-600" id="successTotal"></span></div>
-      <div class="flex justify-between"><span class="text-xs text-gray-500 font-bold uppercase">Payment</span><span class="font-black text-orange-600 text-sm">💵 Cash on Delivery</span></div>
+      <div class="flex justify-between"><span class="text-xs text-gray-500 font-bold uppercase">Payment</span><span class="font-black text-purple-600 text-sm" id="successPaymentMethod">UPI</span></div>
       <div class="flex justify-between"><span class="text-xs text-gray-500 font-bold uppercase">Status</span><span class="font-black text-orange-500 text-sm">🕐 Being Prepared</span></div>
     </div>
     <p class="text-[11px] text-gray-400">We'll call you on <span id="successPhone" class="font-bold text-gray-600"></span> to confirm.</p>
@@ -180,6 +208,36 @@ var watchId = null, trackMap = null, myMarker = null, myCircle = null;
 var radiusM = 200, orderLat = null, orderLng = null, wasOutside = false;
 var activeOid = null, zoneCenterLat = null, zoneCenterLng = null, zoneCircle = null;
 var speechReady = false;
+var selectedPaymentMethod = 'UPI';
+
+function setPaymentMethod(method) {
+  selectedPaymentMethod = method;
+  var btnUPI = document.getElementById('payMethodUPI');
+  var btnCOD = document.getElementById('payMethodCOD');
+  var upiSec = document.getElementById('upiSection');
+  var codSec = document.getElementById('codSection');
+  
+  if (method === 'UPI') {
+    btnUPI.className = 'p-3 rounded-2xl border-2 border-red-600 bg-red-50 text-red-700 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all';
+    btnCOD.className = 'p-3 rounded-2xl border-2 border-gray-200 bg-gray-50 text-gray-600 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all';
+    upiSec.classList.remove('hidden');
+    codSec.classList.add('hidden');
+  } else {
+    btnCOD.className = 'p-3 rounded-2xl border-2 border-red-600 bg-red-50 text-red-700 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all';
+    btnUPI.className = 'p-3 rounded-2xl border-2 border-gray-200 bg-gray-50 text-gray-600 font-black text-xs uppercase flex flex-col items-center gap-1 transition-all';
+    codSec.classList.remove('hidden');
+    upiSec.classList.add('hidden');
+  }
+}
+
+function updateUpiDetails(totalAmount) {
+  document.getElementById('upiAmountText').innerText = '₹' + totalAmount;
+  var upiUrl = 'upi://pay?pa=paytmqr60d9x5@ptys&pn=Bhaskar%20Food&am=' + totalAmount + '&cu=INR';
+  document.getElementById('upiIntentBtn').href = upiUrl;
+  var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiUrl);
+  document.getElementById('upiQrImg').src = qrApiUrl;
+}
+
 /* VOICE */
 function speak(txt, urgent) {
   if (!window.speechSynthesis) return;
@@ -196,6 +254,7 @@ function initSpeech() {
   var w = new SpeechSynthesisUtterance(' '); w.volume = 0; speechSynthesis.speak(w);
 }
 document.addEventListener('click', initSpeech, { once: true });
+
 /* BANNER */
 function showBanner(msg, color) {
   var b = document.getElementById('cBanner');
@@ -203,6 +262,7 @@ function showBanner(msg, color) {
   b.textContent = msg; b.style.background = color === 'red' ? '#dc2626' : '#16a34a'; b.style.color = '#fff'; b.style.opacity = '1';
   clearTimeout(b._t); b._t = setTimeout(function(){ b.style.opacity = '0'; }, 4500);
 }
+
 /* SHARE */
 var shareModal = document.getElementById('share-modal');
 document.getElementById('shareAppBtn').addEventListener('click', function(){ document.getElementById('sharePhone').value = ''; shareModal.classList.remove('hidden'); });
@@ -211,6 +271,7 @@ shareModal.addEventListener('click', function(e){ if (e.target === shareModal) s
 function shareText() { return encodeURIComponent('🌊✨ Hey! Check out *Bhaskar Food* — order your favorite fresh meals right from where you are while enjoying the scenic views of Marine Lines beach! 🛵🌴\n\n🔗 ' + window.location.href + '\n📞 9154095125'); }
 document.getElementById('sendWhatsAppBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('https://wa.me/91'+p+'?text='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
 document.getElementById('sendSMSBtn').addEventListener('click', function(){ var p = document.getElementById('sharePhone').value.replace(/\D/g,''); if (p.length < 10) { showBanner('⚠️ Enter valid 10-digit number','red'); return; } window.open('sms:+91'+p+'?body='+shareText(),'_blank'); shareModal.classList.add('hidden'); });
+
 /* ZONE */
 db.ref('zones').on('value', function(snap) {
   var zones = snap.val() || {}, keys = Object.keys(zones);
@@ -232,6 +293,7 @@ db.ref('settings/serviceRadius').on('value', function(snap) {
   document.getElementById('radiusBar').style.width = ((v-50)/(2000-50)*100)+'%';
   if (myCircle) myCircle.setRadius(v);
 });
+
 /* GPS STATES */
 function setGpsActive() {
   var l = document.getElementById('locBtn'), s = document.getElementById('stopLocBtn');
@@ -246,7 +308,7 @@ function setGpsInactive() {
   l.className = 'bg-red-600 text-white px-4 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1';
   s.disabled = false; s.className = 'gps-idle bg-gray-300 text-gray-500 px-3 py-2 rounded-xl font-black text-xs uppercase active:scale-95 flex items-center gap-1';
 }
-/* GPS */
+
 document.getElementById('locBtn').addEventListener('click', function() {
   var locBtn = document.getElementById('locBtn');
   if (!navigator.geolocation) { alert('GPS not supported'); return; }
@@ -265,6 +327,7 @@ document.getElementById('locBtn').addEventListener('click', function() {
     }, null, { enableHighAccuracy: true, maximumAge: 8000 });
   }, function() { setGpsInactive(); alert('Location denied. Please allow GPS.'); }, { enableHighAccuracy: true });
 });
+
 function stopGPS() {
   if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   myLat = null; myLng = null; setGpsInactive();
@@ -275,18 +338,18 @@ function stopGPS() {
 }
 document.getElementById('stopLocBtn').addEventListener('click', function() { if (!myLat && !watchId) { showBanner('ℹ️ GPS not active yet','red'); return; } stopGPS(); });
 document.getElementById('gpsBarStopBtn').addEventListener('click', stopGPS);
+
 function showMap() {
   document.getElementById('mapWrap').classList.remove('hidden');
   if (!trackMap) {
     trackMap = L.map('trackMap', { zoomControl: true, attributionControl: false }).setView([myLat, myLng], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
     if (zoneCenterLat && zoneCenterLng) {
-      var dR = radiusM >= 1000 ? (radiusM/1000).toFixed(1)+' km' : radiusM+' m';
       zoneCircle = L.circle([zoneCenterLat, zoneCenterLng], { radius: radiusM, color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.08, weight: 2, dashArray: '8,5' }).addTo(trackMap);
     }
   }
   updatePin(myLat, myLng);
-  setTimeout(function(){ trackMap.invalidateSize(); }, 200);
+  setTimeout(function(){ trackMap.invalidateSize(); }, 250);
 }
 function updatePin(lat, lng) {
   if (!trackMap) return;
@@ -317,6 +380,7 @@ function checkBreach(lat, lng) {
   if (out && !wasOutside) { wasOutside = true; speak('Warning! You are crossing the service area.', true); showBanner('⚠️ You are crossing the service area!','red'); if(st){st.textContent='⚠️ Outside radius! ('+dist+'m away)';st.classList.add('text-red-600');} }
   else if (!out && wasOutside) { wasOutside = false; speak('You are back in the service area.'); showBanner('✅ You are back in the service area!','green'); if(st){st.textContent='✅ Inside radius';st.classList.remove('text-red-600');} }
 }
+
 /* CART */
 function updateQty(id, change) {
   initSpeech();
@@ -349,20 +413,28 @@ function applyOosState(mId, isOos) {
     var img2 = card.querySelector('img'); if (img2) img2.style.filter = '';
   }
 }
+
 /* MODALS */
 var modal = document.getElementById('checkout-modal');
 var successModal = document.getElementById('success-modal');
-document.getElementById('proceedBtn').addEventListener('click', function() { modal.classList.remove('hidden'); if (myLat) setTimeout(function(){ if(trackMap) trackMap.invalidateSize(); }, 250); });
+document.getElementById('proceedBtn').addEventListener('click', function() {
+  var total = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  updateUpiDetails(total);
+  modal.classList.remove('hidden');
+  if (myLat) setTimeout(function(){ if(trackMap) trackMap.invalidateSize(); }, 250);
+});
 document.getElementById('closeModalBtn').addEventListener('click', function(){ modal.classList.add('hidden'); });
 document.getElementById('cancelBtn').addEventListener('click', function() { cart = {}; if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; } updateUI(); modal.classList.add('hidden'); document.querySelectorAll('[data-mid]').forEach(function(r){ updateCardQty(r.dataset.mid); }); });
 document.getElementById('successDoneBtn').addEventListener('click', function() { successModal.classList.add('hidden'); document.getElementById('cancelOrderBtn').classList.add('hidden'); document.getElementById('cancelHint').classList.add('hidden'); });
+
 function updateUI() {
   var total = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
   document.getElementById('bottom-bill-bar').style.display = total > 0 ? 'flex' : 'none';
   document.getElementById('panel-total').innerText = '₹'+total;
   document.getElementById('modal-total').innerText = '₹'+total;
+  updateUpiDetails(total);
 }
-/* EVENT DELEGATION */
+
 document.getElementById('customer-list').addEventListener('click', function(e) {
   var btn = e.target.closest('button'); if (!btn) return;
   var row = btn.closest('[data-mid]'); if (!row) return;
@@ -370,7 +442,55 @@ document.getElementById('customer-list').addEventListener('click', function(e) {
   if (btn.classList.contains('qPlus')) updateQty(mid, +1);
   if (btn.classList.contains('qMinus')) updateQty(mid, -1);
 });
-/* RENDER MENU (Respecting custom sort order) */
+
+/* PLACE ORDER */
+document.getElementById('placeOrderBtn').addEventListener('click', function() {
+  var name = document.getElementById('custName').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  if (!name || phone.length < 10) { alert('⚠️ Please enter your Full Name and valid 10-digit Phone Number.'); return; }
+  
+  var totalAmount = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  if (totalAmount <= 0) { alert('Your cart is empty!'); return; }
+  
+  var itemsList = Object.values(cart).map(function(i){ return i.qty + 'x ' + i.dish; }).join(', ');
+  
+  var orderData = {
+    customerName: name,
+    customerPhone: phone,
+    items: itemsList,
+    totalAmount: totalAmount,
+    paymentMethod: selectedPaymentMethod,
+    paymentStatus: selectedPaymentMethod === 'UPI' ? 'Paid / Verification Pending' : 'Cash on Delivery',
+    address: myAddress || (myLat ? myLat.toFixed(5)+','+myLng.toFixed(5) : 'No GPS'),
+    lat: myLat || 0,
+    lng: myLng || 0,
+    status: 'pending',
+    createdAt: Date.now()
+  };
+
+  var btn = document.getElementById('placeOrderBtn');
+  btn.innerHTML = 'Placing Order…'; btn.disabled = true;
+
+  var newRef = db.ref('orders').push();
+  newRef.set(orderData, function(err) {
+    btn.innerHTML = 'Order Now'; btn.disabled = false;
+    if (err) { alert('Failed to place order. Try again.'); return; }
+    activeOid = newRef.key;
+    modal.classList.add('hidden');
+    
+    document.getElementById('successMsg').textContent = 'Thank you, ' + name + '! Your order has been placed successfully.';
+    document.getElementById('successTotal').textContent = '₹' + totalAmount;
+    document.getElementById('successPaymentMethod').textContent = selectedPaymentMethod === 'UPI' ? '📱 UPI Online Payment' : '💵 Cash on Delivery';
+    document.getElementById('successPhone').textContent = phone;
+    successModal.classList.remove('hidden');
+    
+    cart = {}; updateUI();
+    document.querySelectorAll('[data-mid]').forEach(function(r){ updateCardQty(r.dataset.mid); });
+    speak('Your order has been placed successfully!');
+  });
+});
+
+/* RENDER MENU */
 function renderMenu() {
   var container = document.getElementById('customer-list');
   container.innerHTML = '';
@@ -419,7 +539,7 @@ function renderMenu() {
   });
   updateUI();
 }
-/* REAL-TIME OOS LISTENER */
+
 function listenOos(resId, menuObj) {
   Object.keys(menuObj).forEach(function(mId) {
     db.ref('restaurants/'+resId+'/menu/'+mId+'/outOfStock').on('value', function(snap) {
@@ -428,88 +548,16 @@ function listenOos(resId, menuObj) {
     });
   });
 }
-/* LOAD MENU */
+
 var menuLoaded = false;
 var menuTimeout = setTimeout(function() {
   if (!menuLoaded) document.getElementById('customer-list').innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">😕</div><p class="font-black text-gray-700">Menu Not Loading</p><p class="text-sm text-gray-400">Check internet and try again.</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>';
 }, 8000);
+
 db.ref('restaurants').on('value', function(snap) {
   menuLoaded = true; clearTimeout(menuTimeout);
   resData = snap.val() || {}; renderMenu();
   Object.keys(resData).forEach(function(resId) { if (resData[resId].menu) listenOos(resId, resData[resId].menu); });
-}, function(err) {
-  menuLoaded = true; clearTimeout(menuTimeout);
-  document.getElementById('customer-list').innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center"><div class="text-5xl">⚠️</div><p class="font-black text-gray-700">Connection Error</p><p class="text-sm text-gray-400">'+err.message+'</p><button onclick="location.reload()" class="bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase">🔄 Retry</button></div>';
-});
-/* PLACE ORDER */
-document.getElementById('placeOrderBtn').addEventListener('click', function() {
-  var name = document.getElementById('custName').value.trim();
-  var phone = document.getElementById('custPhone').value.trim();
-  if (!name)  { alert('⚠️ Please enter your name!'); return; }
-  if (!phone) { alert('⚠️ Please enter your phone number!'); return; }
-  if (phone.replace(/\D/g,'').length < 10) { alert('⚠️ Please enter a valid 10-digit phone number!'); return; }
-  if (!myLat) { alert('⚠️ Please share your live location first!'); return; }
-  Object.keys(cart).forEach(function(id){ if (outOfStockMap[id]) delete cart[id]; });
-  if (!Object.keys(cart).length) { alert('⚠️ Your cart is empty!'); return; }
-  orderLat = myLat; orderLng = myLng; wasOutside = false;
-  var items = Object.values(cart).map(function(i){ return i.dish+' x'+i.qty; }).join(', ');
-  var total = Object.values(cart).reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
-  var oid = db.ref('orders').push().key;
-  activeOid = oid;
-  db.ref('orders/'+oid).set({
-    id: oid,
-    customerName: name,
-    customerPhone: phone,
-    items: items,
-    totalAmount: total,
-    status: 'pending',
-    paymentMethod: 'Cash on Delivery',
-    lat: myLat, lng: myLng,
-    address: myAddress,
-    radiusMeters: radiusM,
-    timestamp: Date.now(),
-    cancelledBy: null,
-    assignedTo: null,
-    rejectedBy: []
-  }).then(function() {
-    if (watchId) {
-      navigator.geolocation.clearWatch(watchId);
-      watchId = navigator.geolocation.watchPosition(function(p) {
-        myLat = p.coords.latitude; myLng = p.coords.longitude;
-        db.ref('orders/'+oid+'/lat').set(myLat);
-        db.ref('orders/'+oid+'/lng').set(myLng);
-        checkBreach(myLat, myLng);
-      }, null, { enableHighAccuracy: true, maximumAge: 8000 });
-    }
-    document.getElementById('successMsg').textContent = 'Thank you, '+name+'! Your order is confirmed.';
-    document.getElementById('successTotal').textContent = '₹'+total;
-    document.getElementById('successPhone').textContent = phone;
-    successModal.classList.remove('hidden'); modal.classList.add('hidden');
-    speak('Order placed successfully! Your delivery is on the way.');
-    cart = {}; updateUI();
-    document.querySelectorAll('[data-mid]').forEach(function(row){ updateCardQty(row.dataset.mid); });
-    var cancelBtn = document.getElementById('cancelOrderBtn');
-    var cancelHint = document.getElementById('cancelHint');
-    cancelBtn.classList.remove('hidden'); cancelHint.classList.remove('hidden');
-    var cancelTimer = setTimeout(function(){ cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); }, 180000);
-    cancelBtn.onclick = function() {
-      if (!confirm('Are you sure you want to cancel your order?')) return;
-      db.ref('orders/'+oid).once('value', function(snap) {
-        if (!snap.exists()) { showBanner('⚠️ Order not found!','red'); return; }
-        var o = snap.val();
-        if (o.status === 'preparing' || o.status === 'ready_for_pickup' || o.status === 'out_for_delivery' || o.status === 'completed') {
-          showBanner('❌ Cannot cancel — order already being prepared!','red');
-          cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); clearTimeout(cancelTimer); return;
-        }
-        db.ref('orders/'+oid).update({ status: 'cancelled', cancelledAt: Date.now(), cancelledBy: 'customer' });
-        showBanner('✅ Order cancelled!','green'); speak('Your order has been cancelled.');
-        cancelBtn.classList.add('hidden'); cancelHint.classList.add('hidden'); clearTimeout(cancelTimer);
-        successModal.classList.add('hidden');
-      });
-    };
-  }).catch(function(err) {
-    alert('❌ Order failed: ' + err.message);
-  });
 });
 </script>
 </body>
