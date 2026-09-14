@@ -9,9 +9,7 @@
 </head>
 <body class="bg-gray-50 pb-24 p-4">
 <div class="max-w-md mx-auto space-y-4">
-
   <h1 class="text-2xl font-black text-gray-700 italic uppercase">📊 Reports</h1>
-
   <!-- SUMMARY CARDS -->
   <div class="grid grid-cols-2 gap-3">
     <div class="bg-green-600 text-white p-5 rounded-3xl shadow-lg">
@@ -36,6 +34,21 @@
     </div>
   </div>
 
+  <!-- EARNINGS SPLIT CARD -->
+  <div class="bg-indigo-900 text-white rounded-3xl p-5 space-y-3 shadow-lg">
+    <p class="text-[10px] font-black uppercase tracking-widest text-indigo-200">💰 Earnings Breakdown (Completed)</p>
+    <div class="grid grid-cols-2 gap-3 pt-1">
+      <div class="bg-indigo-800/80 rounded-2xl p-3 border border-indigo-700">
+        <p class="text-[10px] text-indigo-300 uppercase font-bold">Hotel Owner Share</p>
+        <p class="font-black text-xl text-white mt-1" id="rOwnerShare">₹0</p>
+      </div>
+      <div class="bg-emerald-800/80 rounded-2xl p-3 border border-emerald-700">
+        <p class="text-[10px] text-emerald-200 uppercase font-bold">Your Earnings</p>
+        <p class="font-black text-xl text-emerald-300 mt-1" id="rMyEarnings">₹0</p>
+      </div>
+    </div>
+  </div>
+
   <!-- COD CARD -->
   <div class="bg-orange-50 border border-orange-200 rounded-3xl p-5 flex items-center gap-4">
     <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl shrink-0">💵</div>
@@ -45,7 +58,6 @@
       <p class="font-black text-orange-600 text-xl mt-1" id="rCodCollected">₹0 collected</p>
     </div>
   </div>
-
   <!-- DELIVERY STATS -->
   <div class="bg-white rounded-3xl border p-5 space-y-3">
     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🛵 Delivery Stats</p>
@@ -60,13 +72,11 @@
       </div>
     </div>
   </div>
-
   <!-- CANCELLED DETAIL -->
   <div id="cancelledSection" class="hidden space-y-3">
     <p class="font-black text-gray-700 text-sm uppercase tracking-wide">❌ Cancelled Orders Detail</p>
     <div id="cancelledList" class="space-y-2"></div>
   </div>
-
   <!-- FILTER + ALL ORDERS -->
   <div class="space-y-3">
     <div class="flex items-center justify-between gap-3">
@@ -84,9 +94,7 @@
     </div>
     <div id="allOrdersList" class="space-y-2"></div>
   </div>
-
 </div>
-
 <!-- BOTTOM NAV -->
 <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-50">
   <a href="control.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-grid-2 text-xl"></i><span class="text-[9px] font-bold">Control</span></a>
@@ -95,7 +103,6 @@
   <a href="delivery.html" class="flex flex-col items-center gap-1 text-gray-400"><i class="fa-solid fa-truck text-xl"></i><span class="text-[9px] font-bold">Delivery</span></a>
   <a href="reports.html" class="flex flex-col items-center gap-1 text-indigo-600"><i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[9px] font-bold">Reports</span></a>
 </div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -107,7 +114,6 @@ firebase.initializeApp({
   appId: "1:712053690568:web:b4d8b789e0359ebc0e95fd"
 });
 var db = firebase.database();
-
 function timeAgo(ts) {
   if (!ts) return '';
   var m = Math.floor((Date.now()-ts)/60000);
@@ -127,15 +133,16 @@ function statusBadge(s) {
   var label = s.replace(/_/g, ' ');
   return '<span class="text-[9px] font-black px-2 py-1 rounded-full uppercase whitespace-nowrap '+(cfg[s]||'bg-gray-100 text-gray-600')+'">'+label+'</span>';
 }
-
 var allOrders = [];
 var filterEl = document.getElementById('filterStatus');
 filterEl.addEventListener('change', renderOrders);
-
 db.ref('orders').on('value', function(snap) {
   allOrders = [];
   var revenue=0, completed=0, active=0, cancelled=0, cancelByCust=0, cancelByKitchen=0,
       codCollected=0, outForDelivery=0, readyPickup=0;
+      
+  var totalOwnerShare = 0;
+  var totalMyEarnings = 0;
 
   if (snap.exists()) {
     snap.forEach(function(c) {
@@ -143,8 +150,19 @@ db.ref('orders').on('value', function(snap) {
       allOrders.push(o);
       var amt = parseFloat(o.totalAmount||0);
       var s = o.status || 'pending';
-
-      if (s === 'completed' || s === 'settled') { revenue += amt; completed++; codCollected += amt; }
+      
+      if (s === 'completed' || s === 'settled') { 
+        revenue += amt; 
+        completed++; 
+        codCollected += amt; 
+        
+        // Calculate split (Assuming roughly 35% markup added to base owner price: Base = Total / 1.35)
+        var ownerAmt = amt / 1.35;
+        var myEarn = amt - ownerAmt;
+        
+        totalOwnerShare += ownerAmt;
+        totalMyEarnings += myEarn;
+      }
       else if (s === 'cancelled') { cancelled++; if (o.cancelledBy === 'customer') cancelByCust++; else cancelByKitchen++; }
       else if (s === 'pending' || s === 'preparing') active++;
       else if (s === 'out_for_delivery') { active++; outForDelivery++; }
@@ -152,16 +170,19 @@ db.ref('orders').on('value', function(snap) {
     });
   }
   allOrders.reverse();
-
-  document.getElementById('rRevenue').textContent = '₹'+revenue;
+  document.getElementById('rRevenue').textContent = '₹'+Math.round(revenue);
   document.getElementById('rTotalOrders').textContent = allOrders.length+' total orders';
   document.getElementById('rCompleted').textContent = completed;
   document.getElementById('rActive').textContent = active;
   document.getElementById('rCancelled').textContent = cancelled;
   document.getElementById('rCancelledSub').textContent = cancelByCust+' by customer · '+cancelByKitchen+' by kitchen';
-  document.getElementById('rCodCollected').textContent = '₹'+codCollected+' collected';
+  document.getElementById('rCodCollected').textContent = '₹'+Math.round(codCollected)+' collected';
   document.getElementById('rOutForDelivery').textContent = outForDelivery;
   document.getElementById('rReadyPickup').textContent = readyPickup;
+  
+  // Update Earnings Split Card
+  document.getElementById('rOwnerShare').textContent = '₹'+Math.round(totalOwnerShare);
+  document.getElementById('rMyEarnings').textContent = '₹'+Math.round(totalMyEarnings);
 
   /* Cancelled detail */
   var cancelledOrders = allOrders.filter(function(o){ return o.status === 'cancelled'; });
@@ -188,16 +209,19 @@ db.ref('orders').on('value', function(snap) {
       '</div>';
     }).join('');
   } else cancelSec.classList.add('hidden');
-
   renderOrders();
 });
-
 function renderOrders() {
   var filter = filterEl.value;
   var list = document.getElementById('allOrdersList');
   var filtered = filter === 'all' ? allOrders : allOrders.filter(function(o){ return o.status === filter; });
   if (!filtered.length) { list.innerHTML = '<p class="text-center text-gray-400 text-sm py-6 font-bold">No orders found.</p>'; return; }
   list.innerHTML = filtered.map(function(o) {
+    var amt = parseFloat(o.totalAmount||0);
+    var isFinished = (o.status === 'completed' || o.status === 'settled');
+    var ownerAmt = isFinished ? Math.round(amt / 1.35) : 0;
+    var myEarn = isFinished ? Math.round(amt - ownerAmt) : 0;
+
     return '<div class="bg-white rounded-2xl border p-4 space-y-2 '+(o.status==='cancelled'?'opacity-80':'')+'">' +
       '<div class="flex justify-between items-start gap-2">' +
         '<div class="min-w-0 flex-1">' +
@@ -208,10 +232,11 @@ function renderOrders() {
           '</div>' +
           '<p class="text-blue-600 text-xs font-bold">📞 '+(o.customerPhone||'—')+'</p>' +
           '<p class="text-[10px] text-gray-500 truncate mt-0.5">'+(o.items||'—')+'</p>' +
+          (isFinished ? '<p class="text-[10px] text-indigo-600 font-bold mt-1">🏨 Owner: ₹'+ownerAmt+' | 🟢 You: ₹'+myEarn+'</p>' : '') +
           (o.assignedTo ? '<p class="text-[10px] text-blue-600 font-bold mt-0.5">🛵 '+(o.assignedName||o.assignedTo)+'</p>' : '') +
         '</div>' +
         '<div class="text-right shrink-0 ml-2">' +
-          '<p class="font-black text-gray-800">₹'+(o.totalAmount||0)+'</p>' +
+          '<p class="font-black text-gray-800">₹'+amt+'</p>' +
           '<p class="text-[10px] text-orange-500 font-bold">💵 COD</p>' +
           '<p class="text-[10px] text-gray-400 mt-1">'+timeAgo(o.timestamp)+'</p>' +
         '</div>' +
